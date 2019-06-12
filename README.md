@@ -16,10 +16,9 @@ npm install
 In terminal/command navigate to gravenight directory. Start node server with
 
 ```
-nodemon server.js
+npm run dev
 ```
 It will automatically detect code changes and refresh the node server.
-Clients will still need to be refreshed.
 Clients can connect at
 
 ```
