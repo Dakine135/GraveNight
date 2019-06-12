@@ -1,0 +1,34 @@
+{
+  "name": "gravenight",
+  "version": "1.0.0",
+  "description": "Javascript multiplayer game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dakine135/GraveNight.git"
+  },
+  "keywords": [
+    "multiplayer",
+    "node",
+    "javascript"
+  ],
+  "author": "Graham Shroyer, Alexander Scott, Dustin Welborn",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Dakine135/GraveNight/issues"
+  },
+  "homepage": "https://github.com/Dakine135/GraveNight#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "reload": "^3.0.1",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
