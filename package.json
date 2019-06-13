@@ -30,5 +30,11 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
+  },
+  "nodemonConfig": {
+    "ignore": ["test/*", "docs/*"],
+    "delay": "2500",
+    "watch": ["./client/index.html", "client", "server.js"]
   }
+
 }
