@@ -5,20 +5,27 @@ var reload = require('reload');
 
 //Our classes or files
 
+let port = 3033;
+
 
 //setup Server
 var app = express();
-var server = app.listen(3033);
+var server = app.listen(port);
 var io = socket(server);
 app.use(express.static('./client'));
 reload(app);
-console.log("GraveNight server running");
+console.log(`GraveNight server running on port ${port}`);
 
 
 io.sockets.on('connection', newConnection);
 function newConnection(socket){
   //Client first connects
   console.log("a user connected: ", socket.id);
+
+
+ 
+
+
 
 
   socket.on('disconnecting', () => {
