@@ -34,7 +34,7 @@
   "nodemonConfig": {
     "ignore": ["test/*", "docs/*"],
     "delay": "2500",
-    "watch": ["./client/index.html", "client", "server.js"]
+    "watch": ["index.html", "client", "server.js", "server"]
   }
 
 }
