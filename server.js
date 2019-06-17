@@ -17,7 +17,12 @@ var io = socket(server);
 app.use(express.static('./client'));
 reload(app);
 console.log(`GraveNight server running on port ${port}`);
-let config = {ticRate: 500, debugEngine: false, debugStates: true};
+let config = {
+	ticRate: 500, 
+	debugEngine: false, 
+	debugStates: true,
+	io:io
+};
 var gameEngine = new Engine(config);
 gameEngine.start();
 
@@ -43,6 +48,7 @@ function newConnection(socket){
 
   socket.on('disconnecting', () => {
         console.log("client disconnected: ", socket.id);
+        gameEngine.removePlayer({socketId:socket.id});
   });
 
 }//new connection "per socket"

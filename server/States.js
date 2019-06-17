@@ -22,6 +22,11 @@ module.exports = class States{
 
     removePlayer(info){
 		if(this.debug) console.log(`Removing Player ${info}`);
+		this.currentState.removePlayer(info);
+    }
+
+    package({tickNumber=this.currentState.tick}){
+    	return this.states[tickNumber].package();
     }
 }
 
@@ -57,6 +62,10 @@ class State{
 		this.players[player.socketId] = player;
 	}
 
+	removePlayer(info){
+		delete this.players[info.socketId];
+	}
+
 	processActions(){
 		//move threw actions backwards (first in first out)
 		for(var i=(this.actions.length-1); i>=0; i--){
@@ -66,6 +75,13 @@ class State{
 			this.actions.splice(i,1);
 		}//for each action
 	} //processActions
+
+	package(){
+		return {
+			players: this.players,
+			objects: this.objects
+		}
+	}
 
 	toString({verbose=false}){
 		if(verbose){

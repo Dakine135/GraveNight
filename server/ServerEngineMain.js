@@ -4,10 +4,12 @@ module.exports = class Engine {
   constructor({
     ticRate=20,
     debugEngine=false,
-    debugStates=false
+    debugStates=false,
+    io=this.throwError("socket io not provided to server")
   }){
     console.log("create game instance tickRate is %s",ticRate);
     this.id = null;
+    this.io = io;
     this.tickCount = 0;
     this.timeStep = 1000 / this.ticRate;
     this.running = false;
@@ -77,6 +79,12 @@ module.exports = class Engine {
 
   update(){
     this.states.createState(this.tickCount);
+    this.sendGameStateToClients(this.tickCount);
+  }
+
+  sendGameStateToClients(tickNumber){
+    //current state is none specified
+    this.io.emit('serverGameState', this.states.package({tickNumber:tickNumber})); 
   }
 
   addPlayer(info){
@@ -85,6 +93,10 @@ module.exports = class Engine {
 
   removePlayer(info){
     this.states.removePlayer(info);
+  }
+
+  throwError(error){
+    throw new Error(error);
   }
 
 }//end class Engine

@@ -1,5 +1,4 @@
-var socket;
-socket = io();
+
 
 let incrementer = 0;
 let objects = [];
