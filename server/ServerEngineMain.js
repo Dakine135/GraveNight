@@ -95,6 +95,11 @@ module.exports = class Engine {
     this.states.removePlayer(info);
   }
 
+  clientAction(data){
+    if(this.debug) console.log(`clientAction:`,data);
+    this.states.addAction(data);
+  }
+
   throwError(error){
     throw new Error(error);
   }

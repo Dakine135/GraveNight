@@ -1,54 +1,16 @@
-
-
-let incrementer = 0;
-let objects = [];
-
-class Box{
-  constructor(x,y,size){
-    this.x = x;
-    this.y = y;
-    this.size = size;
-  }
-  rand(){
-    this.x = Math.floor(random(windowWidth-this.size));
-    this.y = Math.floor(random(windowHeight-this.size));
-  }
-  draw(){
-    rect (this.x, this.y, this.size, this.size);
-  }
-  collide(box){
-    
-  }
-
-}
-
-let rec = new Box(100,100,50);
-objects.push(rec);
-
-let rec2 = new Box(500,500,50);
-objects.push(rec2);
-
-let player = {
-  x: 50,
-  y: 50,
-  size: 50,
-  speed: 10,
-  move: function(x,y){
-    this.x += (x * this.speed);
-    this.y += (y * this.speed);
-  },
-  draw: function(){
-    rect (this.x, this.y, this.size, this.size);
-  }
-}
-objects.push(player);
-console.log(objects);
+var STATES;
+var CONTROLS;
+var NETWORK;
 
 
 //runs once at load
 function setup() {
+  console.log("Start P5 Setup");
   createCanvas(windowWidth, windowHeight); //fun screen
-  noStroke();
+  STATES = new States({debug:true});
+  NETWORK = new Networking({debug:false});
+  CONTROLS = new Controls({debug:false});
+  console.log("End P5 Setup");
 }
 
 function windowResized() {
@@ -56,52 +18,29 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-//listens to server when it sends a drawing event (another person is drawing)
-// socket.on('drawing', (data)=>{
-// 	console.log(data);
-// 	fill(random(255),random(255),random(255));
-// 	ellipse(data.x, data.y, 10, 10);
-// });
+function keyPressed(){
+  CONTROLS.keyPressed(keyCode, key);
+}
+
+function keyReleased(){
+  CONTROLS.keyReleased(keyCode, key);
+}
 
 
 //runs every frame of animation
 function draw() {
    background(200); //background "wipes" the screen every frame
   let mouse = {x:round(mouseX), y:round(mouseY)};
-  // if(mouseIsPressed){
-  //    fill(0); 
-  //    ellipse(mouse.x, mouse.y, 10, 10);
-  //    // socket.emit('draw',mouse);
-  // }
 
-  objects.forEach((item)=>{
-    item.draw();
-  });
-  
-  
-  incrementer++;
-  if(incrementer % 75 == 0) {
-    rec.rand();
-    rec2.rand();
-  }
 
-  if (keyIsDown(65)) {
-    player.move(-1,0);
-  }
+  //draw cross-hair
+  let size = 10;
+  stroke(100);
+  line(mouse.x-size, mouse.y, mouse.x+size, mouse.y);
+  line(mouse.x, mouse.y-size, mouse.x, mouse.y+size);
+}  
 
-  if (keyIsDown(68)) {
-    player.move(1,0);
-  }
-
-  if (keyIsDown(87)) {
-    player.move(0,-1);
-  }
-
-  if (keyIsDown(83)) {
-    player.move(0,1);
-  }
-
- var collideRectRect = function (box1, box2) {
+var collideRectRect = function (box1, box2) {
   let x = box1.x;
   let y = box1.y; 
   let w = box1.size;
@@ -120,11 +59,3 @@ function draw() {
   }
   return false;
 };
-
-
-  //draw crosshair
-  let size = 10;
-  stroke(100);
-  line(mouse.x-size, mouse.y, mouse.x+size, mouse.y);
-  line(mouse.x, mouse.y-size, mouse.x, mouse.y+size);
-}  

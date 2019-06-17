@@ -25,6 +25,11 @@ module.exports = class States{
 		this.currentState.removePlayer(info);
     }
 
+    addAction(action){
+    	if(this.debug) console.log("Adding action to tick", this.currentState.tick, action);
+    	this.currentState.addAction(action);
+    }
+
     package({tickNumber=this.currentState.tick}){
     	return this.states[tickNumber].package();
     }
@@ -54,6 +59,8 @@ class State{
 			this.objects = Object.assign({}, previousState.objects);
 			this.actions = [];
 			this.processActions(previousState.actions);
+			this.updatePlayers();
+			this.updateObjects();
 		}
 	} //constructor
 
@@ -66,15 +73,37 @@ class State{
 		delete this.players[info.socketId];
 	}
 
-	processActions(){
-		//move threw actions backwards (first in first out)
-		for(var i=(this.actions.length-1); i>=0; i--){
-			//process action on state
+	addAction(action){
+		this.actions.push(action);
+		// console.log(this.toString({verbose:true}));
+	}
 
-			//remove from actions
-			this.actions.splice(i,1);
+	processActions(actions){
+		//move threw actions backwards (first in first out)
+		for(var i=0; i<actions.length; i++){
+			//process action on state
+			let action = actions[i];
+			console.log("process action:",action);
+			switch(action.type){
+				case "playerMove":
+					let player = this.players[action.socketId];
+					player.setMovement(action);
+					break;
+				default:
+					console.log("Unknown action");
+			}
 		}//for each action
 	} //processActions
+
+	updatePlayers(){
+		for(var id in this.players){
+			this.players[id].update();
+		}
+	}//update players
+
+	updateObjects(){
+
+	}//update objects
 
 	package(){
 		return {

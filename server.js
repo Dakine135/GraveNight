@@ -18,9 +18,9 @@ app.use(express.static('./client'));
 reload(app);
 console.log(`GraveNight server running on port ${port}`);
 let config = {
-	ticRate: 500, 
+	ticRate: 1000, 
 	debugEngine: false, 
-	debugStates: true,
+	debugStates: false,
 	io:io
 };
 var gameEngine = new Engine(config);
@@ -33,12 +33,16 @@ function newConnection(socket){
   console.log("a user connected: ", socket.id);
   //create a player
   gameEngine.addPlayer({socketId:socket.id});
+
+  socket.emit('start',{socketId:socket.id});
   
 
-  // socket.on('draw', (data)=>{
-  // 	console.log('draw:', data);
-  // 	socket.broadcast.emit('drawing', data);
-  // });
+  socket.on('clientAction', (data)=>{
+    data['socketId'] = socket.id;
+  	// console.log('clientAction:', data);
+    gameEngine.clientAction(data);
+  	// socket.broadcast.emit('drawing', data);
+  });
 
 
  
