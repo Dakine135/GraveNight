@@ -12,12 +12,12 @@ module.exports = class States{
     	let newState = new State(tickNumber, this.currentState);
     	this.currentState = newState;
     	this.states[tickNumber] = newState;
-    	if(this.debug) console.log(newState.toStringCounts());
+    	if(this.debug) console.log(newState.toString({verbose:true}));
     }
 
     addPlayer(info){
-    	if(this.debug) console.log(`Adding Player ${info}`);
-    	this.currentState.addPlayer
+    	if(this.debug) console.log(`Adding Player ${JSON.stringify(info)}`);
+    	this.currentState.addPlayer(info);
     }
 
     removePlayer(info){
@@ -31,7 +31,7 @@ module.exports = class States{
 
 class State{
 	constructor(tickNumber, previousState){
-		if(previousState == null && tickNumber != 1){
+		if(previousState == null && tickNumber != 0){
 			throw new Error('no previousState given in state constructor');
 		}
 
@@ -52,6 +52,11 @@ class State{
 		}
 	} //constructor
 
+	addPlayer(info){
+		let player = new Player(info);
+		this.players[player.socketId] = player;
+	}
+
 	processActions(){
 		//move threw actions backwards (first in first out)
 		for(var i=(this.actions.length-1); i>=0; i--){
@@ -62,7 +67,17 @@ class State{
 		}//for each action
 	} //processActions
 
-	toStringCounts(){
+	toString({verbose=false}){
+		if(verbose){
+			let playerNames = [];
+			for(var id in this.players){
+			   		playerNames.push(this.players[id].name);
+			   }
+			return `Tick:${this.tick}, `+
+			   `Players:${playerNames}, `+
+			   `Objects:${Object.keys(this.objects).length}, `+
+			   `Actions:${this.actions.length}`;
+		}
 		return `Tick:${this.tick}, `+
 			   `Players:${Object.keys(this.players).length}, `+
 			   `Objects:${Object.keys(this.objects).length}, `+

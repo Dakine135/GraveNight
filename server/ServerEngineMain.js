@@ -26,6 +26,7 @@ module.exports = class Engine {
 
     //States
     this.states = new States({debug:debugStates});
+    this.states.createState(this.tickCount);
   }//constructor
 
   getCurrentTimeInNanoseconds() {

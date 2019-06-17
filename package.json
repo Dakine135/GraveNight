@@ -32,9 +32,16 @@
     "nodemon": "^1.19.1"
   },
   "nodemonConfig": {
-    "ignore": ["test/*", "docs/*"],
+    "ignore": [
+      "test/*",
+      "docs/*"
+    ],
     "delay": "2500",
-    "watch": ["index.html", "client", "server.js", "server"]
+    "watch": [
+      "index.html",
+      "client",
+      "server.js",
+      "server"
+    ]
   }
-
 }

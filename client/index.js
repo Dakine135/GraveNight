@@ -1,5 +1,5 @@
 var socket;
-//socket = io();
+socket = io();
 
 let incrementer = 0;
 let objects = [];

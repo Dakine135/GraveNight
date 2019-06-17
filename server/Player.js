@@ -1,7 +1,7 @@
 module.exports = class Player{
 	constructor({
 		socketId = 0,
-		name = getRandomName(),
+		name = this.getRandomName(),
 		x = 500,
 		y = 500
 	}){

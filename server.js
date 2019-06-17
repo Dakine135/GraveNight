@@ -27,6 +27,7 @@ function newConnection(socket){
   //Client first connects
   console.log("a user connected: ", socket.id);
   //create a player
+  gameEngine.addPlayer({socketId:socket.id});
   
 
   // socket.on('draw', (data)=>{
