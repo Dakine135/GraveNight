@@ -44,6 +44,7 @@ class State{
 		if(previousState == null && tickNumber != 0){
 			throw new Error('no previousState given in state constructor');
 		}
+		//need time stamps
 
 		this.tick = tickNumber;
 
@@ -83,7 +84,7 @@ class State{
 		for(var i=0; i<actions.length; i++){
 			//process action on state
 			let action = actions[i];
-			console.log("process action:",action);
+			//console.log("process action:",action);
 			switch(action.type){
 				case "playerMove":
 					let player = this.players[action.socketId];
@@ -107,6 +108,7 @@ class State{
 
 	package(){
 		return {
+			tick: this.tick,
 			players: this.players,
 			objects: this.objects
 		}

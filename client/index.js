@@ -6,8 +6,9 @@ var NETWORK;
 //runs once at load
 function setup() {
   console.log("Start P5 Setup");
+  console.log("Screen Size: ",windowWidth, windowHeight);
   createCanvas(windowWidth, windowHeight); //fun screen
-  STATES = new States({debug:true});
+  STATES = new StatesManager({debug:true});
   NETWORK = new Networking({debug:false});
   CONTROLS = new Controls({debug:false});
   console.log("End P5 Setup");
@@ -16,6 +17,7 @@ function setup() {
 function windowResized() {
   //https://p5js.org/reference/#/p5/resizeCanvas
   resizeCanvas(windowWidth, windowHeight);
+  console.log("Resize: ",windowWidth, windowHeight);
 }
 
 function keyPressed(){
@@ -29,8 +31,10 @@ function keyReleased(){
 
 //runs every frame of animation
 function draw() {
-   background(200); //background "wipes" the screen every frame
+  background(200); //background "wipes" the screen every frame
   let mouse = {x:round(mouseX), y:round(mouseY)};
+
+  STATES.draw();
 
 
   //draw cross-hair

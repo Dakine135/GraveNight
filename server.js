@@ -18,7 +18,7 @@ app.use(express.static('./client'));
 reload(app);
 console.log(`GraveNight server running on port ${port}`);
 let config = {
-	ticRate: 1000, 
+	ticRate: 20, 
 	debugEngine: false, 
 	debugStates: false,
 	io:io
