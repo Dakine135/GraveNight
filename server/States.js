@@ -44,9 +44,9 @@ class State{
 		if(previousState == null && tickNumber != 0){
 			throw new Error('no previousState given in state constructor');
 		}
-		//need time stamps
-
+		
 		this.tick = tickNumber;
+		this.time = new Date().getTime();
 
 		//if first state
 		if(previousState == null){
@@ -109,6 +109,7 @@ class State{
 	package(){
 		return {
 			tick: this.tick,
+			time: this.time,
 			players: this.players,
 			objects: this.objects
 		}
@@ -121,6 +122,7 @@ class State{
 			   		playerNames.push(this.players[id].name);
 			   }
 			return `Tick:${this.tick}, `+
+			   `Time:${this.time}, `+
 			   `Players:${playerNames}, `+
 			   `Objects:${Object.keys(this.objects).length}, `+
 			   `Actions:${this.actions.length}`;
