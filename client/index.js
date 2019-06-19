@@ -2,12 +2,51 @@ var STATES;
 var CONTROLS;
 var NETWORK;
 
+
+
+//disabled right-click menu
+window.addEventListener('contextmenu', event => {
+  event.preventDefault();
+});
+
+var leftClickPressed=false;
+var middleClickPressed=false;
+var rightClickPressed=false;
+window.addEventListener('mousedown', event => {
+  // console.log(event.button);
+  switch(event.button){
+    case 0:
+      leftClickPressed = true;
+      break;
+    case 1:
+      middleClickPressed=true;
+      break;
+    case 2:
+      rightClickPressed = true;
+      break;
+  }
+});
+window.addEventListener('mouseup', event => {
+  // console.log(event.button);
+  switch(event.button){
+    case 0:
+      leftClickPressed = false;
+      break;
+    case 1:
+      middleClickPressed=false;
+      break;
+    case 2:
+      rightClickPressed = false;
+      break;
+  }
+});
+
 //runs once at load
 function setup() {
   console.log("Start P5 Setup");
   console.log("Screen Size: ",windowWidth, windowHeight);
   createCanvas(windowWidth, windowHeight); //fun screen
-  STATES = new StatesManager({debug:true});
+  STATES = new StatesManager({debug:false});
   NETWORK = new Networking({debug:false});
   CONTROLS = new Controls({debug:false});
   angleMode(DEGREES);
@@ -29,6 +68,13 @@ function keyReleased(){
   CONTROLS.keyReleased(keyCode, key);
 }
 
+function mouseMoved(){
+  CONTROLS.mouseMoved(mouseX, mouseY);
+}
+
+function mouseReleased() {
+  rightClick=false;
+}
 
 //runs every frame of animation
 function draw() {
@@ -40,6 +86,13 @@ function draw() {
 
   //draw cross-hair
   let size = 10;
+  if(rightClickPressed){
+    ellipse(mouse.x, mouse.y, size*2, size*2);
+  }
+  if(leftClickPressed){
+    ellipse(mouse.x, mouse.y, size/2, size/2);
+  }
+  
   stroke(100);
   line(mouse.x-size, mouse.y, mouse.x+size, mouse.y);
   line(mouse.x, mouse.y-size, mouse.x, mouse.y+size);

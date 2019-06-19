@@ -13,6 +13,10 @@ class Networking{
 
 	}//constructor
 
+    getMyPlayer(){
+        return STATES.getPlayer(this.mySocketId);
+    }
+
 	clientConnects(data){
 		//create local player with socket Id
 		this.mySocketId = data.socketId;

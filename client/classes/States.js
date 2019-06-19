@@ -42,6 +42,10 @@ class StatesManager{
 		return this.state;
 	}
 
+	getPlayer(socketId){
+		return this.state.players[socketId];
+	}
+
 
 } //States class
 

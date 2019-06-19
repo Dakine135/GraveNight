@@ -92,5 +92,17 @@ class Controls{
 		}
 	} // keyReleased
 
+	mouseMoved(mouseX, mouseY) {
+		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
+		let myPlayer = NETWORK.getMyPlayer();
+		if(myPlayer == null) return;
+		let angle = myPlayer.calculateAngle(mouseX, mouseY);
+		if(this.debug) console.log("player Angle:", angle);
+		NETWORK.sendClientAction({
+			type:'playerRotate',
+			angle: angle
+		});
+	}
+
 
 } //Controls Class

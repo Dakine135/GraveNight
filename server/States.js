@@ -67,6 +67,7 @@ class State{
 
 	addPlayer(info){
 		let player = new Player(info);
+		// console.log(player);
 		this.players[player.socketId] = player;
 	}
 
@@ -85,10 +86,13 @@ class State{
 			//process action on state
 			let action = actions[i];
 			//console.log("process action:",action);
+			let player = this.players[action.socketId];
 			switch(action.type){
 				case "playerMove":
-					let player = this.players[action.socketId];
 					player.setMovement(action);
+					break;
+				case "playerRotate":
+					player.setAngle(action);
 					break;
 				default:
 					console.log("Unknown action");
