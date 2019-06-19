@@ -2,7 +2,6 @@ var STATES;
 var CONTROLS;
 var NETWORK;
 
-
 //runs once at load
 function setup() {
   console.log("Start P5 Setup");
@@ -11,6 +10,8 @@ function setup() {
   STATES = new StatesManager({debug:true});
   NETWORK = new Networking({debug:false});
   CONTROLS = new Controls({debug:false});
+  angleMode(DEGREES);
+  rectMode(CENTER);
   console.log("End P5 Setup");
 }
 
