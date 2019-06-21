@@ -1,3 +1,5 @@
+var Hitbox = require('./Hitbox.js');
+
 module.exports = class Player{
 	constructor({
 		socketId = this.throwError('No socketId given'),
@@ -7,7 +9,8 @@ module.exports = class Player{
 		vX = 0,
 		vY = 0,
 		speedMultiplier = 5,
-		angle=0
+		angle=0,
+		size = 50
 	}){
 		this.socketId = socketId;
 		this.name = name;
@@ -15,9 +18,16 @@ module.exports = class Player{
 		this.y = y;
 		this.vX = vX;
 		this.vY = vY;
+		this.size = size;
 		this.speedMultiplier = speedMultiplier;
 		this.angle = angle;
 		this.color = this.randomColor();
+		this.hitbox = new Hitbox({
+			top: this.y - this.size/2, 
+			bottom: this.y + size/2,
+			left: this.x - size/2, 
+			right: this.x + size/2});
+		
 	}
 
 	randomColor(){
