@@ -1,7 +1,8 @@
-class Controls{
-	constructor({debug=false}){
+module.exports = class Controls{
+	constructor({debug=false, NETWORK=null}){
 		console.log("Create Controls");
 		this.debug = debug;
+		this.NETWORK = NETWORK;
 	}
 
 	keyPressed(keyCode, key) {
@@ -9,7 +10,7 @@ class Controls{
 		switch(keyCode){
 			case 65: //A
 				//player move Left
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: true,
 					x:-1,
@@ -18,7 +19,7 @@ class Controls{
 				break;
 			case 68: //D
 				//Player move Right
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: true,
 					x:1,
@@ -27,7 +28,7 @@ class Controls{
 				break;
 			case 87: //W
 				//Player Move Up
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: true,
 					x:0,
@@ -36,7 +37,7 @@ class Controls{
 				break;
 			case 83: //S
 				//Player Move Down
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: true,
 					x:0,
@@ -53,7 +54,7 @@ class Controls{
 		switch(keyCode){
 			case 65: //A
 				//player move Left
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: false,
 					x:-1,
@@ -62,7 +63,7 @@ class Controls{
 				break;
 			case 68: //D
 				//Player move Right
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: false,
 					x:1,
@@ -71,7 +72,7 @@ class Controls{
 				break;
 			case 87: //W
 				//Player Move Up
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: false,
 					x:0,
@@ -80,7 +81,7 @@ class Controls{
 				break;
 			case 83: //S
 				//Player Move Down
-				NETWORK.sendClientAction({
+				this.NETWORK.sendClientAction({
 					type:'playerMove',
 					pressed: false,
 					x:0,
@@ -92,13 +93,13 @@ class Controls{
 		}
 	} // keyReleased
 
-	mouseMoved(mouseX, mouseY) {
+	mouseMoved(mouseX, mouseY, sk) {
 		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
-		let myPlayer = NETWORK.getMyPlayer();
+		let myPlayer = this.NETWORK.getMyPlayer();
 		if(myPlayer == null) return;
-		let angle = myPlayer.calculateAngle(mouseX, mouseY);
+		let angle = myPlayer.calculateAngle(mouseX, mouseY, sk);
 		if(this.debug) console.log("player Angle:", angle);
-		NETWORK.sendClientAction({
+		this.NETWORK.sendClientAction({
 			type:'playerRotate',
 			angle: angle
 		});

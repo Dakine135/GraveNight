@@ -1,6 +1,8 @@
-class Networking{
-	constructor({debug=false}){
+module.exports = class Networking{
+	constructor({debug=false, STATES=null}){
 		console.log("Create Networking");
+        if(STATES==null) throw new error("Networking Needs STATES");
+        this.STATES = STATES;
 		this.debug = debug;
 		this.socket = io();
 		this.mySocketId = null;
@@ -14,7 +16,7 @@ class Networking{
 	}//constructor
 
     getMyPlayer(){
-        return STATES.getPlayer(this.mySocketId);
+        return this.STATES.getPlayer(this.mySocketId);
     }
 
 	clientConnects(data){
@@ -24,7 +26,7 @@ class Networking{
 
 	processGameState(data){
 		if(this.debug) console.log("Networking:",data);
-		STATES.reciveServerState(data);
+		this.STATES.reciveServerState(data);
 	} //processGameState
 
 	sendClientAction(data){

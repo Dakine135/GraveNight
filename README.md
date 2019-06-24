@@ -40,4 +40,4 @@ Hosted at welbornhome.duckdns.org/gravenight on Unbunut 17 Sever running pm2 nod
 * **Alexander Scott**
 * **Dustin Welborn**
 
-See also the list of [contributors](https://github.com/Tweasy65/Tron/graphs/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Dakine135/GraveNight/graphs/contributors) who participated in this project.

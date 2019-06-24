@@ -1,9 +1,12 @@
-class StatesManager{
-	constructor({debug=false}){
+import Player from './player.js';
+
+export default class StatesManager{
+	constructor({debug=false, sk=null}){
 		console.log("Create State Manager");
 		this.debug = debug;
 		this.nextState = new State({tick:1});
 		this.state = new State({tick:0});
+		this.sk = sk;
 	}//constructor
 
 	/*
@@ -29,10 +32,10 @@ class StatesManager{
 		if(drawingState == null) return;
 		// console.log(drawingState.toString({verbose:true}));
 		for(var id in drawingState.players){
-			drawingState.players[id].draw();
+			drawingState.players[id].draw(this.sk);
 		}
 		for(var id in drawingState.objects){
-			drawingState.objects[id].draw();
+			drawingState.objects[id].draw(this.sk);
 		}
 	}//draw
 
@@ -73,7 +76,7 @@ class State{
 			// check if player is already in
 			if(existingPlayer == null || existingPlayer == undefined){
 				//create player
-				this.players[id] = new Player(serverPlayer);
+				this.players[id] = new Player(serverPlayer, this.sk);
 				// console.log("new Player:",this.players);
 			} else {
 				//update player

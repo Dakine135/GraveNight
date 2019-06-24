@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
+    "dev": "nodemon",
+    "build": "npx webpack --config webpack.config.js",
     "start": "node server.js"
   },
   "repository": {
@@ -15,7 +16,10 @@
   "keywords": [
     "multiplayer",
     "node",
-    "javascript"
+    "javascript",
+    "topdown",
+    "2D",
+    "CustomEngine"
   ],
   "author": "Graham Shroyer, Alexander Scott, Dustin Welborn",
   "license": "UNLICENSED",
@@ -26,7 +30,9 @@
   "dependencies": {
     "express": "^4.17.1",
     "reload": "^3.0.1",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
@@ -34,14 +40,21 @@
   "nodemonConfig": {
     "ignore": [
       "test/*",
-      "docs/*"
+      "docs/*",
+      "public/js/clientBundle.js"
     ],
     "delay": "2500",
     "watch": [
       "index.html",
-      "client",
+      "public",
       "server.js",
-      "server"
-    ]
+      "server",
+      "shared",
+      "clientSource"
+    ],
+    "events": {
+      "restart": "npm run build",
+      "start": "npm run build"
+    }
   }
 }
