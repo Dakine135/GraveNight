@@ -1,10 +1,12 @@
-var States = require('./States.js');
+var StateManager = require('./StateManager.js');
 
 module.exports = class Engine {
   constructor({
     ticRate=20,
     debugEngine=false,
+    debugStateManager=false,
     debugStates=false,
+    verbose=false,
     io=this.throwError("socket io not provided to server")
   }){
     console.log("create game instance tickRate is %s",ticRate);
@@ -14,6 +16,7 @@ module.exports = class Engine {
     this.timeStep = 1000 / this.ticRate;
     this.running = false;
     this.debug = debugEngine;
+    this.verbose = verbose;
 
     this.secondsIntoNanoseconds = 1e9;
     this.nanosecondsIntoSeconds = 1 / this.secondsIntoNanoseconds;
@@ -26,9 +29,8 @@ module.exports = class Engine {
     this.targertNextTickTime = this.getCurrentTimeInNanoseconds();
     this.acumulatedTime = 0;
 
-    //States
-    this.states = new States({debug:debugStates});
-    this.states.createState(this.tickCount);
+    //StateManager
+    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose});
   }//constructor
 
   getCurrentTimeInNanoseconds() {
@@ -78,26 +80,26 @@ module.exports = class Engine {
   }
 
   update(){
-    this.states.createState(this.tickCount);
+    this.stateManager.createNextState(this.tickCount);
     this.sendGameStateToClients(this.tickCount);
   }
 
-  sendGameStateToClients(tickNumber){
+  sendGameStateToClients(tick){
     //current state is none specified
-    this.io.emit('serverGameState', this.states.package({tickNumber:tickNumber})); 
+    this.io.emit('serverGameState', this.stateManager.package({tick:tick})); 
   }
 
   addPlayer(info){
-    this.states.addPlayer(info);
+    this.stateManager.addPlayer(info);
   }
 
   removePlayer(info){
-    this.states.removePlayer(info);
+    this.stateManager.removePlayer(info);
   }
 
   clientAction(data){
     if(this.debug) console.log(`clientAction:`,data);
-    this.states.addAction(data);
+    this.stateManager.addAction(data);
   }
 
   throwError(error){

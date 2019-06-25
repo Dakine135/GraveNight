@@ -18,8 +18,10 @@ app.use(express.static('./public'));
 console.log(`GraveNight server running on port ${port}`);
 let config = {
 	ticRate: 20, 
-	debugEngine: false, 
+	debugEngine: false,
+  debugStateManager: false, 
 	debugStates: false,
+  verbose: true,
 	io:io
 };
 var gameEngine = new Engine(config);

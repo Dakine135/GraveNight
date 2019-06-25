@@ -1,4 +1,6 @@
-module.exports = class Controls{
+import Player from '../../shared/Player.js';
+
+export default class Controls{
 	constructor({debug=false, NETWORK=null}){
 		console.log("Create Controls");
 		this.debug = debug;
@@ -97,7 +99,7 @@ module.exports = class Controls{
 		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
 		let myPlayer = this.NETWORK.getMyPlayer();
 		if(myPlayer == null) return;
-		let angle = myPlayer.calculateAngle(mouseX, mouseY, sk);
+		let angle = Player.calculateAngle(myPlayer, mouseX, mouseY, sk);
 		if(this.debug) console.log("player Angle:", angle);
 		this.NETWORK.sendClientAction({
 			type:'playerRotate',

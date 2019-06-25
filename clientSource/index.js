@@ -1,4 +1,4 @@
-import StatesManager from '../shared/States.js';
+import StatesManager from './js/StateManagerClient.js';
 import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 // import Player from '../shared/player.js';
@@ -52,7 +52,7 @@ let sketch = (sk)=>{
     console.log("Start P5 Setup");
     console.log("Screen Size: ", sk.windowWidth, sk.windowHeight);
     sk.createCanvas(sk.windowWidth, sk.windowHeight); //fun screen
-    STATES = new StatesManager({debug:false, sk:sk});
+    STATES = new StatesManager({debug:false, debugState:false, sk:sk});
     NETWORK = new Networking({debug:false, STATES:STATES});
     CONTROLS = new Controls({debug:false, NETWORK:NETWORK});
     sk.angleMode(sk.DEGREES);
@@ -102,71 +102,6 @@ let sketch = (sk)=>{
 
 } //P5
 const P5 = new p5(sketch);
-
-
-
-
-
-
-
-
-
-
-// function setup() {
-//   console.log("Start P5 Setup");
-//   console.log("Screen Size: ",windowWidth, windowHeight);
-//   createCanvas(windowWidth, windowHeight); //fun screen
-//   STATES = new StatesManager({debug:false});
-//   NETWORK = new Networking({debug:false});
-//   CONTROLS = new Controls({debug:false});
-//   angleMode(DEGREES);
-//   rectMode(CENTER);
-//   console.log("End P5 Setup");
-// }
-
-// function windowResized() {
-//   //https://p5js.org/reference/#/p5/resizeCanvas
-//   resizeCanvas(windowWidth, windowHeight);
-//   console.log("Resize: ",windowWidth, windowHeight);
-// }
-
-// function keyPressed(){
-//   CONTROLS.keyPressed(keyCode, key);
-// }
-
-// function keyReleased(){
-//   CONTROLS.keyReleased(keyCode, key);
-// }
-
-// function mouseMoved(){
-//   CONTROLS.mouseMoved(mouseX, mouseY);
-// }
-
-// function mouseReleased() {
-//   rightClick=false;
-// }
-
-//runs every frame of animation
-// function draw() {
-//   background(200); //background "wipes" the screen every frame
-//   let mouse = {x:round(mouseX), y:round(mouseY)};
-
-//   STATES.draw();
-
-
-//   //draw cross-hair
-//   let size = 10;
-//   if(rightClickPressed){
-//     ellipse(mouse.x, mouse.y, size*2, size*2);
-//   }
-//   if(leftClickPressed){
-//     ellipse(mouse.x, mouse.y, size/2, size/2);
-//   }
-  
-//   stroke(100);
-//   line(mouse.x-size, mouse.y, mouse.x+size, mouse.y);
-//   line(mouse.x, mouse.y-size, mouse.x, mouse.y+size);
-// }  
 
 // var collideRectRect = function (box1, box2) {
 //   let x = box1.x;
