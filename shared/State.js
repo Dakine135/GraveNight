@@ -27,7 +27,7 @@ exports.createNextState = (previousState)=>{
 	newStateObj.players = Object.assign({}, previousState.players);
 	newStateObj.objects = Object.assign({}, previousState.objects);
 	newStateObj.actions = [];
-	processActions(newStateObj, previousState.actions);
+	processActions(newStateObj, previousState);
 	updatePlayersMutate(newStateObj);
 	// updateObjectsMutate(newStateObj);
 	return newStateObj;
@@ -41,13 +41,24 @@ exports.createNextState = (previousState)=>{
 
 // }//create State From
 
-function processActions(state, actions){
+function processActions(state, previousState){
+	let actions = previousState.actions;
 	//move threw actions backwards (first in first out)
+	var startTime = previousState.time;
+	var lastAction = startTime;
+	var deltaTime = 0;
 	for(var i=0; i<actions.length; i++){
 		//process action on state
 		let action = actions[i];
 		//console.log("process action:",action);
 		let player = state.players[action.socketId];
+		//conpensate for ping and time differnce
+		//TODO should roll back to previous state and re-simulate the ticks to full incorporate the change at the time the client did the action from their perspective.
+		let timeAdjusted = action.time + (player.ping/2) + player.timeDiffernce;
+		deltaTime = timeAdjusted - lastAction;
+		lastAction = timeAdjusted;
+		// console.log("deltaTime:",deltaTime);
+		action.deltaTime = deltaTime;
 		switch(action.type){
 			case "playerMove":
 				Player.setMovementMutate(player, action);
@@ -90,6 +101,13 @@ function updateObjectsMutate(){
 	}
 }//update objects
 exports.updateObjectsMutate = updateObjectsMutate;
+
+function updatePlayerNetworkData(state, data){
+	let player = state.players[data.socketId];
+	player.ping = data.ping;
+	player.timeDiffernce = data.timeDiffernce;
+}
+exports.updatePlayerNetworkData = updatePlayerNetworkData;
 
 function updateWithNewData(state, data){
 	for(var property in data){

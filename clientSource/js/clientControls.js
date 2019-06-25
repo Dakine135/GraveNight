@@ -9,90 +9,62 @@ export default class Controls{
 
 	keyPressed(keyCode, key) {
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
+		let data = {type:'playerMove', pressed:true};
 		switch(keyCode){
 			case 65: //A
 				//player move Left
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: true,
-					x:-1,
-					y:0
-				});
+				data.x = -1;
+				data.y = 0;
 				break;
 			case 68: //D
 				//Player move Right
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: true,
-					x:1,
-					y:0
-				});
+				data.x = 1;
+				data.y = 0;
 				break;
 			case 87: //W
 				//Player Move Up
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: true,
-					x:0,
-					y:-1
-				});
+				data.x = 0;
+				data.y = -1;
 				break;
 			case 83: //S
 				//Player Move Down
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: true,
-					x:0,
-					y:1
-				});
+				data.x = 0;
+				data.y = 1;
 				break;
 			default:
 				console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
 		}//switch
+		this.NETWORK.sendClientAction(data);
 	} //keyPressed
 
 	keyReleased(keyCode, key) {
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
+		let data = {type:'playerMove', pressed:false};
 		switch(keyCode){
 			case 65: //A
 				//player move Left
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: false,
-					x:-1,
-					y:0
-				});
+				data.x = -1;
+				data.y = 0;
 				break;
 			case 68: //D
 				//Player move Right
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: false,
-					x:1,
-					y:0
-				});
+				data.x = 1;
+				data.y = 0;
 				break;
 			case 87: //W
 				//Player Move Up
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: false,
-					x:0,
-					y:-1
-				});
+				data.x = 0;
+				data.y = -1;
 				break;
 			case 83: //S
 				//Player Move Down
-				this.NETWORK.sendClientAction({
-					type:'playerMove',
-					pressed: false,
-					x:0,
-					y:1
-				});
+				data.x = 0;
+				data.y = 1;
 				break;
 			default:
 				console.log(`Key Not Used Released: ${keyCode}, ${key}`);
 		}
+		this.NETWORK.sendClientAction(data);
 	} // keyReleased
 
 	mouseMoved(mouseX, mouseY, sk) {

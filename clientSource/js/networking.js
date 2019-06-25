@@ -34,6 +34,13 @@ module.exports = class Networking{
 		this.socket.emit('clientAction', data);
 	}
 
+    sendServerNetworkInfo(){
+        this.socket.emit('clientNetworkInfo', {
+            ping: this.ping,
+            timeDiffernce: this.timeDiffernce
+        });
+    }
+
 	getServerTimeStamp(){
         return new Promise(function(resolve){
             this.socket.emit('sendPing');
@@ -50,19 +57,19 @@ module.exports = class Networking{
             this.getServerTimeDiffernce().then((timeDiffernce) => {
                 if(this.timeDiffernce == null){
                     this.timeDiffernce = timeDiffernce;
-                    // GAMESTATE.GUI.timeDiffernceText.content = "Time Differnce: Calculating";
+                    //still calculating
                 }
                 this.timeDiffernceArray.push(timeDiffernce);
-                //console.log(timeDiffernce);
+                // console.log(timeDiffernce);
                 setTimeout(function(){
                     this.updateServerTimeDiffernce();
-                }, 3000);
+                }.bind(this), 100);
             });
 
         } else {
             //calculate standard deviation and mean, then set timeDiffernce
             this.timeDiffernceArray.sort();
-            console.log(this.timeDiffernceArray);
+            // console.log(this.timeDiffernceArray);
             var midIndex = Math.floor(this.timeDiffernceArray.length / 2);
             var mean = this.timeDiffernceArray[midIndex];
             //console.log("Mean: ", mean);
@@ -76,7 +83,7 @@ module.exports = class Networking{
             var standardDeviation = Math.pow(avgSquaredDistance, 0.5);
             //console.log("standardDeviation: ", standardDeviation);
             var sumOfCluster = 0;
-            totalCount = 0;
+            var totalCount = 0;
             this.timeDiffernceArray.forEach((time) => {
               if(time < standardDeviation){
                 sumOfCluster += time;
@@ -84,8 +91,7 @@ module.exports = class Networking{
               }
             });
             this.timeDiffernce = sumOfCluster / totalCount;
-            // GAMESTATE.GUI.timeDiffernceText.content = "Time Differnce: " + this.timeDiffernce;
-            //console.log("this.timeDiffernce: ",this.timeDiffernce);
+            this.sendServerNetworkInfo();
         }
     } //end updateServerTimeDiffernce
 

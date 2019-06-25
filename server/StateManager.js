@@ -36,6 +36,11 @@ module.exports = class StateManager{
     	State.addAction(this.currentState, action);
     }
 
+    updatePlayerNetworkData(data){
+        if(this.debug) console.log(`updatePlayerNetworkData Player ${JSON.stringify(data)}`);
+        State.updatePlayerNetworkData(this.currentState, data);
+    }
+
     package({tick=this.currentState.tick}){
     	let state = this.states[tick];
     	if(this.debug) console.log("Package in StateManager tick:", tick, state);

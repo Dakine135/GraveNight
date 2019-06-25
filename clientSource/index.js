@@ -46,6 +46,9 @@ window.addEventListener('mouseup', event => {
   }
 });
 
+var time = new Date().getTime();
+var lastTime = time;
+var frames = 0;
 let sketch = (sk)=>{
   //runs once at load
   sk.setup = ()=>{
@@ -54,6 +57,7 @@ let sketch = (sk)=>{
     sk.createCanvas(sk.windowWidth, sk.windowHeight); //fun screen
     STATES = new StatesManager({debug:false, debugState:false, sk:sk});
     NETWORK = new Networking({debug:false, STATES:STATES});
+    NETWORK.updateServerTimeDiffernce();
     CONTROLS = new Controls({debug:false, NETWORK:NETWORK});
     sk.angleMode(sk.DEGREES);
     sk.rectMode(sk.CENTER);
@@ -85,6 +89,22 @@ let sketch = (sk)=>{
 
     STATES.draw();
 
+    //once a second
+    time = new Date().getTime();
+    frames++;
+    if(time % lastTime >= 1000){
+      // console.log("=============");
+      // console.log("Once a second");
+      NETWORK.updateServerTimeDiffernce();
+      // console.log("timeDiffernce:",NETWORK.timeDiffernce);
+      // console.log("Ping:",NETWORK.ping);
+      // console.log("FrameRate:",frames);
+      lastTime = time;
+      frames = 0;
+      // console.log("=============");
+    }
+    
+    
 
     //draw cross-hair
     let size = 10;

@@ -8,9 +8,7 @@ exports.create = ({
 		y = 500,
 		cursorX = 500,
 		cursorY = 500,
-		vX = 0,
-		vY = 0,
-		speedMultiplier = 5,
+		speedMultiplier = 5, //increments "pixels" per second
 		angle = 0,
 		size = 50,
 		color = randomColor()
@@ -24,12 +22,18 @@ exports.create = ({
 		y: y,
 		cursorX: cursorX,
 		cursorY: cursorY,
-		vX: vX,
-		vY: vY,
+		vX: 0,
+		vY: 0,
 		size: size,
 		speedMultiplier: speedMultiplier,
 		angle: angle,
-		color: color
+		color: color,
+		//just server stuff
+		ping: 0,
+		timeDiffernce: 0,
+		//acumulate total movement for tick based on time stamps of client actions
+		moveByX: 0, 
+		moveByY: 0
 	};
 }//create new player
 
@@ -51,10 +55,14 @@ exports.updateMutate = (obj)=>{
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
 	if(obj.type != "Player") Utilities.error('Object not of type Player');
 	if(obj.x == null || obj.y == null) Utilities.error('Player object missing location');
-
 	//actualt do update on new object
 	obj.x = obj.x + (obj.vX * obj.speedMultiplier);
 	obj.y = obj.y + (obj.vY * obj.speedMultiplier);
+	// obj.x += Math.round(obj.moveByX);
+	// obj.y += Math.round(obj.moveByY);
+	// obj.moveByX = 0;
+	// obj.moveByY = 0;
+
 } //updateMutate player
 
 exports.updateFromPlayerMutate = (playerObj, newData)=>{
@@ -72,13 +80,19 @@ exports.updateFromPlayerCreateNew = (playerObj, newData)=>{
 }
 
 exports.setMovementMutate = (obj, action)=>{
-	if(action.pressed){
+	console.log(action);
+	if(action.pressed){ //adding movement
 		if(action.x != 0) obj.vX += action.x;
 		if(action.y != 0) obj.vY += action.y;
-	} else {
+	} else { //stopping movement
 		if(action.x != 0) obj.vX -= action.x;
 		if(action.y != 0) obj.vY -= action.y;
 	}
+	//TODO Revisit logic, not moving while held;
+	//setMovement by time since last change
+	// let amountToMove = obj.speedMultiplier * (action.deltaTime/1000);
+	// obj.moveByX = obj.moveByX + (obj.vX * amountToMove);
+	// obj.moveByY = obj.moveByY + (obj.vY * amountToMove);
 } //set movement
 
 exports.setAngleMutate = (obj, action)=>{

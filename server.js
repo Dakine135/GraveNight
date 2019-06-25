@@ -51,11 +51,12 @@ function startSocketIO(){
       // socket.broadcast.emit('drawing', data);
     });
 
-
-   
-
-
-
+    socket.on('sendPing', ping);
+        function ping(){
+            var serverTime = new Date().getTime();
+            //console.log("Server Time: ", serverTime);
+            socket.emit('pong', serverTime);
+        }
 
     socket.on('disconnecting', () => {
           console.log("client disconnected: ", socket.id);

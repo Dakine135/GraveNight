@@ -89,6 +89,11 @@ module.exports = class Engine {
     this.io.emit('serverGameState', this.stateManager.package({tick:tick})); 
   }
 
+  updatePlayerNetworkData(data){
+    if(this.debug) console.log(`network update:`,data);
+    this.stateManager.updatePlayerNetworkData(data);
+  }
+
   addPlayer(info){
     this.stateManager.addPlayer(info);
   }
