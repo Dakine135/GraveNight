@@ -13,6 +13,8 @@ export default class StatesManager{
 		this.debugState = debugState;
 		this.state = State.createStartState({debug:this.debugState});
 		this.nextState = State.createNextState(this.state);
+		//set by server tick, then added as delta time progresses, not actual system time
+		this.currentTime = 0;
 		this.sk = sk;
 	}//constructor
 
@@ -29,13 +31,14 @@ export default class StatesManager{
 		// if(this.debug) console.log("NextState:",this.nextState);
 		// if(this.debug) console.log("================================");
 		if(this.nextState != null) this.state = State.clone(this.nextState);
+		this.currentTime = this.state.time;
 		State.updateWithNewData(this.nextState, data);
 	}
 
 	
 
-	draw(){
-		let drawingState = this.getIntermediateState();
+	draw(deltaTime){
+		let drawingState = this.getIntermediateState(deltaTime);
 		if(drawingState == null) return;
 		// console.log(drawingState.toString({verbose:true}));
 		for(var id in drawingState.players){
@@ -46,11 +49,33 @@ export default class StatesManager{
 		}
 	}//draw
 
-	getIntermediateState(){
-		//TODO interperlate between this.state and this.nextState
-		//Needs to add timestamps to ticks
-		return this.state;
+	getIntermediateState(deltaTime){
+		//interpolate between this.state and this.nextState
+		this.currentTime += deltaTime;
+		let totalTimeBetweenStates = this.nextState.time - this.state.time;
+		let timeElapsedSinceCurrentState = this.currentTime - this.state.time;
+		let percent = timeElapsedSinceCurrentState / totalTimeBetweenStates;
+		// console.log("Percent:",percent);
+		if(percent >= 1) return this.nextState;
+		else{
+			return State.InterpolateCreateNew(this.state, this.nextState, percent);
+		}
+		
 	}
+
+	removePlayer(info){
+		if(this.debug) console.log(`Removing Player ${info}`);
+		State.removePlayer(this.state, info);
+    }
+
+    //apply player actions immediately for smoothness
+    //difficulty is in making the actions results line up with the server's result
+    //otherwise it'll snap around.
+    //TODO
+    addAction(action){
+    	if(this.debug) console.log("Adding action to tick", this.currentState.tick, action);
+    	//State.addAction(this.state, action);
+    }
 
 	getPlayer(Id){
 		return this.state.players[Id];
@@ -58,69 +83,3 @@ export default class StatesManager{
 
 
 } //States class
-
-
-/*
-==================================================================
-*/
-
-// class State{
-// 	constructor({tick=0, debug=false}){
-// 		this.players = {};
-// 		this.objects = {};
-// 		this.tick=tick;
-// 		this.debug = debug;
-// 	}
-
-// 	updateWithServerData(data){
-// 		this.tick = data.tick;
-// 		for(var id in data.players){
-// 			let existingPlayer = this.players[id];
-// 			// console.log("id:", id);
-// 			// console.log("this.players:", this.players);
-// 			// console.log("existingPlayer:", existingPlayer);
-			
-// 			let serverPlayer = data.players[id];
-// 			// check if player is already in
-// 			if(existingPlayer == null || existingPlayer == undefined){
-// 				//create player
-// 				this.players[id] = Player.create(serverPlayer);
-// 				if(this.debug) console.log("new Player:",this.players);
-// 			} else {
-// 				//update player
-// 				if(this.debug) console.log("updatePlayer");
-// 				Player.updateFromPlayerMutate(existingPlayer, serverPlayer);
-// 			}
-// 		}
-// 		for(var id in data.objects){
-// 			// check if object is already in
-// 		}
-// 	}
-
-// 	clone(){
-// 		let newClone = new State({tick:this.tick});
-// 		for(var id in this.players){
-// 			newClone.players[id] = Utilities.cloneObject(this.players[id]);
-// 		}
-// 		for(var id in this.objects){
-// 			newClone.objects[id] = Utilities.cloneObject(this.objects[id]);
-// 		}
-// 		return newClone;
-// 	}
-
-// 	toString({verbose=false}){
-// 		if(verbose){
-// 			let playerNames = [];
-// 			for(var id in this.players){
-// 				console.log("toString Loop:",id,this.players);
-// 			   		playerNames.push(this.players[id].name);
-// 			   }
-// 			return `Tick:${this.tick}, `+
-// 			   `Players:${playerNames}, `+
-// 			   `Objects:${Object.keys(this.objects).length}, `;
-// 		}
-// 		return `Tick:${this.tick}, `+
-// 			   `Players:${Object.keys(this.players).length}, `+
-// 			   `Objects:${Object.keys(this.objects).length}, `;
-// 	}//toString
-// } //State class

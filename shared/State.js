@@ -52,8 +52,9 @@ function processActions(state, previousState){
 		let action = actions[i];
 		//console.log("process action:",action);
 		let player = state.players[action.socketId];
-		//conpensate for ping and time differnce
+		//compensate for ping and time difference
 		//TODO should roll back to previous state and re-simulate the ticks to full incorporate the change at the time the client did the action from their perspective.
+		//BUG each player needs a separate delta from last action, currently it is shared with all actions, not good.
 		let timeAdjusted = action.time + (player.ping/2) + player.timeDiffernce;
 		deltaTime = timeAdjusted - lastAction;
 		lastAction = timeAdjusted;
@@ -61,7 +62,7 @@ function processActions(state, previousState){
 		action.deltaTime = deltaTime;
 		switch(action.type){
 			case "playerMove":
-				Player.setMovementMutate(player, action);
+				Player.setMovementDirectionMutate(player, action);
 				break;
 			case "playerRotate":
 				Player.setAngleMutate(player, action);
@@ -110,6 +111,7 @@ function updatePlayerNetworkData(state, data){
 exports.updatePlayerNetworkData = updatePlayerNetworkData;
 
 function updateWithNewData(state, data){
+	// console.log("data:",data);
 	for(var property in data){
 		if(property == 'players'){
 			for(var id in data.players){
@@ -133,7 +135,7 @@ function updateWithNewData(state, data){
 			}
 		}
 		else{
-			state[property] = data.property;
+			state[property] = data[property];
 		}
 	}//for every key on data
 }
@@ -156,6 +158,36 @@ function clone(state){
 	return newStateObj;
 }
 exports.clone = clone;
+
+exports.InterpolateCreateNew = (startState, endState, percent)=>{
+	let newStateObj = {};
+	let differnceInTick = endState.tick - startState.tick;
+	newStateObj.tick = startState.tick + (differnceInTick*percent);
+	let differnceInTime = endState.time - startState.time;
+	newStateObj.time = startState.time + (differnceInTime*percent);
+	newStateObj.debug = startState.debug;
+	newStateObj.actions = [];
+	newStateObj.players = {};
+	for(var id in startState.players){
+		let intermediatePlayer = Utilities.cloneObject(startState.players[id]);
+		if(endState.players[id] != null){
+			//calculate the difference in location between the states
+			let playerEnd = endState.players[id];
+			let diffX = intermediatePlayer.x - playerEnd.x;
+			intermediatePlayer.x = intermediatePlayer.x - (diffX * percent);
+			let diffY = intermediatePlayer.y - playerEnd.y;
+			intermediatePlayer.y = intermediatePlayer.y - (diffY * percent);
+		}
+		
+		newStateObj.players[id] = intermediatePlayer;
+	}
+	newStateObj.objects = {};
+	for(var id in startState.objects){
+		newStateObj.objects[id] = Utilities.cloneObject(startState.objects[id]);
+		//TODO intermediate objects
+	}
+	return newStateObj;
+}
 
 exports.package = (state)=>{
 	if(state == null) console.log("state null in state.package");

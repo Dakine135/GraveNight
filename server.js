@@ -9,7 +9,6 @@ let Engine = require('./server/ServerEngineMain.js');
 let port = 3033;
 
 
-
 //setup Server
 var app = express();
 var server = app.listen(port);
@@ -17,7 +16,7 @@ var io = socket(server);
 app.use(express.static('./public'));
 console.log(`GraveNight server running on port ${port}`);
 let config = {
-	ticRate: 20, 
+	ticRate: 500, 
 	debugEngine: false,
   debugStateManager: false, 
 	debugStates: false,
@@ -30,7 +29,7 @@ gameEngine.start();
 //trying to be hacky about sockets not starting until bundle was created
 let waitTime = 5000;
 console.log(`Wait ${waitTime} then startSocketIO`);
-setTimeout(startSocketIO,waitTime);
+setTimeout(startSocketIO, waitTime);
 
 function startSocketIO(){
   console.log("start WebSockets");

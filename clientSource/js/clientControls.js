@@ -1,15 +1,20 @@
 import Player from '../../shared/Player.js';
 
 export default class Controls{
-	constructor({debug=false, NETWORK=null}){
+	constructor({debug=false, NETWORK=null, STATES=null}){
 		console.log("Create Controls");
 		this.debug = debug;
 		this.NETWORK = NETWORK;
+		this.STATES = STATES;
 	}
 
 	keyPressed(keyCode, key) {
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
-		let data = {type:'playerMove', pressed:true};
+		let data = {
+			type:'playerMove', 
+			pressed:true,
+			time: new Date().getTime()
+		};
 		switch(keyCode){
 			case 65: //A
 				//player move Left
@@ -35,11 +40,16 @@ export default class Controls{
 				console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
 		}//switch
 		this.NETWORK.sendClientAction(data);
+		this.STATES.addAction(data);
 	} //keyPressed
 
 	keyReleased(keyCode, key) {
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
-		let data = {type:'playerMove', pressed:false};
+		let data = {
+			type:'playerMove', 
+			pressed:false,
+			time: new Date().getTime()
+		};
 		switch(keyCode){
 			case 65: //A
 				//player move Left
@@ -65,6 +75,7 @@ export default class Controls{
 				console.log(`Key Not Used Released: ${keyCode}, ${key}`);
 		}
 		this.NETWORK.sendClientAction(data);
+		this.STATES.addAction(data);
 	} // keyReleased
 
 	mouseMoved(mouseX, mouseY, sk) {
@@ -73,10 +84,13 @@ export default class Controls{
 		if(myPlayer == null) return;
 		let angle = Player.calculateAngle(myPlayer, mouseX, mouseY, sk);
 		if(this.debug) console.log("player Angle:", angle);
-		this.NETWORK.sendClientAction({
+		let data = {
 			type:'playerRotate',
-			angle: angle
-		});
+			angle: angle,
+			time: new Date().getTime()
+		};
+		this.NETWORK.sendClientAction(data);
+		this.STATES.addAction(data);
 	}
 
 

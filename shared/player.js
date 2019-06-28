@@ -8,7 +8,7 @@ exports.create = ({
 		y = 500,
 		cursorX = 500,
 		cursorY = 500,
-		speedMultiplier = 5, //increments "pixels" per second
+		speedMultiplier = 300, //increments "pixels" per second
 		angle = 0,
 		size = 50,
 		color = randomColor()
@@ -31,9 +31,10 @@ exports.create = ({
 		//just server stuff
 		ping: 0,
 		timeDiffernce: 0,
-		//acumulate total movement for tick based on time stamps of client actions
+		//accumulate total movement for tick based on time stamps of client actions
 		moveByX: 0, 
-		moveByY: 0
+		moveByY: 0,
+		lastActionTime: 0
 	};
 }//create new player
 
@@ -55,13 +56,20 @@ exports.updateMutate = (obj)=>{
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
 	if(obj.type != "Player") Utilities.error('Object not of type Player');
 	if(obj.x == null || obj.y == null) Utilities.error('Player object missing location');
-	//actualt do update on new object
-	obj.x = obj.x + (obj.vX * obj.speedMultiplier);
-	obj.y = obj.y + (obj.vY * obj.speedMultiplier);
-	// obj.x += Math.round(obj.moveByX);
-	// obj.y += Math.round(obj.moveByY);
-	// obj.moveByX = 0;
-	// obj.moveByY = 0;
+	//actually do update on new object
+	// obj.x = obj.x + (obj.vX * obj.speedMultiplier);
+	// obj.y = obj.y + (obj.vY * obj.speedMultiplier);
+	//do final calculations on movement to account for buttons held for the duration of the tick
+	let currentTime = new Date().getTime();
+	let deltaTime = currentTime - obj.lastActionTime;
+	obj.lastActionTime = currentTime;
+	accumulateMovementMutate(obj, deltaTime);
+	//apply movement
+	obj.x += obj.moveByX;
+	obj.y += obj.moveByY;
+	//reset accumulated movement
+	obj.moveByX = 0;
+	obj.moveByY = 0;
 
 } //updateMutate player
 
@@ -79,8 +87,12 @@ exports.updateFromPlayerCreateNew = (playerObj, newData)=>{
 	return newObj;
 }
 
-exports.setMovementMutate = (obj, action)=>{
-	console.log(action);
+exports.setMovementDirectionMutate = (obj, action)=>{
+	// console.log(action);
+	obj.lastActionTime = action.time;
+	accumulateMovementMutate(obj, action.deltaTime);
+
+	//change direction based on new action
 	if(action.pressed){ //adding movement
 		if(action.x != 0) obj.vX += action.x;
 		if(action.y != 0) obj.vY += action.y;
@@ -88,12 +100,23 @@ exports.setMovementMutate = (obj, action)=>{
 		if(action.x != 0) obj.vX -= action.x;
 		if(action.y != 0) obj.vY -= action.y;
 	}
-	//TODO Revisit logic, not moving while held;
-	//setMovement by time since last change
-	// let amountToMove = obj.speedMultiplier * (action.deltaTime/1000);
-	// obj.moveByX = obj.moveByX + (obj.vX * amountToMove);
-	// obj.moveByY = obj.moveByY + (obj.vY * amountToMove);
-} //set movement
+} //set setMovementMutate
+
+/*
+Input:
+	obj = Player object
+Output:
+	NONE, mutates object input
+Description:
+	accumulates any movement changes within a tick to account for multiple button presses within a tick to properly apply the effect instead of just the last action
+*/
+function accumulateMovementMutate(obj, deltaTime){
+	//set Movement by time since last change based on current direction
+	let amountToMove = obj.speedMultiplier * (deltaTime/1000);
+	obj.moveByX = obj.moveByX + (obj.vX * amountToMove);
+	obj.moveByY = obj.moveByY + (obj.vY * amountToMove);
+	// console.log(`moveByX:${obj.moveByX}, moveByY:${obj.moveByY}`);
+}
 
 exports.setAngleMutate = (obj, action)=>{
 	// console.log(action);

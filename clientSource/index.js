@@ -46,8 +46,9 @@ window.addEventListener('mouseup', event => {
   }
 });
 
-var time = new Date().getTime();
-var lastTime = time;
+var currentTime = new Date().getTime();
+var lastFrame = currentTime;
+var lastSecond = currentTime;
 var frames = 0;
 let sketch = (sk)=>{
   //runs once at load
@@ -58,9 +59,10 @@ let sketch = (sk)=>{
     STATES = new StatesManager({debug:false, debugState:false, sk:sk});
     NETWORK = new Networking({debug:false, STATES:STATES});
     NETWORK.updateServerTimeDiffernce();
-    CONTROLS = new Controls({debug:false, NETWORK:NETWORK});
+    CONTROLS = new Controls({debug:false, NETWORK:NETWORK, STATES:STATES});
     sk.angleMode(sk.DEGREES);
     sk.rectMode(sk.CENTER);
+    sk.frameRate(60); //default and max is 60
     console.log("End P5 Setup");
   } //setup
 
@@ -86,20 +88,22 @@ let sketch = (sk)=>{
   sk.draw = ()=>{
     sk.background(200); //background "wipes" the screen every frame
     let mouse = {x:sk.round(sk.mouseX), y:sk.round(sk.mouseY)};
+    currentTime = new Date().getTime();
+    let deltaTime = currentTime - lastFrame;
+    lastFrame = currentTime;
+    frames++;
 
-    STATES.draw();
+    STATES.draw(deltaTime);
 
     //once a second
-    time = new Date().getTime();
-    frames++;
-    if(time % lastTime >= 1000){
+    if(currentTime % lastSecond >= 1000){
       // console.log("=============");
       // console.log("Once a second");
       NETWORK.updateServerTimeDiffernce();
       // console.log("timeDiffernce:",NETWORK.timeDiffernce);
       // console.log("Ping:",NETWORK.ping);
       // console.log("FrameRate:",frames);
-      lastTime = time;
+      lastSecond = currentTime;
       frames = 0;
       // console.log("=============");
     }

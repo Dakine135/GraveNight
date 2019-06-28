@@ -30,7 +30,6 @@ module.exports = class Networking{
 	} //processGameState
 
 	sendClientAction(data){
-		data.time = new Date().getTime();
 		this.socket.emit('clientAction', data);
 	}
 
