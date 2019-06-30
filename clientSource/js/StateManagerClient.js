@@ -47,6 +47,8 @@ export default class StatesManager{
 		for(var id in drawingState.objects){
 			// drawingState.objects[id].draw(this.sk);
 		}
+		State.processActions(this.state, this.state);
+		this.state.actions = [];
 	}//draw
 
 	getIntermediateState(deltaTime){
@@ -74,7 +76,7 @@ export default class StatesManager{
     //TODO
     addAction(action){
     	if(this.debug) console.log("Adding action to tick", this.currentState.tick, action);
-    	//State.addAction(this.state, action);
+    	State.addAction(this.state, action);
     }
 
 	getPlayer(Id){

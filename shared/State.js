@@ -45,21 +45,22 @@ function processActions(state, previousState){
 	let actions = previousState.actions;
 	//move threw actions backwards (first in first out)
 	var startTime = previousState.time;
-	var lastAction = startTime;
-	var deltaTime = 0;
+	// var lastAction = startTime;
+	// var deltaTime = 0;
 	for(var i=0; i<actions.length; i++){
 		//process action on state
 		let action = actions[i];
 		//console.log("process action:",action);
 		let player = state.players[action.socketId];
+		if(player == null) return;
 		//compensate for ping and time difference
 		//TODO should roll back to previous state and re-simulate the ticks to full incorporate the change at the time the client did the action from their perspective.
 		//BUG each player needs a separate delta from last action, currently it is shared with all actions, not good.
-		let timeAdjusted = action.time + (player.ping/2) + player.timeDiffernce;
-		deltaTime = timeAdjusted - lastAction;
-		lastAction = timeAdjusted;
+		let timeAdjusted = action.time + player.timeDiffernce; // + (player.ping/2)
+		// deltaTime = timeAdjusted - lastAction;
+		// lastAction = timeAdjusted;
 		// console.log("deltaTime:",deltaTime);
-		action.deltaTime = deltaTime;
+		action.timeAdjusted = timeAdjusted;
 		switch(action.type){
 			case "playerMove":
 				Player.setMovementDirectionMutate(player, action);
@@ -72,6 +73,7 @@ function processActions(state, previousState){
 		}
 	}//for each action
 } //processActions
+exports.processActions = processActions;
 
 
 exports.addPlayer = (state, info)=>{
@@ -91,7 +93,8 @@ exports.addAction = (state, action)=>{
 
 function updatePlayersMutate(state){
 	for(var id in state.players){
-		Player.updateMutate(state.players[id]);
+		Player.updateMutate(state.players[id], state.time);
+		//TODO check, debug
 	}
 }//update players
 exports.updatePlayersMutate = updatePlayersMutate;

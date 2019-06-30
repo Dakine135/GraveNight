@@ -51,7 +51,7 @@ exports.updateCreateNew = (obj)=>{
 	return newObj;
 } //updateCreateNew player
 
-exports.updateMutate = (obj)=>{
+exports.updateMutate = (obj, currentTime)=>{
 	//check for proper peramteres
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
 	if(obj.type != "Player") Utilities.error('Object not of type Player');
@@ -60,7 +60,6 @@ exports.updateMutate = (obj)=>{
 	// obj.x = obj.x + (obj.vX * obj.speedMultiplier);
 	// obj.y = obj.y + (obj.vY * obj.speedMultiplier);
 	//do final calculations on movement to account for buttons held for the duration of the tick
-	let currentTime = new Date().getTime();
 	let deltaTime = currentTime - obj.lastActionTime;
 	obj.lastActionTime = currentTime;
 	accumulateMovementMutate(obj, deltaTime);
@@ -89,8 +88,9 @@ exports.updateFromPlayerCreateNew = (playerObj, newData)=>{
 
 exports.setMovementDirectionMutate = (obj, action)=>{
 	// console.log(action);
-	obj.lastActionTime = action.time;
-	accumulateMovementMutate(obj, action.deltaTime);
+	let deltaTime = action.timeAdjusted - obj.lastActionTime;
+	obj.lastActionTime = action.timeAdjusted;
+	accumulateMovementMutate(obj, deltaTime);
 
 	//change direction based on new action
 	if(action.pressed){ //adding movement
