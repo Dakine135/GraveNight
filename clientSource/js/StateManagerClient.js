@@ -6,16 +6,23 @@ export default class StatesManager{
 	constructor({
 		debug=false, 
 		debugState=false,
+		stateInterpolation=true,
+		clientSimulation=true,
 		sk=Utilities.error('client needs render')
 	}){
 		console.log("Create State Manager");
 		this.debug = debug;
 		this.debugState = debugState;
+		this.stateInterpolation = stateInterpolation;
+		this.clientSimulation = clientSimulation;
 		this.state = State.createStartState({debug:this.debugState});
 		this.nextState = State.createNextState(this.state);
 		//set by server tick, then added as delta time progresses, not actual system time
-		this.currentTime = 0;
+		this.currentDeltaTime = 0;
 		this.sk = sk;
+
+		//temp
+		this.doLimited = 0;
 	}//constructor
 
 	/*
@@ -31,14 +38,19 @@ export default class StatesManager{
 		// if(this.debug) console.log("NextState:",this.nextState);
 		// if(this.debug) console.log("================================");
 		if(this.nextState != null) this.state = State.clone(this.nextState);
-		this.currentTime = this.state.time;
-		State.updateWithNewData(this.nextState, data);
-	}
-
-	
+		this.currentDeltaTime = 0;
+		if(this.doLimited <= 10){
+			State.updateWithNewData(this.nextState, data);
+			// this.doLimited++;
+		}
+		
+	}//reciveServerState
 
 	draw(deltaTime){
+		let currentTimeInSimulation = this.state.time + this.currentDeltaTime;
+		if(this.clientSimulation) State.simulateForClient(this.state, currentTimeInSimulation);
 		let drawingState = this.getIntermediateState(deltaTime);
+
 		if(drawingState == null) return;
 		// console.log(drawingState.toString({verbose:true}));
 		for(var id in drawingState.players){
@@ -47,16 +59,15 @@ export default class StatesManager{
 		for(var id in drawingState.objects){
 			// drawingState.objects[id].draw(this.sk);
 		}
-		State.processActions(this.state, this.state);
-		this.state.actions = [];
+		
 	}//draw
 
 	getIntermediateState(deltaTime){
+		this.currentDeltaTime += deltaTime;
+		if(!this.stateInterpolation) return State.clone(this.state);
 		//interpolate between this.state and this.nextState
-		this.currentTime += deltaTime;
 		let totalTimeBetweenStates = this.nextState.time - this.state.time;
-		let timeElapsedSinceCurrentState = this.currentTime - this.state.time;
-		let percent = timeElapsedSinceCurrentState / totalTimeBetweenStates;
+		let percent = this.currentDeltaTime / totalTimeBetweenStates;
 		// console.log("Percent:",percent);
 		if(percent >= 1) return this.nextState;
 		else{
@@ -75,7 +86,7 @@ export default class StatesManager{
     //otherwise it'll snap around.
     //TODO
     addAction(action){
-    	if(this.debug) console.log("Adding action to tick", this.currentState.tick, action);
+    	if(this.debug) console.log("Adding action to tick", this.state.tick, action);
     	State.addAction(this.state, action);
     }
 

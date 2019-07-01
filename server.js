@@ -16,7 +16,7 @@ var io = socket(server);
 app.use(express.static('./public'));
 console.log(`GraveNight server running on port ${port}`);
 let config = {
-	ticRate: 10000, 
+	ticRate: 20, //delay between ticks  16.667 is 60 a second
 	debugEngine: false,
   debugStateManager: false, 
 	debugStates: false,
@@ -24,7 +24,6 @@ let config = {
 	io:io
 };
 var gameEngine = new Engine(config);
-gameEngine.start();
 
 //trying to be hacky about sockets not starting until bundle was created
 let waitTime = 5000;
@@ -34,6 +33,7 @@ setTimeout(startSocketIO, waitTime);
 function startSocketIO(){
   console.log("start WebSockets");
   reload(app);
+  gameEngine.start();
   io.sockets.on('connection', (socket)=>{
     //Client first connects
     console.log("a user connected: ", socket.id);

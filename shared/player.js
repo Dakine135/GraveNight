@@ -14,7 +14,7 @@ exports.create = ({
 		color = randomColor()
 	}) => {
 	return {
-		id: socketId, //might change later to something else more persistant
+		id: socketId, //might change later to something else more persistent
 		socketId: socketId,
 		type: 'Player',
 		name: name,
@@ -52,23 +52,26 @@ exports.updateCreateNew = (obj)=>{
 } //updateCreateNew player
 
 exports.updateMutate = (obj, currentTime)=>{
-	//check for proper peramteres
+	// console.log("updateMutate");
+	//check for proper parameters
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
 	if(obj.type != "Player") Utilities.error('Object not of type Player');
 	if(obj.x == null || obj.y == null) Utilities.error('Player object missing location');
+	
 	//actually do update on new object
-	// obj.x = obj.x + (obj.vX * obj.speedMultiplier);
-	// obj.y = obj.y + (obj.vY * obj.speedMultiplier);
 	//do final calculations on movement to account for buttons held for the duration of the tick
 	let deltaTime = currentTime - obj.lastActionTime;
+	// if(deltaTime <= 0) console.log(`${currentTime} - ${obj.lastActionTime} = ${deltaTime}`);
 	obj.lastActionTime = currentTime;
-	accumulateMovementMutate(obj, deltaTime);
+	if(deltaTime > 0) accumulateMovementMutate(obj, deltaTime);
 	//apply movement
 	obj.x += obj.moveByX;
 	obj.y += obj.moveByY;
 	//reset accumulated movement
 	obj.moveByX = 0;
 	obj.moveByY = 0;
+	//update Angle of player based on cursor location relative to player
+	calculateAndSetAngleMutate(obj);
 
 } //updateMutate player
 
@@ -88,9 +91,9 @@ exports.updateFromPlayerCreateNew = (playerObj, newData)=>{
 
 exports.setMovementDirectionMutate = (obj, action)=>{
 	// console.log(action);
-	let deltaTime = action.timeAdjusted - obj.lastActionTime;
-	obj.lastActionTime = action.timeAdjusted;
-	accumulateMovementMutate(obj, deltaTime);
+	let deltaTime = action.time - obj.lastActionTime;
+	obj.lastActionTime = action.time;
+	if(deltaTime > 0) accumulateMovementMutate(obj, deltaTime);
 
 	//change direction based on new action
 	if(action.pressed){ //adding movement
@@ -112,16 +115,30 @@ Description:
 */
 function accumulateMovementMutate(obj, deltaTime){
 	//set Movement by time since last change based on current direction
+	// console.log("accumulateMovementMutate deltaTime:",deltaTime);
+	if(deltaTime <= 0){ console.log("deltaTime not positive", deltaTime); return;}
 	let amountToMove = obj.speedMultiplier * (deltaTime/1000);
 	obj.moveByX = obj.moveByX + (obj.vX * amountToMove);
 	obj.moveByY = obj.moveByY + (obj.vY * amountToMove);
 	// console.log(`moveByX:${obj.moveByX}, moveByY:${obj.moveByY}`);
 }
 
-exports.setAngleMutate = (obj, action)=>{
+exports.setCursorMutate = (obj, action)=>{
 	// console.log(action);
-	obj.angle = action.angle;
+	obj.cursorX = action.x;
+	obj.cursorY = action.y;
 }
+
+function calculateAndSetAngleMutate(obj){
+	let diffX = obj.cursorX - obj.x;
+	let diffY = obj.cursorY - obj.y;
+	// angle in radians
+	var angleRadians = Math.atan2(diffY, diffX);
+	// angle in degrees
+	// var angleDeg = angleRadians * 180 / Math.PI;
+	obj.angle = angleRadians;
+}
+exports.calculateAndSetAngleMutate = calculateAndSetAngleMutate;
 
 function getRandomName(){
 	let names = ["Cornell", "Ward", "Perry", "Solomon", "Donnell", "Antonia", "Billie", "Grover", "Vaughn", "Jarvis", "Kenneth", "Agustin", "Rickey", "Alfonso", "Derick", "Angel", "Demarcus", "Ivory", "Heath", "Toney", "Barry", "Matthew", "Kasey", "Del", "Kirby", "Jeff", "Anibal", "Markus", "Armand", "Bernardo", "Jan", "Mckinley", "Scott", "Jerrold", "Kristofer", "Yong", "Reinaldo", "Blaine", "Leif", "Vincenzo", "Tad", "Donald", "Preston", "Harvey", "Leonel", "Eusebio", "Joseph", "Jake", "Robin", "Hollis", "Graham", "Dustin", "Alex"];
@@ -139,16 +156,6 @@ function randomColor(){
 	}
 }
 exports.randomColor = randomColor;
-
-function calculateAngle(obj, mouseX, mouseY, sk){
-	let v1 = sk.createVector(mouseX-obj.x, mouseY-obj.y);
-	let v2 = sk.createVector(1,0);
-	let angle = v1.angleBetween(v2);
-	//angle = acos((v1.dot(v2))/(abs(v1.mag())*abs(v2.mag())));
-	if(mouseY <= obj.y) angle = -angle;
-	return angle;
-}
-exports.calculateAngle = calculateAngle;
 
 exports.draw = (obj, render)=>{
 	// console.log("drawing");

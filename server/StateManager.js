@@ -3,19 +3,21 @@ const State = require('../shared/State.js');
 const Utilities = require('../shared/Utilities.js');
 
 module.exports = class StateManager{
-    constructor({debug=false, debugState=false, verbose=false}){
+    constructor({debug=false, debugState=false, verbose=false, startTime=0}){
         this.states = {};
-        let startState = State.createStartState({debug:debugState});
+        let startState = State.createStartState({debug:debugState, startTime:startTime});
         this.currentState = startState;
         this.states[0] = startState;
+        this.currentTime = 0;
         this.debug = debug;
         this.verbose = verbose;
         if(this.debug) console.log('Creating State Manager');
     }
 
-    createNextState(tick){
+    createNextState(tick, currentTime){
+        this.currentTime = currentTime;
     	if(tick != (this.currentState.tick + 1)) Utilities.error('tick out of sync somehow');
-    	let newState = State.createNextState(this.currentState);
+    	let newState = State.createNextState(this.currentState, this.currentTime);
     	this.currentState = newState;
     	this.states[tick] = newState;
     	if(this.debug) console.log(State.toString(newState, {verbose:this.verbose}));
@@ -41,6 +43,7 @@ module.exports = class StateManager{
         State.updatePlayerNetworkData(this.currentState, data);
     }
 
+    //TODO make it build state Delta instead of sending entire state everyTime
     package({tick=this.currentState.tick}){
     	let state = this.states[tick];
     	if(this.debug) console.log("Package in StateManager tick:", tick, state);

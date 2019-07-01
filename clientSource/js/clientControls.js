@@ -6,14 +6,47 @@ export default class Controls{
 		this.debug = debug;
 		this.NETWORK = NETWORK;
 		this.STATES = STATES;
+
+		this.leftClickPressed=false;
+		this.middleClickPressed=false;
+		this.rightClickPressed=false;
+		window.addEventListener('mousedown', event => {
+		  // console.log(event.button);
+		  switch(event.button){
+		    case 0:
+		      this.leftClickPressed = true;
+		      break;
+		    case 1:
+		      this.middleClickPressed=true;
+		      break;
+		    case 2:
+		      this.rightClickPressed = true;
+		      break;
+		  }
+		});
+		window.addEventListener('mouseup', event => {
+		  // console.log(event.button);
+		  switch(event.button){
+		    case 0:
+		      this.leftClickPressed = false;
+		      break;
+		    case 1:
+		      this.middleClickPressed=false;
+		      break;
+		    case 2:
+		      this.rightClickPressed = false;
+		      break;
+		  }
+		});
 	}
 
 	keyPressed(keyCode, key) {
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
+		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:true,
-			time: new Date().getTime()
+			time: eventTime
 		};
 		switch(keyCode){
 			case 65: //A
@@ -40,15 +73,17 @@ export default class Controls{
 				console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
 		}//switch
 		this.NETWORK.sendClientAction(data);
+		data.socketId = this.NETWORK.mySocketId;
 		this.STATES.addAction(data);
 	} //keyPressed
 
 	keyReleased(keyCode, key) {
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
+		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:false,
-			time: new Date().getTime()
+			time: eventTime
 		};
 		switch(keyCode){
 			case 65: //A
@@ -75,21 +110,22 @@ export default class Controls{
 				console.log(`Key Not Used Released: ${keyCode}, ${key}`);
 		}
 		this.NETWORK.sendClientAction(data);
+		data.socketId = this.NETWORK.mySocketId;
 		this.STATES.addAction(data);
 	} // keyReleased
 
-	mouseMoved(mouseX, mouseY, sk) {
+	mouseMoved(mouseX, mouseY) {
 		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
-		let myPlayer = this.NETWORK.getMyPlayer();
-		if(myPlayer == null) return;
-		let angle = Player.calculateAngle(myPlayer, mouseX, mouseY, sk);
-		if(this.debug) console.log("player Angle:", angle);
+		// if(this.debug) console.log("player Angle:", angle);
+		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
-			type:'playerRotate',
-			angle: angle,
-			time: new Date().getTime()
+			type:'playerCursor',
+			x: mouseX,
+			y: mouseY,
+			time: eventTime
 		};
 		this.NETWORK.sendClientAction(data);
+		data.socketId = this.NETWORK.mySocketId;
 		this.STATES.addAction(data);
 	}
 

@@ -1,13 +1,15 @@
 const Player = require('./Player.js');
 const Utilities = require('./Utilities.js');
+//const Objects = require('./Objects.js'); //Doesnt exist yet
 
 exports.createStartState = ({
-	debug = false
+	debug = false,
+	startTime = 0
 })=>{
 	console.log("start State");
 	return {
 		tick: 0,
-		time: new Date().getTime(),
+		time: startTime,
 		debug: debug,
 		players: {},
 		objects: {},
@@ -15,21 +17,21 @@ exports.createStartState = ({
 	};
 }//creat Start state
 
-exports.createNextState = (previousState)=>{
+exports.createNextState = (previousState, currentTime)=>{
 	if(previousState == null || previousState == undefined){
 		Utilities.error('no previousState given in createNextState');
 	}
 	//copy previousState and process actions
 	let newStateObj = {};
-	newStateObj.tick = previousState.tick++;
-	newStateObj.time = new Date().getTime();
+	newStateObj.tick = previousState.tick + 1;
+	newStateObj.time = currentTime;
 	newStateObj.debug = previousState.debug;
 	newStateObj.players = Object.assign({}, previousState.players);
 	newStateObj.objects = Object.assign({}, previousState.objects);
 	newStateObj.actions = [];
 	processActions(newStateObj, previousState);
-	updatePlayersMutate(newStateObj);
-	// updateObjectsMutate(newStateObj);
+	updatePlayersMutate(newStateObj, newStateObj.time);
+	updateObjectsMutate(newStateObj, newStateObj.time);
 	return newStateObj;
 } //createNextState
 
@@ -47,26 +49,29 @@ function processActions(state, previousState){
 	var startTime = previousState.time;
 	// var lastAction = startTime;
 	// var deltaTime = 0;
+	var lastActionTime = 0;
 	for(var i=0; i<actions.length; i++){
 		//process action on state
 		let action = actions[i];
-		//console.log("process action:",action);
+		// if(action.time < lastActionTime) console.log("actions processed out of order?");
+		lastActionTime = action.time;
 		let player = state.players[action.socketId];
-		if(player == null) return;
+		if(player == null) {
+			console.log("No Player",action.socketId); 
+			return;
+		}
 		//compensate for ping and time difference
 		//TODO should roll back to previous state and re-simulate the ticks to full incorporate the change at the time the client did the action from their perspective.
-		//BUG each player needs a separate delta from last action, currently it is shared with all actions, not good.
-		let timeAdjusted = action.time + player.timeDiffernce; // + (player.ping/2)
-		// deltaTime = timeAdjusted - lastAction;
-		// lastAction = timeAdjusted;
-		// console.log("deltaTime:",deltaTime);
-		action.timeAdjusted = timeAdjusted;
+	
+		// console.log("process action:",action.time);
 		switch(action.type){
 			case "playerMove":
 				Player.setMovementDirectionMutate(player, action);
 				break;
-			case "playerRotate":
-				Player.setAngleMutate(player, action);
+			case "playerCursor":
+				// console.log("BEFORE player.cursor:",player.cursorX, player.cursorY);
+				Player.setCursorMutate(player, action);
+				// console.log("AFTER player.cursor:",player.cursorX, player.cursorY);
 				break;
 			default:
 				console.log("Unknown action");
@@ -74,6 +79,14 @@ function processActions(state, previousState){
 	}//for each action
 } //processActions
 exports.processActions = processActions;
+
+exports.simulateForClient = (state, currentTime)=>{
+	// console.log("simulateForClient", state.actions.length);
+	processActions(state, state);
+	state.actions = [];
+	updatePlayersMutate(state, currentTime);
+	updateObjectsMutate(state, currentTime);
+}
 
 
 exports.addPlayer = (state, info)=>{
@@ -87,21 +100,21 @@ exports.removePlayer = (state, info)=>{
 }
 
 exports.addAction = (state, action)=>{
+	// console.log("addAction", action);
 	state.actions.push(action);
-	// console.log(this.toString({verbose:true}));
+	// console.log(State.toString(state,{verbose:true}));
 }
 
-function updatePlayersMutate(state){
+function updatePlayersMutate(state, currentTime){
 	for(var id in state.players){
-		Player.updateMutate(state.players[id], state.time);
-		//TODO check, debug
+		Player.updateMutate(state.players[id], currentTime);
 	}
 }//update players
 exports.updatePlayersMutate = updatePlayersMutate;
 
-function updateObjectsMutate(){
+function updateObjectsMutate(state, currentTime){
 	for(var id in state.objects){
-		Objects.updateMutate(state.Objects[id]);
+		Objects.updateMutate(state.Objects[id], currentTime);
 	}
 }//update objects
 exports.updateObjectsMutate = updateObjectsMutate;
@@ -150,6 +163,9 @@ function clone(state){
 	newStateObj.time = state.time;
 	newStateObj.debug = state.debug;
 	newStateObj.actions = [];
+	state.actions.forEach((action)=>{
+		newStateObj.actions.push(Utilities.cloneObject(action));
+	});
 	newStateObj.players = {};
 	for(var id in state.players){
 		newStateObj.players[id] = Utilities.cloneObject(state.players[id]);
@@ -180,6 +196,8 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 			intermediatePlayer.x = intermediatePlayer.x - (diffX * percent);
 			let diffY = intermediatePlayer.y - playerEnd.y;
 			intermediatePlayer.y = intermediatePlayer.y - (diffY * percent);
+			let diffAngle = intermediatePlayer.angle - playerEnd.angle;
+			intermediatePlayer.angle = intermediatePlayer.angle - (diffAngle * percent);
 		}
 		
 		newStateObj.players[id] = intermediatePlayer;

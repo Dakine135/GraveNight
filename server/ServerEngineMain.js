@@ -30,7 +30,9 @@ module.exports = class Engine {
     this.acumulatedTime = 0;
 
     //StateManager
-    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose});
+    let now = this.getCurrentTimeInNanoseconds();
+    let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
+    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds});
   }//constructor
 
   getCurrentTimeInNanoseconds() {
@@ -43,6 +45,7 @@ module.exports = class Engine {
     if(!this.running) return;
 
     let now = this.getCurrentTimeInNanoseconds();
+    let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
 
     if(now >= this.targertNextTickTime){
       let deltaTime = now - this.previousTime;
@@ -57,7 +60,7 @@ module.exports = class Engine {
         if((this.tickCount % 1) == 0){
           if(this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${(deltaTime * this.nanosecondsIntoMiliseconds)}`);
         }
-        this.update();
+        this.update(timeInMiliseconds);
 
       }
     }
@@ -79,8 +82,8 @@ module.exports = class Engine {
     this.running = false;
   }
 
-  update(){
-    this.stateManager.createNextState(this.tickCount);
+  update(currentTime){
+    this.stateManager.createNextState(this.tickCount, currentTime);
     this.sendGameStateToClients(this.tickCount);
   }
 
