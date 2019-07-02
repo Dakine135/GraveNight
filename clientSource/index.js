@@ -4,6 +4,17 @@ import Networking from './js/networking.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
+function template({var1="1",var2="2"}){
+  return `${var1}, ${var2} = sdglfdk`;
+}
+
+let test1 = template({var1:"string1", var2:54563});
+let test2 = template({var1:"string2", var2:{test:"testing"}});
+console.log("test1:", test1);
+console.log("test2:", test2);
+
+
+
 console.log("index.js loaded in bundle");
 var STATES;
 var CONTROLS;
@@ -33,7 +44,7 @@ let sketch = (sk)=>{
     CONTROLS = new Controls({debug:false, NETWORK:NETWORK, STATES:STATES});
     sk.angleMode(sk.RADIANS);
     sk.rectMode(sk.CENTER);
-    sk.frameRate(20); //default and max is 60
+    sk.frameRate(60); //default and max is 60
     console.log("End P5 Setup");
   } //setup
 

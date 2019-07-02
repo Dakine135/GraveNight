@@ -6,11 +6,10 @@ function HUD({
 	this.viewWidth = 0;
 	this.viewHeight = 0;
 	this.debug = debug;
-	this.debugTemplateText = "";
+	this.debugVars = {};
+	this.debugTemplateText = function(){return "";};
+	this.debugText = "";
 
-	this.updateDebugTextTemplate = (variables,text)=>{
-
-	}
 }//HUD
 
 exports.HUD = HUD;
