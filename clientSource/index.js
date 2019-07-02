@@ -8,6 +8,7 @@ console.log("index.js loaded in bundle");
 var STATES;
 var CONTROLS;
 var NETWORK;
+var p5Canvas;
 
 var currentTime = new Date().getTime();
 var lastFrame = currentTime;
@@ -18,12 +19,13 @@ let sketch = (sk)=>{
   sk.setup = ()=>{
     console.log("Start P5 Setup");
     console.log("Screen Size: ", sk.windowWidth, sk.windowHeight);
-    sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
+    p5Canvas = sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
+    p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
     STATES = new StatesManager({
       debug:false, 
       debugState:false,
       stateInterpolation: true,
-      clientSimulation: false,
+      clientSimulation: false, //not really working atm
       sk:sk
     });
     NETWORK = new Networking({debug:false, STATES:STATES});

@@ -47,14 +47,9 @@ function processActions(state, previousState){
 	let actions = previousState.actions;
 	//move threw actions backwards (first in first out)
 	var startTime = previousState.time;
-	// var lastAction = startTime;
-	// var deltaTime = 0;
-	var lastActionTime = 0;
 	for(var i=0; i<actions.length; i++){
 		//process action on state
 		let action = actions[i];
-		// if(action.time < lastActionTime) console.log("actions processed out of order?");
-		lastActionTime = action.time;
 		let player = state.players[action.socketId];
 		if(player == null) {
 			console.log("No Player",action.socketId); 

@@ -15,21 +15,33 @@
             /*Stuff to make the full screen better and remove cursor*/
             canvas {
                 position:absolute;
+                cursor: none;
+            }
+            #stage {
+                position: fixed;
                 left:0;
                 top:0;
                 width:100%;
                 height:100%;
-                cursor: none;
             }
+            #hud-layer { z-index: 3; }
+            #lighting-layer { z-index: 2; }
+            #P5-Canvas-Container { z-index: 1; cursor: none;}
         </style>
     </head>
     <body>
+
+        <div id="stage">
+          <canvas id="hud-layer"></canvas>
+          <canvas id="lighting-layer"></canvas>
+          <div id="P5-Canvas-Container"></div>
+        </div>
+
+        <style>
+          
+        </style>
+
 	    <script src="/reload/reload.js"></script>
-        <script type="text/javascript" src="js/clientBundle.js"></script>
-        <!-- <script type="text/javascript" src="classes/player.js"></script>
-        <script type="text/javascript" src="classes/clientControls.js"></script>
-        <script type="text/javascript" src="classes/states.js"></script>
-        <script type="text/javascript" src="classes/networking.js"></script>
-        <script src="index.js"></script> -->	    
+        <script type="text/javascript" src="js/clientBundle.js"></script>    
     </body>
 </html>
