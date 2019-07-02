@@ -157,16 +157,22 @@ function randomColor(){
 }
 exports.randomColor = randomColor;
 
-exports.draw = (obj, render)=>{
+exports.draw = (obj, render, CAMERA)=>{
 	// console.log("drawing");
+	// console.log("drawing player:", CAMERA);
 	render.push(); // Start a new drawing state
 	render.noStroke();
-	render.translate(obj.x, obj.y);
+	// render.translate(obj.x, obj.y);
+	let translatedLocation = CAMERA.translate(obj.x, obj.y);
+	render.translate(translatedLocation.x, translatedLocation.y);
 	render.textSize(18);
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
 	render.textAlign(render.CENTER);
 	render.text(obj.name, 0, -obj.size);
+	render.fill(0);
+	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.size);
 	render.rotate(obj.angle);
+	render.fill(obj.color.r, obj.color.g, obj.color.b);
 	render.rect (0, 0, obj.size, obj.size);
 	render.fill(0, 0, 255);
 	render.circle(15, 10, 10);

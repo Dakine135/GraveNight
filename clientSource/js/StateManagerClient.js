@@ -8,7 +8,8 @@ export default class StatesManager{
 		debugState=false,
 		stateInterpolation=true,
 		clientSimulation=true,
-		sk=Utilities.error('client needs render')
+		sk=Utilities.error('client needs render'),
+		CAMERA = Utilities.error('client needs CAMERA')
 	}){
 		console.log("Create State Manager");
 		this.debug = debug;
@@ -20,6 +21,7 @@ export default class StatesManager{
 		//set by server tick, then added as delta time progresses, not actual system time
 		this.currentDeltaTime = 0;
 		this.sk = sk;
+		this.CAMERA = CAMERA;
 
 		//temp
 		this.doLimited = 0;
@@ -54,7 +56,7 @@ export default class StatesManager{
 		if(drawingState == null) return;
 		// console.log(drawingState.toString({verbose:true}));
 		for(var id in drawingState.players){
-			Player.draw(drawingState.players[id], this.sk);
+			Player.draw(drawingState.players[id], this.sk, this.CAMERA);
 		}
 		for(var id in drawingState.objects){
 			// drawingState.objects[id].draw(this.sk);

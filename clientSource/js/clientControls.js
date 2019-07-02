@@ -1,11 +1,12 @@
 import Player from '../../shared/Player.js';
 
 export default class Controls{
-	constructor({debug=false, NETWORK=null, STATES=null}){
+	constructor({debug=false, NETWORK=null, STATES=null, CAMERA=null}){
 		console.log("Create Controls");
 		this.debug = debug;
 		this.NETWORK = NETWORK;
 		this.STATES = STATES;
+		this.CAMERA = CAMERA;
 
 		this.leftClickPressed=false;
 		this.middleClickPressed=false;
@@ -114,14 +115,22 @@ export default class Controls{
 		this.STATES.addAction(data);
 	} // keyReleased
 
+	translateScreenLocToWorld(x,y){
+		let worldX = this.CAMERA.x + x;
+		let worldY = this.CAMERA.y + y;
+		return {x:worldX, y:worldY};
+	}
+
 	mouseMoved(mouseX, mouseY) {
 		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
+		let locInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
+		if(this.debug) console.log(`locInWorld: ${locInWorld.x}, ${locInWorld.y}`);
 		// if(this.debug) console.log("player Angle:", angle);
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerCursor',
-			x: mouseX,
-			y: mouseY,
+			x: locInWorld.x,
+			y: locInWorld.y,
 			time: eventTime
 		};
 		this.NETWORK.sendClientAction(data);
