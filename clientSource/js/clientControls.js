@@ -49,6 +49,7 @@ export default class Controls{
 			pressed:true,
 			time: eventTime
 		};
+		let validKey = true;
 		switch(keyCode){
 			case 65: //A
 				//player move Left
@@ -72,10 +73,13 @@ export default class Controls{
 				break;
 			default:
 				console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
+				validKey = false;
 		}//switch
-		this.NETWORK.sendClientAction(data);
-		data.socketId = this.NETWORK.mySocketId;
-		this.STATES.addAction(data);
+		if(validKey){
+			this.NETWORK.sendClientAction(data);
+			data.socketId = this.NETWORK.mySocketId;
+			this.STATES.addAction(data);
+		}
 	} //keyPressed
 
 	keyReleased(keyCode, key) {
@@ -86,6 +90,7 @@ export default class Controls{
 			pressed:false,
 			time: eventTime
 		};
+		let validKey = true;
 		switch(keyCode){
 			case 65: //A
 				//player move Left
@@ -109,15 +114,20 @@ export default class Controls{
 				break;
 			default:
 				console.log(`Key Not Used Released: ${keyCode}, ${key}`);
+				validKey = false;
 		}
-		this.NETWORK.sendClientAction(data);
-		data.socketId = this.NETWORK.mySocketId;
-		this.STATES.addAction(data);
+		if(validKey){
+			this.NETWORK.sendClientAction(data);
+			data.socketId = this.NETWORK.mySocketId;
+			this.STATES.addAction(data);
+		}
 	} // keyReleased
 
 	translateScreenLocToWorld(x,y){
-		let worldX = this.CAMERA.x + x;
-		let worldY = this.CAMERA.y + y;
+		let offsetX = x - (this.CAMERA.width/2);
+		let offsetY = y - (this.CAMERA.height/2);
+		let worldX = Math.round((this.CAMERA.x) + offsetX);
+		let worldY = Math.round((this.CAMERA.y) + offsetY);
 		return {x:worldX, y:worldY};
 	}
 

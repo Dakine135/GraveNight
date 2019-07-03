@@ -9,10 +9,8 @@ module.exports = class Camera{
 	}
 	
 	moveTo(x, y){
-		let centerX = Math.floor(x - (this.width / 2));
-		let centerY = Math.floor(y - (this.height / 2));
-		this.x = centerX;
-		this.y = centerY;
+		this.x = x;
+		this.y = y;
 	}
 
 	setGoal(x,y){
@@ -21,12 +19,20 @@ module.exports = class Camera{
 	}
 
 	translate(x, y){
-		let tx = Math.round(x - this.x);
-		let ty = Math.round(y - this.y);
+		let orgiginX = this.x - (this.width/2);
+		let orgiginY = this.y - (this.height/2);
+		let tx = Math.round(x - orgiginX);
+		let ty = Math.round(y - orgiginY);
 		return {x:tx, y:ty};
 	}
 
 	update(){
-		this.moveTo(this.goalX, this.goalY);
+		let diffX = this.x - this.goalX;
+		let diffY = this.y - this.goalY;
+		let moveX = this.x - (diffX/50);
+		let moveY = this.y - (diffY/50);
+		if(Math.abs(diffX) < 1) moveX = this.goalX;
+		if(Math.abs(diffY) < 1) moveY = this.goalY;
+		this.moveTo(moveX, moveY);
 	}
 }//camera class

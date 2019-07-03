@@ -1,5 +1,6 @@
-function HUD({
-	debug=false
+module.exports = class HUD({
+	debug=false,
+	divId="hud-layer"
 }){
 	this.canvas = null;
 	this.render = null;
@@ -11,5 +12,3 @@ function HUD({
 	this.debugText = "";
 
 }//HUD
-
-exports.HUD = HUD;

@@ -45,9 +45,21 @@ exports.updateCreateNew = (obj)=>{
 	if(obj.x == null || obj.y == null) Utilities.error('Player object missing location');
 
 	let newObj = Utilities.cloneObject(obj);
-	//actualt do update on new object
-	newObj.x = newObj.x + (newObj.vX * newObj.speedMultiplier);
-	newObj.y = newObj.y + (newObj.vY * newObj.speedMultiplier);
+	//actually do update on new object
+	//do final calculations on movement to account for buttons held for the duration of the tick
+	let deltaTime = currentTime - newObj.lastActionTime;
+	newObj.lastActionTime = currentTime;
+	if(deltaTime > 0) accumulateMovementMutate(newObj, deltaTime);
+	//apply movement
+	newObj.x += newObj.moveByX;
+	newObj.y += newObj.moveByY;
+	newObj.cursorX += newObj.moveByX;
+	newObj.cursorY += newObj.moveByY;
+	//reset accumulated movement
+	newObj.moveByX = 0;
+	newObj.moveByY = 0;
+	//update Angle of player based on cursor location relative to player
+	calculateAndSetAngleMutate(newObj);
 	return newObj;
 } //updateCreateNew player
 
@@ -67,6 +79,8 @@ exports.updateMutate = (obj, currentTime)=>{
 	//apply movement
 	obj.x += obj.moveByX;
 	obj.y += obj.moveByY;
+	obj.cursorX += obj.moveByX;
+	obj.cursorY += obj.moveByY;
 	//reset accumulated movement
 	obj.moveByX = 0;
 	obj.moveByY = 0;

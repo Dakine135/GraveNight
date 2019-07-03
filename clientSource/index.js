@@ -2,6 +2,7 @@ import StatesManager from './js/StateManagerClient.js';
 import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
+import Lighting from './js/lighting.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
@@ -21,6 +22,7 @@ var STATES;
 var CONTROLS;
 var NETWORK;
 var CAMERA;
+var LIGHTING;
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -35,13 +37,20 @@ let sketch = (sk)=>{
     p5Canvas = sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
     p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
     CAMERA = new Camera(0,0, sk.windowWidth, sk.windowHeight);
+    LIGHTING = new Lighting({
+      width: sk.windowWidth, 
+      height: sk.windowHeight
+    });
+    LIGHTING.createLightSource({});
+    // LIGHTING.createLightSource({x:500,y:500, size:300});
     STATES = new StatesManager({
       debug:false, 
       debugState:false,
       stateInterpolation: true,
       clientSimulation: false, //not really working atm
       sk:sk,
-      CAMERA: CAMERA
+      CAMERA: CAMERA,
+      LIGHTING: LIGHTING
     });
     NETWORK = new Networking({
       debug:false, 
@@ -91,7 +100,25 @@ let sketch = (sk)=>{
     if(myPlayer != null) CAMERA.setGoal(myPlayer.x, myPlayer.y);
     CAMERA.update();
 
+    //draw line between player and cursor
+    if(myPlayer != null){
+      let playerLocOnScreen = CAMERA.translate(myPlayer.x, myPlayer.y);
+      sk.line(
+        playerLocOnScreen.x, playerLocOnScreen.y, 
+        mouse.x, mouse.y);
+    }
+
+    //square at 0,0
+    let origin = CAMERA.translate(0,0);
+    sk.rect(origin.x,origin.y,20,20);
+    sk.text(0+","+0,origin.x, origin.y);
+
     STATES.draw(deltaTime);
+    LIGHTING.update();
+    let ligthingOffset = CAMERA.translate(0,0);
+    let offsetX = ligthingOffset.x;
+    let offsetY = ligthingOffset.y;
+    LIGHTING.draw(offsetX, offsetY, STATES.frameState);
 
     //once a second
     if(currentTime % lastSecond >= 1000){
@@ -106,13 +133,6 @@ let sketch = (sk)=>{
       // console.log("=============");
     }
 
-    //draw line between player and cursor
-    if(myPlayer != null){
-      let playerLocOnScreen = CAMERA.translate(myPlayer.x, myPlayer.y);
-      sk.line(
-        playerLocOnScreen.x, playerLocOnScreen.y, 
-        mouse.x, mouse.y);
-    }
 
     //draw cross-hair
     let size = 10;
@@ -133,10 +153,7 @@ let sketch = (sk)=>{
     let mouseWorld = CONTROLS.translateScreenLocToWorld(mouse.x, mouse.y);
     sk.text(mouseWorld.x+","+mouseWorld.y,mouse.x, mouse.y+size);
 
-    //square at 0,0
-    let origin = CAMERA.translate(0,0);
-    sk.rect(origin.x,origin.y,20,20);
-    sk.text(0+","+0,origin.x, origin.y);
+    
   }  //draw
 
 } //P5

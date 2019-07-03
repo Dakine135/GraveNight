@@ -17,6 +17,7 @@ export default class StatesManager{
 		this.stateInterpolation = stateInterpolation;
 		this.clientSimulation = clientSimulation;
 		this.state = State.createStartState({debug:this.debugState});
+		this.frameState = this.state;
 		this.nextState = State.createNextState(this.state);
 		//set by server tick, then added as delta time progresses, not actual system time
 		this.currentDeltaTime = 0;
@@ -66,14 +67,22 @@ export default class StatesManager{
 
 	getIntermediateState(deltaTime){
 		this.currentDeltaTime += deltaTime;
-		if(!this.stateInterpolation) return State.clone(this.state);
+		if(!this.stateInterpolation){
+			let tempState = State.clone(this.state);
+			this.frameState = tempState;
+			return tempState;
+		}
 		//interpolate between this.state and this.nextState
 		let totalTimeBetweenStates = this.nextState.time - this.state.time;
 		let percent = this.currentDeltaTime / totalTimeBetweenStates;
 		// console.log("Percent:",percent);
-		if(percent >= 1) return this.nextState;
+		if(percent >= 1){
+			this.frameState = this.nextState;
+			return this.nextState;
+		}
 		else{
-			return State.InterpolateCreateNew(this.state, this.nextState, percent);
+			this.frameState = State.InterpolateCreateNew(this.state, this.nextState, percent);
+			return this.frameState;
 		}
 		
 	}
