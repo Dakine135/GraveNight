@@ -71,6 +71,7 @@ let sketch = (sk)=>{
 
   sk.windowResized = ()=>{
     //https://p5js.org/reference/#/p5/resizeCanvas
+    //TODO make lighting and camera and GUI, and such resize with window as well
     sk.resizeCanvas(sk.windowWidth, sk.windowHeight);
     console.log("Resize: ",sk.windowWidth, sk.windowHeight);
   } //window Resized
