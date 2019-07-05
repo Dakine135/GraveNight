@@ -4,10 +4,12 @@ module.exports = class lighting{
 		debug=false,
 		divId="lighting-layer",
 		width=0,
-		height=0
+		height=0,
+		darkness=0.9
 	}){
 		this.width = width;
 		this.height = height;
+		this.darkness=darkness;
 		this.canvas = document.getElementById(divId);
 		this.render = this.canvas.getContext("2d");
 		this.canvas.width = this.width;
@@ -46,7 +48,7 @@ module.exports = class lighting{
 
         //fill black
         this.render.save();
-        this.render.fillStyle = "rgba(0, 0, 0, 0.9)";
+        this.render.fillStyle = "rgba(0, 0, 0,"+ this.darkness +")";
         this.render.fillRect(0,0,this.width,this.height);
         this.render.restore();
 

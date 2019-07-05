@@ -3,6 +3,7 @@ import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
 import Lighting from './js/lighting.js';
+import Hud from './js/hud.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
@@ -23,6 +24,7 @@ var CONTROLS;
 var NETWORK;
 var CAMERA;
 var LIGHTING;
+var HUD;
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -37,9 +39,14 @@ let sketch = (sk)=>{
     p5Canvas = sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
     p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
     CAMERA = new Camera(0,0, sk.windowWidth, sk.windowHeight);
-    LIGHTING = new Lighting({
+    HUD = new Hud({
       width: sk.windowWidth, 
       height: sk.windowHeight
+    });
+    LIGHTING = new Lighting({
+      width: sk.windowWidth, 
+      height: sk.windowHeight,
+      darkness:0.9 //darkness level 0-1
     });
     LIGHTING.createLightSource({});
     // LIGHTING.createLightSource({x:500,y:500, size:300});
@@ -120,19 +127,21 @@ let sketch = (sk)=>{
     let offsetX = ligthingOffset.x;
     let offsetY = ligthingOffset.y;
     LIGHTING.draw(offsetX, offsetY, STATES.frameState);
+    
 
     //once a second
     if(currentTime % lastSecond >= 1000){
-      // console.log("=============");
-      // console.log("Once a second");
       NETWORK.updateServerTimeDiffernce();
-      // console.log("timeDiffernce:",NETWORK.timeDiffernce);
-      // console.log("Ping:",NETWORK.ping);
-      // console.log("FrameRate:",frames);
+      HUD.update({
+        FrameRate:frames,
+        Ping:NETWORK.ping,
+        // timeDiffernce:NETWORK.timeDiffernce
+      });
       lastSecond = currentTime;
       frames = 0;
-      // console.log("=============");
     }
+
+    HUD.draw();
 
 
     //draw cross-hair

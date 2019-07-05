@@ -11,7 +11,8 @@ exports.create = ({
 		speedMultiplier = 300, //increments "pixels" per second
 		angle = 0,
 		size = 50,
-		color = randomColor()
+		color = randomColor(),
+		energy = 100
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -28,6 +29,7 @@ exports.create = ({
 		speedMultiplier: speedMultiplier,
 		angle: angle,
 		color: color,
+		energy:energy,
 		//just server stuff
 		ping: 0,
 		timeDiffernce: 0,
