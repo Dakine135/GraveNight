@@ -24,6 +24,9 @@ let config = {
 	io:io
 };
 var gameEngine = new Engine(config);
+gameEngine.createWorld({
+  
+});
 
 //trying to be hacky about sockets not starting until bundle was created
 let waitTime = 5000;

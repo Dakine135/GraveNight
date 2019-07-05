@@ -65,11 +65,18 @@ module.exports = class lighting{
         for(var id in state.players){
         	let player = state.players[id];
         	//placeholder for player energy eventually
-        	let energy = 200;
         	let x = player.x + offsetX;
         	let y = player.y + offsetY;
         	// console.log("player light:",player);
-        	this.drawLightPoint({x:x, y:y, intensity:energy});
+        	this.drawLightPoint({x:x, y:y, intensity:player.energy});
+        	//flashlight location
+        	this.render.save();
+        	this.render.translate(x, y);
+        	x = player.width/2;
+        	y = player.height/2;
+        	this.render.rotate(player.angle);
+        	this.drawLightCone({x:x, y:y, intensity:(player.energy*2)});
+        	this.render.restore();
         }
 	}//draw
 
@@ -81,6 +88,7 @@ module.exports = class lighting{
 		// console.log("lightdraw:",intensity);
 		x = Math.round(x);
 		y = Math.round(y);
+		this.render.save();
 		this.render.beginPath();
     	this.render.globalCompositeOperation = "xor";
     	let gradient = this.render.createRadialGradient(x, y, (intensity*0.6), x, y, intensity);
@@ -90,12 +98,31 @@ module.exports = class lighting{
     	gradient.addColorStop(1,"rgba(255, 255, 255, 0.1)");
     	this.render.fillStyle = gradient;
     	this.render.arc(x, y, intensity, 0, Math.PI*2);
-    	this.render.fill();
     	this.render.closePath();
+    	this.render.fill();
+    	this.render.restore();
 	}
 
-	drawLightCone(){
-		
+	drawLightCone({
+		x, 
+		y,
+		intensity
+	}){
+		// the triangle
+		this.render.beginPath();
+		this.render.globalCompositeOperation = "xor";
+		this.render.moveTo(x, y);
+		this.render.lineTo(x+intensity, y-(intensity*0.5));
+		this.render.lineTo(x+intensity, y+(intensity*0.5));
+		this.render.closePath();
+		// the fill color
+		let gradient = this.render.createRadialGradient(x, y, (intensity*0.2), x, y, intensity);
+    	gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
+    	gradient.addColorStop(0.3,"rgba(255, 255, 255, 1)");
+    	gradient.addColorStop(0.8,"rgba(255, 255, 255, 0.8)");
+    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
+    	this.render.fillStyle = gradient;
+		this.render.fill();
 	}
 
 

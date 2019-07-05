@@ -1,18 +1,26 @@
 // var Hitbox = require('./Hitbox.js');
 var Utilities = require('../shared/Utilities.js');
+var Hitbox = require('../shared/Hitbox.js');
 
 exports.create = ({
 		socketId = Utilities.error('No socketId given'),
 		name = getRandomName(),
-		x = 500,
-		y = 500,
+		x = ((Math.random()*900)-400),
+		y = ((Math.random()*900)-400),
 		cursorX = 500,
 		cursorY = 500,
 		speedMultiplier = 300, //increments "pixels" per second
 		angle = 0,
-		size = 50,
-		color = randomColor(),
-		energy = 100
+		width = 50,
+		height = 50,
+		hitbox = Hitbox.create({
+			top: height/2,
+			bottom: -height/2,
+			left: -width/2,
+			right: width/2
+		}),
+		color = Utilities.randomColor(),
+		energy = 200
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -25,7 +33,9 @@ exports.create = ({
 		cursorY: cursorY,
 		vX: 0,
 		vY: 0,
-		size: size,
+		width: width,
+		height: height,
+		hitbox: hitbox,
 		speedMultiplier: speedMultiplier,
 		angle: angle,
 		color: color,
@@ -164,15 +174,6 @@ function getRandomName(){
 }
 exports.getRandomName = getRandomName;
 
-function randomColor(){
-	return {
-		r: Math.floor(255*Math.random()),
-		g: Math.floor(255*Math.random()),
-		b: Math.floor(255*Math.random())
-	}
-}
-exports.randomColor = randomColor;
-
 exports.draw = (obj, render, CAMERA)=>{
 	// console.log("drawing");
 	// console.log("drawing player:", CAMERA);
@@ -181,18 +182,25 @@ exports.draw = (obj, render, CAMERA)=>{
 	// render.translate(obj.x, obj.y);
 	let translatedLocation = CAMERA.translate(obj.x, obj.y);
 	render.translate(translatedLocation.x, translatedLocation.y);
+	//player Name
 	render.textSize(18);
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
 	render.textAlign(render.CENTER);
-	render.text(obj.name, 0, -obj.size);
+	render.text(obj.name, 0, -obj.height);
+	//player location for debugging
 	render.fill(0);
-	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.size);
+	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.height);
+
+	//rotate for player direction facing
 	render.rotate(obj.angle);
+	//draw main body
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.rect (0, 0, obj.size, obj.size);
+	render.rect (0, 0, obj.width, obj.height);
+	//draw eyes
 	render.fill(0, 0, 255);
 	render.circle(15, 10, 10);
 	render.circle(15, -10, 10);
+	//draw flashlight
 	render.fill(0);
 	render.rect(25, 25, 20, 10);
 	render.pop(); // Restore original state

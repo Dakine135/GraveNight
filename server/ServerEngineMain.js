@@ -110,6 +110,21 @@ module.exports = class Engine {
     this.stateManager.addAction(data);
   }
 
+  createWorld({
+    width=1000,
+    height=1000,
+    thickness=50
+  }){
+    let topWorld = {x:0, y:-(height/2), width:width, height:thickness};
+    let bottomWorld = {x:0, y:(height/2), width:width, height:thickness};
+    let leftWorld = {x:-(width/2), y:0, width:thickness, height:height};
+    let rightWorld = {x:(width/2), y:0, width:thickness, height:height};
+    this.stateManager.addBlock(topWorld);
+    this.stateManager.addBlock(bottomWorld);
+    this.stateManager.addBlock(leftWorld);
+    this.stateManager.addBlock(rightWorld);
+  }
+
   throwError(error){
     throw new Error(error);
   }

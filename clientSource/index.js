@@ -46,7 +46,7 @@ let sketch = (sk)=>{
     LIGHTING = new Lighting({
       width: sk.windowWidth, 
       height: sk.windowHeight,
-      darkness:0.9 //darkness level 0-1
+      darkness:1 //darkness level 0-1
     });
     LIGHTING.createLightSource({});
     // LIGHTING.createLightSource({x:500,y:500, size:300});
@@ -131,6 +131,7 @@ let sketch = (sk)=>{
 
     //once a second
     if(currentTime % lastSecond >= 1000){
+      // console.log(STATES.state);
       NETWORK.updateServerTimeDiffernce();
       HUD.update({
         FrameRate:frames,

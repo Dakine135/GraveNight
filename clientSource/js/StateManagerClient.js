@@ -1,4 +1,5 @@
 import Player from '../../shared/Player.js';
+import Block from '../../shared/Block.js';
 import State from '../../shared/State.js';
 import Utilities from '../../shared/Utilities.js';
 
@@ -59,8 +60,8 @@ export default class StatesManager{
 		for(var id in drawingState.players){
 			Player.draw(drawingState.players[id], this.sk, this.CAMERA);
 		}
-		for(var id in drawingState.objects){
-			// drawingState.objects[id].draw(this.sk);
+		for(var id in drawingState.blocks){
+			Block.draw(drawingState.blocks[id], this.sk, this.CAMERA);
 		}
 		
 	}//draw

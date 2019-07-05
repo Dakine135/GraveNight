@@ -1,4 +1,5 @@
 const Player = require('./Player.js');
+const Block = require('../shared/Block.js');
 const Utilities = require('./Utilities.js');
 //const Objects = require('./Objects.js'); //Doesnt exist yet
 
@@ -12,7 +13,8 @@ exports.createStartState = ({
 		time: startTime,
 		debug: debug,
 		players: {},
-		objects: {},
+		blocks: {},
+		// objects: {},
 		actions: []
 	};
 }//creat Start state
@@ -27,11 +29,12 @@ exports.createNextState = (previousState, currentTime)=>{
 	newStateObj.time = currentTime;
 	newStateObj.debug = previousState.debug;
 	newStateObj.players = Object.assign({}, previousState.players);
-	newStateObj.objects = Object.assign({}, previousState.objects);
+	newStateObj.blocks = Object.assign({}, previousState.blocks);
+	// newStateObj.objects = Object.assign({}, previousState.objects);
 	newStateObj.actions = [];
 	processActions(newStateObj, previousState);
 	updatePlayersMutate(newStateObj, newStateObj.time);
-	updateObjectsMutate(newStateObj, newStateObj.time);
+	// updateObjectsMutate(newStateObj, newStateObj.time);
 	return newStateObj;
 } //createNextState
 
@@ -90,6 +93,11 @@ exports.addPlayer = (state, info)=>{
 	state.players[player.socketId] = player;
 }
 
+exports.addBlock = (state, info)=>{
+	let block = Block.create(info);
+	state.blocks[info.id] = block;
+}
+
 exports.removePlayer = (state, info)=>{
 	delete state.players[info.socketId];
 }
@@ -107,12 +115,12 @@ function updatePlayersMutate(state, currentTime){
 }//update players
 exports.updatePlayersMutate = updatePlayersMutate;
 
-function updateObjectsMutate(state, currentTime){
-	for(var id in state.objects){
-		Objects.updateMutate(state.Objects[id], currentTime);
-	}
-}//update objects
-exports.updateObjectsMutate = updateObjectsMutate;
+// function updateObjectsMutate(state, currentTime){
+// 	for(var id in state.objects){
+// 		Objects.updateMutate(state.Objects[id], currentTime);
+// 	}
+// }//update objects
+// exports.updateObjectsMutate = updateObjectsMutate;
 
 function updatePlayerNetworkData(state, data){
 	let player = state.players[data.socketId];
@@ -165,10 +173,14 @@ function clone(state){
 	for(var id in state.players){
 		newStateObj.players[id] = Utilities.cloneObject(state.players[id]);
 	}
-	newStateObj.objects = {};
-	for(var id in state.objects){
-		newStateObj.objects[id] = Utilities.cloneObject(state.objects[id]);
+	newStateObj.blocks = {};
+	for(var id in state.blocks){
+		newStateObj.blocks[id] = Utilities.cloneObject(state.blocks[id]);
 	}
+	// newStateObj.objects = {};
+	// for(var id in state.objects){
+	// 	newStateObj.objects[id] = Utilities.cloneObject(state.objects[id]);
+	// }
 	return newStateObj;
 }
 exports.clone = clone;
@@ -182,6 +194,7 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 	newStateObj.debug = startState.debug;
 	newStateObj.actions = [];
 	newStateObj.players = {};
+	newStateObj.blocks = startState.blocks;
 	for(var id in startState.players){
 		let intermediatePlayer = Utilities.cloneObject(startState.players[id]);
 		if(endState.players[id] != null){
@@ -197,11 +210,11 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 		
 		newStateObj.players[id] = intermediatePlayer;
 	}
-	newStateObj.objects = {};
-	for(var id in startState.objects){
-		newStateObj.objects[id] = Utilities.cloneObject(startState.objects[id]);
-		//TODO intermediate objects
-	}
+	// newStateObj.objects = {};
+	// for(var id in startState.objects){
+	// 	newStateObj.objects[id] = Utilities.cloneObject(startState.objects[id]);
+	// 	//TODO intermediate objects
+	// }
 	return newStateObj;
 }
 
@@ -212,7 +225,8 @@ exports.package = (state)=>{
 		tick: state.tick,
 		time: state.time,
 		players: state.players,
-		objects: state.objects
+		blocks: state.blocks
+		// objects: state.objects
 	}
 }
 

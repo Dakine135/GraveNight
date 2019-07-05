@@ -5,6 +5,7 @@ const Utilities = require('../shared/Utilities.js');
 module.exports = class StateManager{
     constructor({debug=false, debugState=false, verbose=false, startTime=0}){
         this.states = {};
+        this.blockCount = 0;
         let startState = State.createStartState({debug:debugState, startTime:startTime});
         this.currentState = startState;
         this.states[0] = startState;
@@ -41,6 +42,12 @@ module.exports = class StateManager{
     updatePlayerNetworkData(data){
         if(this.debug) console.log(`updatePlayerNetworkData Player ${JSON.stringify(data)}`);
         State.updatePlayerNetworkData(this.currentState, data);
+    }
+
+    addBlock(info){
+        info.id = this.blockCount;
+        State.addBlock(this.currentState, info);
+        this.blockCount++;
     }
 
     //TODO make it build state Delta instead of sending entire state everyTime
