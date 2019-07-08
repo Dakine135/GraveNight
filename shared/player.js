@@ -21,7 +21,7 @@ exports.create = ({
 			right: width/2
 		}),
 		color = Utilities.randomColor(),
-		energy = 200
+		energy = 300
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -71,6 +71,9 @@ exports.updateCreateNew = (obj, currentTime)=>{
 	//reset accumulated movement
 	newObj.moveByX = 0;
 	newObj.moveByY = 0;
+	if(newObj.energy>0){
+	//newObj.energy = newObj.energy-.1;
+	}
 	//update Angle of player based on cursor location relative to player
 	calculateAndSetAngleMutate(newObj);
 	return newObj;

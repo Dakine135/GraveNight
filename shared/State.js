@@ -118,7 +118,7 @@ function updatePlayersMutate(state, currentTime){
 			//do collision check on temp playerMoved
 			let colliding = getColliding(state, playerMoved);
 			if(colliding){
-				console.log("colliding with: ", colliding);
+				// console.log("colliding with: ", colliding);
 				playerMoved.x = player.x;
 				playerMoved.y = player.y;
 			}
