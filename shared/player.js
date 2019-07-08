@@ -1,6 +1,7 @@
 // var Hitbox = require('./Hitbox.js');
 var Utilities = require('../shared/Utilities.js');
 var Hitbox = require('../shared/Hitbox.js');
+var State = require('../shared/State.js');
 
 exports.create = ({
 		socketId = Utilities.error('No socketId given'),
@@ -25,7 +26,7 @@ exports.create = ({
 	return {
 		id: socketId, //might change later to something else more persistent
 		socketId: socketId,
-		type: 'Player',
+		type: 'player',
 		name: name,
 		x: x,
 		y: y,
@@ -50,7 +51,7 @@ exports.create = ({
 	};
 }//create new player
 
-exports.updateCreateNew = (obj)=>{
+exports.updateCreateNew = (obj, currentTime)=>{
 	//check for proper peramteres
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
 	if(obj.type != "Player") Utilities.error('Object not of type Player');
@@ -88,6 +89,16 @@ exports.updateMutate = (obj, currentTime)=>{
 	// if(deltaTime <= 0) console.log(`${currentTime} - ${obj.lastActionTime} = ${deltaTime}`);
 	obj.lastActionTime = currentTime;
 	if(deltaTime > 0) accumulateMovementMutate(obj, deltaTime);
+
+	//check new location for collision
+	// let nextX = obj.x + obj.moveByX;
+	// let nextY = obj.y + obj.moveByY;
+	// let myHitbox = Hitbox.translate(nextX, nextY, obj.hitbox);
+	//get object you are colliding with or null
+	// let colliding = State.getColliding(state, myHitbox);
+	//handle collision
+
+
 	//apply movement
 	obj.x += obj.moveByX;
 	obj.y += obj.moveByY;

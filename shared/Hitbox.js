@@ -24,3 +24,18 @@ function colliding(hitbox1, hitbox2) {
 	return true;
 } //colliding
 exports.colliding = colliding;
+
+function translate({
+	x=0, 
+	y=0, 
+	hitbox=null, 
+	angle=0 //not yet implemented
+}){
+	let translatedHitbox = Utilities.cloneObject(hitbox);
+	translatedHitbox.top = translatedHitbox.top + y;
+	translatedHitbox.bottom = translatedHitbox.bottom + y;
+	translatedHitbox.left = translatedHitbox.left + x;
+	translatedHitbox.right = translatedHitbox.right + x;
+	return translatedHitbox;
+}; //translate
+exports.translate = translate;

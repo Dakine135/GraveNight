@@ -110,7 +110,12 @@ exports.addAction = (state, action)=>{
 
 function updatePlayersMutate(state, currentTime){
 	for(var id in state.players){
-		Player.updateMutate(state.players[id], currentTime);
+		let playerMoved = Player.updateCreateNew(state.players[id], currentTime);
+		//do collision check on temp playerMoved
+		let colliding = getColliding(state, playerMoved);
+		//apply change to main player in state
+		state.players[id] = playerMoved;
+
 	}
 }//update players
 exports.updatePlayersMutate = updatePlayersMutate;
@@ -128,6 +133,41 @@ function updatePlayerNetworkData(state, data){
 	player.timeDiffernce = data.timeDiffernce;
 }
 exports.updatePlayerNetworkData = updatePlayerNetworkData;
+
+/*
+	Get all hit-boxes in range
+*/
+function getObjectsInRange(state, obj){
+	let objectsInRange = [];
+	for(var id in state.players){
+		let player = state.players[id];
+		if(obj.type == 'player' && obj.id == id){
+			console.log("self");
+			return;
+		}
+		let dist = Math.max(player.width, player.height);
+		let diffX = Math.abs(player.x - x);
+		let diffY = Math.abs(player.y - y); 
+		if(diffX <= dist && diffY <= dist) objectsInRange.push(player);
+	}//players
+	for(var id in state.blocks){
+		let block = state.blocks[id];
+		let dist = Math.max(block.width, block.height);
+		let diffX = Math.abs(block.x - x);
+		let diffY = Math.abs(block.y - y); 
+		if(diffX <= dist && diffY <= dist) objectsInRange.push(block);
+	}//blocks
+	return objectsInRange;
+}
+exports.getObjectsInRange = getObjectsInRange;
+
+/*
+ 	Return what you are colliding with or null
+*/
+function getColliding(state, obj){
+	let objectsInRange = getObjectsInRange(state, obj);
+}
+exports.getColliding = getColliding;
 
 function updateWithNewData(state, data){
 	// console.log("data:",data);

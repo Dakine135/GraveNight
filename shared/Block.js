@@ -17,6 +17,7 @@ exports.create = ({
 })=>{
 	return {
 		id:id,
+		type:"block",
 		x:x,
 		y:y,
 		width:width,
