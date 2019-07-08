@@ -14,7 +14,10 @@ exports.create = ({
 	}
 } //create
 
-function colliding(hitbox1, hitbox2) {
+function colliding(obj1, obj2) {
+	let hitbox1 = getHitbox(obj1);
+	let hitbox2 = getHitbox(obj2);
+	// console.log("In colliding:", hitbox1, hitbox2);
 	if(hitbox1.top > hitbox2.bottom ||
 	   hitbox1.bottom < hitbox2.top ||
 	   hitbox1.right < hitbox2.left ||
@@ -39,3 +42,12 @@ function translate({
 	return translatedHitbox;
 }; //translate
 exports.translate = translate;
+
+function getHitbox(obj){
+	return translate({
+		x: obj.x,
+		y: obj.y,
+		hitbox: obj.hitbox,
+		angle: obj.angle
+	});
+}

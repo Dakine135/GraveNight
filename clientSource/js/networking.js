@@ -90,6 +90,7 @@ module.exports = class Networking{
               }
             });
             this.timeDiffernce = sumOfCluster / totalCount;
+            this.timeDiffernceArray = [];
             this.sendServerNetworkInfo();
         }
     } //end updateServerTimeDiffernce

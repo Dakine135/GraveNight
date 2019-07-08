@@ -1,5 +1,6 @@
 const Player = require('./Player.js');
 const Block = require('../shared/Block.js');
+const Hitbox = require('../shared/Hitbox.js');
 const Utilities = require('./Utilities.js');
 //const Objects = require('./Objects.js'); //Doesnt exist yet
 
@@ -110,12 +111,21 @@ exports.addAction = (state, action)=>{
 
 function updatePlayersMutate(state, currentTime){
 	for(var id in state.players){
-		let playerMoved = Player.updateCreateNew(state.players[id], currentTime);
-		//do collision check on temp playerMoved
-		let colliding = getColliding(state, playerMoved);
+		let player = state.players[id];
+		let playerMoved = Player.updateCreateNew(player, currentTime);
+		if(player.x != playerMoved.x || player.y != playerMoved.y){
+			// console.log("============Update Player==========");
+			//do collision check on temp playerMoved
+			let colliding = getColliding(state, playerMoved);
+			if(colliding){
+				console.log("colliding with: ", colliding);
+				playerMoved.x = player.x;
+				playerMoved.y = player.y;
+			}
+			// console.log("====================================");
+		}
 		//apply change to main player in state
 		state.players[id] = playerMoved;
-
 	}
 }//update players
 exports.updatePlayersMutate = updatePlayersMutate;
@@ -141,20 +151,26 @@ function getObjectsInRange(state, obj){
 	let objectsInRange = [];
 	for(var id in state.players){
 		let player = state.players[id];
-		if(obj.type == 'player' && obj.id == id){
-			console.log("self");
-			return;
+		if(obj.type === 'player' && obj.id === id){
+			//don't count yourself as another object
+			continue;
 		}
 		let dist = Math.max(player.width, player.height);
-		let diffX = Math.abs(player.x - x);
-		let diffY = Math.abs(player.y - y); 
+		dist += Math.max(obj.width, obj.height);
+		let diffX = Math.abs(player.x - obj.x);
+		let diffY = Math.abs(player.y - obj.y); 
 		if(diffX <= dist && diffY <= dist) objectsInRange.push(player);
 	}//players
 	for(var id in state.blocks){
 		let block = state.blocks[id];
+		if(obj.type === 'block' && obj.id === id){
+			//don't count yourself as another object
+			continue;
+		}
 		let dist = Math.max(block.width, block.height);
-		let diffX = Math.abs(block.x - x);
-		let diffY = Math.abs(block.y - y); 
+		dist += Math.max(obj.width, obj.height);
+		let diffX = Math.abs(block.x - obj.x);
+		let diffY = Math.abs(block.y - obj.y); 
 		if(diffX <= dist && diffY <= dist) objectsInRange.push(block);
 	}//blocks
 	return objectsInRange;
@@ -166,6 +182,14 @@ exports.getObjectsInRange = getObjectsInRange;
 */
 function getColliding(state, obj){
 	let objectsInRange = getObjectsInRange(state, obj);
+	let colliding = null;
+	objectsInRange.forEach((otherObj)=>{
+		let collisionBool = Hitbox.colliding(obj, otherObj);
+		if(collisionBool){
+			colliding=otherObj;
+		} 
+	});
+	return colliding;
 }
 exports.getColliding = getColliding;
 

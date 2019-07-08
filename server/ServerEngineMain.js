@@ -111,8 +111,8 @@ module.exports = class Engine {
   }
 
   createWorld({
-    width=1000,
-    height=1000,
+    width=10000,
+    height=10000,
     thickness=50
   }){
     let topWorld = {x:0, y:-(height/2), width:width, height:thickness};
@@ -123,7 +123,23 @@ module.exports = class Engine {
     this.stateManager.addBlock(bottomWorld);
     this.stateManager.addBlock(leftWorld);
     this.stateManager.addBlock(rightWorld);
-  }
+
+    //add random blocks
+    let startPointX = -((width/2)-(thickness/2));
+    let endPointX = (width/2)-(thickness/2);
+    let startPointY = -((height/2)-(thickness/2));
+    let endPointY = (height/2)-(thickness/2);
+    for(var x=startPointX; x<endPointX; x+=thickness){
+      for(var y=startPointY; y<endPointY; y+=thickness){
+        //for every 50px block
+        let chance = Math.random();
+        if(chance < 0.01){ //1%
+          this.stateManager.addBlock({x:x, y:y, width:thickness, height:thickness});
+        }
+
+      }
+    }
+  }//create world
 
   throwError(error){
     throw new Error(error);

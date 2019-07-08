@@ -8,8 +8,8 @@ exports.create = ({
 	width = 50,
 	height = 50,
 	hitbox = Hitbox.create({
-			top: height/2,
-			bottom: -height/2,
+			top: -height/2,
+			bottom: height/2,
 			left: -width/2,
 			right: width/2
 		}),

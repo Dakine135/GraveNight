@@ -25,8 +25,9 @@ export default class StatesManager{
 		this.sk = sk;
 		this.CAMERA = CAMERA;
 
-		//temp
-		this.doLimited = 0;
+		//stats
+		this.timeSinceLastServerUpdate = 0;
+		this.serverUpdatesPerSecond = 10;
 	}//constructor
 
 	/*
@@ -42,12 +43,15 @@ export default class StatesManager{
 		// if(this.debug) console.log("NextState:",this.nextState);
 		// if(this.debug) console.log("================================");
 		if(this.nextState != null) this.state = State.clone(this.nextState);
+		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
-		if(this.doLimited <= 10){
-			State.updateWithNewData(this.nextState, data);
-			// this.doLimited++;
+		State.updateWithNewData(this.nextState, data);
+		if(this.timeSinceLastServerUpdate > 0){
+			this.serverUpdatesPerSecond = Math.round(
+				((1000/this.timeSinceLastServerUpdate)*0.7) + 
+				(this.serverUpdatesPerSecond*0.3)
+			);
 		}
-		
 	}//reciveServerState
 
 	draw(deltaTime){

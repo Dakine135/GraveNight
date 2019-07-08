@@ -6,8 +6,8 @@ var State = require('../shared/State.js');
 exports.create = ({
 		socketId = Utilities.error('No socketId given'),
 		name = getRandomName(),
-		x = ((Math.random()*900)-400),
-		y = ((Math.random()*900)-400),
+		x = ((Math.random()*1900)-1000),
+		y = ((Math.random()*1900)-1000),
 		cursorX = 500,
 		cursorY = 500,
 		speedMultiplier = 300, //increments "pixels" per second
@@ -15,8 +15,8 @@ exports.create = ({
 		width = 50,
 		height = 50,
 		hitbox = Hitbox.create({
-			top: height/2,
-			bottom: -height/2,
+			top: -height/2,
+			bottom: height/2,
 			left: -width/2,
 			right: width/2
 		}),

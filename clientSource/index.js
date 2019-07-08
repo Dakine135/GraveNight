@@ -136,7 +136,8 @@ let sketch = (sk)=>{
       HUD.update({
         FrameRate:frames,
         Ping:NETWORK.ping,
-        // timeDiffernce:NETWORK.timeDiffernce
+        ServerUPS: STATES.serverUpdatesPerSecond,
+        timeDiffernce:NETWORK.timeDiffernce
       });
       lastSecond = currentTime;
       frames = 0;
