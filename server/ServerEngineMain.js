@@ -88,7 +88,7 @@ module.exports = class Engine {
   }
 
   sendGameStateToClients(tick){
-    //current state is none specified
+    //current state if none specified
     this.io.emit('serverGameState', this.stateManager.package({tick:tick})); 
   }
 

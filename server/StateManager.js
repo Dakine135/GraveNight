@@ -51,6 +51,7 @@ module.exports = class StateManager{
     }
 
     //TODO make it build state Delta instead of sending entire state everyTime
+    //TODO also only send nearby objects instead of all, this would be per-client of course
     package({tick=this.currentState.tick}){
     	let state = this.states[tick];
     	if(this.debug) console.log("Package in StateManager tick:", tick, state);

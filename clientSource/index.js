@@ -38,7 +38,12 @@ let sketch = (sk)=>{
     console.log("Screen Size: ", sk.windowWidth, sk.windowHeight);
     p5Canvas = sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
     p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
-    CAMERA = new Camera(0,0, sk.windowWidth, sk.windowHeight);
+    CAMERA = new Camera({
+      x:0,y:0, 
+      width:sk.windowWidth, 
+      height:sk.windowHeight,
+      speed:0.2
+    });
     HUD = new Hud({
       width: sk.windowWidth, 
       height: sk.windowHeight

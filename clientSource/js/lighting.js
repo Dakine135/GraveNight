@@ -12,7 +12,9 @@ module.exports = class lighting{
 		this.darkness=darkness;
 		this.canvas = document.getElementById(divId);
 		this.render = this.canvas.getContext("2d");
-		this.offscreenCanvas = new OffscreenCanvas(width, height);
+		this.offscreenCanvas = document.createElement('canvas');
+		this.offscreenCanvas.width = this.width;
+		this.offscreenCanvas.height = this.height;
 		this.offscreenRender = this.offscreenCanvas.getContext("2d");
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
@@ -136,7 +138,7 @@ module.exports = class lighting{
 			return;
 		}
 		// the triangle
-		var numDiv = 50;
+		var numDiv = 20;
 		//var 
 		for(var i=0;i<=numDiv;i++){
 		this.offscreenRender.beginPath();

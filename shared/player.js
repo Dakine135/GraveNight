@@ -6,6 +6,7 @@ var State = require('../shared/State.js');
 exports.create = ({
 		socketId = Utilities.error('No socketId given'),
 		name = getRandomName(),
+		//TODO BUG, Currently you can spawn inside a box and get stuck
 		x = ((Math.random()*1900)-1000),
 		y = ((Math.random()*1900)-1000),
 		cursorX = 500,
