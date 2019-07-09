@@ -42,6 +42,7 @@ function startSocketIO(){
     console.log("a user connected: ", socket.id);
     //create a player
     gameEngine.addPlayer({socketId:socket.id});
+    gameEngine.sendFullState({socketId:socket.id});
 
     socket.emit('start',{socketId:socket.id});
     

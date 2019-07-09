@@ -89,7 +89,17 @@ module.exports = class Engine {
 
   sendGameStateToClients(tick){
     //current state if none specified
-    this.io.emit('serverGameState', this.stateManager.package({tick:tick})); 
+    // let clients = this.io.sockets.clients(); //could put a room name
+    let clients = Object.keys(this.io.sockets.sockets);
+    clients.forEach((socketId)=>{
+      // console.log(socketId);
+      // this.io.emit('serverGameState', this.stateManager.package({tick:tick}));
+      this.io.to(`${socketId}`).emit('serverGameState', this.stateManager.package({tick:tick, playerId:socketId}));
+    });
+  }
+
+  sendFullState({socketId:socketId}){
+    this.io.to(`${socketId}`).emit('serverGameState', this.stateManager.package({tick:this.tickCount, playerId:socketId, full:true}));
   }
 
   updatePlayerNetworkData(data){
