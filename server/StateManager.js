@@ -47,15 +47,22 @@ module.exports = class StateManager{
 
     addBlock(info){
         info.id = this.blockCount;
-        State.addBlock(this.currentState, info);
+        info.type = 'block';
+        State.addStaticObject(this.currentState, info);
         this.blockCount++;
     }
 
     //TODO make it build state Delta instead of sending entire state everyTime
     //TODO also only send nearby objects instead of all, this would be per-client of course
-    package({tick=this.currentState.tick}){
+    package({tick=this.currentState.tick, playerId=null, full=false}){
     	let state = this.states[tick];
+        let previousState = this.states[tick-1];
     	if(this.debug) console.log("Package in StateManager tick:", tick, state);
-    	return State.package(this.states[tick]);
+    	return State.package({
+            state:this.states[tick], 
+            playerId:playerId, 
+            previousState:previousState,
+            full:full
+        });
     }
 }
