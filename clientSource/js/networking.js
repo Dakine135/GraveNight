@@ -1,8 +1,10 @@
+var World = require('../../shared/World.js');
 module.exports = class Networking{
-	constructor({debug=false, STATES=null}){
+	constructor({debug=false, STATES=null, WORLD=null}){
 		console.log("Create Networking");
         if(STATES==null) throw new error("Networking Needs STATES");
         this.STATES = STATES;
+        this.WORLD = WORLD;
 		this.debug = debug;
 		this.socket = io();
 		this.mySocketId = null;
@@ -12,6 +14,7 @@ module.exports = class Networking{
 
 		this.socket.on('start', this.clientConnects.bind(this));
 		this.socket.on('serverGameState', this.processGameState.bind(this));
+        this.socket.on('world', this.reciveWorld.bind(this));
 
 	}//constructor
 
@@ -28,6 +31,17 @@ module.exports = class Networking{
 		if(this.debug) console.log("Networking:",data);
 		this.STATES.reciveServerState(data);
 	} //processGameState
+
+    reciveWorld(data){
+        console.log("world:",data);
+        this.WORLD = World.create({
+              width:data.width,
+              height:data.height,
+              gridsize:data.gridsize
+        });
+        this.WORLD.grid = data.grid;
+        console.log(this.WORLD.grid);
+    }
 
 	sendClientAction(data){
 		this.socket.emit('clientAction', data);

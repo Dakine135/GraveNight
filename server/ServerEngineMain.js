@@ -37,7 +37,13 @@ module.exports = class Engine {
     this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds});
 
     //World, static objects, world gen
-    this.world = World.create();
+    this.world = World.create({
+      width:10000,
+      height:10000,
+      gridsize:50
+    });
+    World.createBounderies(this.world);
+    // World.randomWorld(this.world);
   }//constructor
 
   getCurrentTimeInNanoseconds() {
@@ -108,6 +114,10 @@ module.exports = class Engine {
     this.io.to(`${socketId}`).emit('serverGameState', this.stateManager.package({tick:this.tickCount, playerId:socketId, full:true}));
   }
 
+  sendWorld({socketId:socketId}){
+    this.io.to(`${socketId}`).emit('world', this.world);
+  }
+
   updatePlayerNetworkData(data){
     if(this.debug) console.log(`network update:`,data);
     this.stateManager.updatePlayerNetworkData(data);
@@ -125,37 +135,6 @@ module.exports = class Engine {
     if(this.debug) console.log(`clientAction:`,data);
     this.stateManager.addAction(data);
   }
-
-  createWorld({
-    width=10000,
-    height=10000,
-    thickness=50
-  }){
-    let topWorld = {x:0, y:-(height/2), width:width, height:thickness};
-    let bottomWorld = {x:0, y:(height/2), width:width, height:thickness};
-    let leftWorld = {x:-(width/2), y:0, width:thickness, height:height};
-    let rightWorld = {x:(width/2), y:0, width:thickness, height:height};
-    World.addBlock(this.world, topWorld);
-    World.addBlock(this.world, bottomWorld);
-    World.addBlock(this.world, leftWorld);
-    World.addBlock(this.world, rightWorld);
-
-    //add random blocks
-    let startPointX = -((width/2)-(thickness/2));
-    let endPointX = (width/2)-(thickness/2);
-    let startPointY = -((height/2)-(thickness/2));
-    let endPointY = (height/2)-(thickness/2);
-    for(var x=startPointX; x<endPointX; x+=thickness){
-      for(var y=startPointY; y<endPointY; y+=thickness){
-        //for every 50px block
-        let chance = Math.random();
-        if(chance < 0.01){ //1%
-          World.addBlock(this.world, {x:x, y:y, width:thickness, height:thickness});
-        }
-
-      }
-    }
-  }//create world
 
   throwError(error){
     throw new Error(error);

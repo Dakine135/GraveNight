@@ -4,6 +4,7 @@ import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
 import Lighting from './js/lighting.js';
 import Hud from './js/hud.js';
+import World from '../shared/World.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
@@ -25,6 +26,7 @@ var NETWORK;
 var CAMERA;
 var LIGHTING;
 var HUD;
+var WORLD = null;
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -66,7 +68,8 @@ let sketch = (sk)=>{
     });
     NETWORK = new Networking({
       debug:false, 
-      STATES:STATES
+      STATES:STATES,
+      WORLD: WORLD
     });
     NETWORK.updateServerTimeDiffernce();
     CONTROLS = new Controls({

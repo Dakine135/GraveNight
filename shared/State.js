@@ -18,7 +18,7 @@ exports.createStartState = ({
 		players: {},
 		// staticObjects: [],
 		actions: [],
-		delta: []
+		// delta: []
 	};
 }//create Start state
 
@@ -34,7 +34,7 @@ exports.createNextState = (previousState, currentTime)=>{
 	// newStateObj.staticObjects = previousState.staticObjects; //intentionally a reference
 	newStateObj.players = Object.assign({}, previousState.players);
 	newStateObj.actions = [];
-	newStateObj.delta = [];
+	// newStateObj.delta = [];
 	processActions(newStateObj, previousState);
 	updatePlayersMutate(newStateObj, newStateObj.time);
 	return newStateObj;
@@ -95,24 +95,9 @@ exports.addPlayer = (state, info)=>{
 	state.players[player.socketId] = player;
 }
 
-// exports.addStaticObject = (state, info)=>{
-// 	let newObject = null;
-// 	switch(info.type){
-// 		case 'block':
-// 			newObject = Block.create(info);
-// 			break;
-// 		default:
-// 			console.log("Unknown static Object Type");
-// 	}
-// 	if(newObject != null){
-// 		Grid.addObject(state.staticObjects, newObject);
-// 		state.delta.push({change:"addStaticObject", obj:newObject});
-// 	}
-// }//addStaticObject
-
 exports.removePlayer = (state, info)=>{
 	delete state.players[info.socketId];
-	state.delta.push({change:"removePlayer",playerId:info.socketId});
+	// state.delta.push({change:"removePlayer",playerId:info.socketId});
 }
 
 exports.addAction = (state, action)=>{
@@ -227,11 +212,11 @@ function updateWithNewData(state, data){
 				}
 			}//for each player in data
 		}
-		else if(property == 'delta'){
-			for(var id in data.delta){
-				console.log(delta[id]);
-			}
-		}
+		// else if(property == 'delta'){
+		// 	for(var id in data.delta){
+		// 		console.log(delta[id]);
+		// 	}
+		// }
 		else{
 			state[property] = data[property];
 		}
@@ -245,7 +230,7 @@ function clone(state){
 	newStateObj.time = state.time;
 	newStateObj.debug = state.debug;
 	newStateObj.actions = [];
-	newStateObj.delta = [];
+	// newStateObj.delta = [];
 	// newStateObj.staticObjects = state.staticObjects; //intentionally a reference
 	state.actions.forEach((action)=>{
 		newStateObj.actions.push(Utilities.cloneObject(action));
@@ -335,7 +320,7 @@ exports.package = ({
 			time: state.time,
 			players: state.players,
 			myPlayer: state.players[playerId],
-			delta: state.delta,
+			// delta: state.delta,
 			//staticObjects: state.staticObjects
 		}
 	}
