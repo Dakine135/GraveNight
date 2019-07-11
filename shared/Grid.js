@@ -12,7 +12,7 @@ exports.addObject = (grid, obj)=>{
 	if(grid == null) Utilities.error('Grid addObject needs a grid');
 	//grid buckets will be 100x100
 	//floor objects location to nearest 100 to get index
-	let bucketSize = 100;
+	let bucketSize = 500;
 	let indexX = Math.floor(obj.x/bucketSize) * bucketSize;
 	let indexY = Math.floor(obj.y/bucketSize) * bucketSize;
 	console.log("addObject to bucket:", indexX, indexY);

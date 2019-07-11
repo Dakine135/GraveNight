@@ -17,6 +17,7 @@ module.exports = class StateManager{
 
     createNextState(tick, deltaTime){
         this.currentTime = this.currentTime + deltaTime;
+        // console.log("currentTime:", this.currentTime);
     	if(tick != (this.currentState.tick + 1)) Utilities.error('tick out of sync somehow');
     	let newState = State.createNextState(this.currentState, this.currentTime);
     	this.currentState = newState;
@@ -45,12 +46,12 @@ module.exports = class StateManager{
         State.updatePlayerNetworkData(this.currentState, data);
     }
 
-    addBlock(info){
-        info.id = this.blockCount;
-        info.type = 'block';
-        State.addStaticObject(this.currentState, info);
-        this.blockCount++;
-    }
+    // addBlock(info){
+    //     info.id = this.blockCount;
+    //     info.type = 'block';
+    //     State.addStaticObject(this.currentState, info);
+    //     this.blockCount++;
+    // }
 
     //TODO make it build state Delta instead of sending entire state everyTime
     //TODO also only send nearby objects instead of all, this would be per-client of course

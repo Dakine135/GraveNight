@@ -16,7 +16,7 @@ exports.createStartState = ({
 		time: startTime,
 		debug: debug,
 		players: {},
-		staticObjects: [],
+		// staticObjects: [],
 		actions: [],
 		delta: []
 	};
@@ -31,7 +31,7 @@ exports.createNextState = (previousState, currentTime)=>{
 	newStateObj.tick = previousState.tick + 1;
 	newStateObj.time = currentTime;
 	newStateObj.debug = previousState.debug;
-	newStateObj.staticObjects = previousState.staticObjects; //intentionally a reference
+	// newStateObj.staticObjects = previousState.staticObjects; //intentionally a reference
 	newStateObj.players = Object.assign({}, previousState.players);
 	newStateObj.actions = [];
 	newStateObj.delta = [];
@@ -95,20 +95,20 @@ exports.addPlayer = (state, info)=>{
 	state.players[player.socketId] = player;
 }
 
-exports.addStaticObject = (state, info)=>{
-	let newObject = null;
-	switch(info.type){
-		case 'block':
-			newObject = Block.create(info);
-			break;
-		default:
-			console.log("Unknown static Object Type");
-	}
-	if(newObject != null){
-		Grid.addObject(state.staticObjects, newObject);
-		state.delta.push({change:"addStaticObject", obj:newObject});
-	}
-}//addStaticObject
+// exports.addStaticObject = (state, info)=>{
+// 	let newObject = null;
+// 	switch(info.type){
+// 		case 'block':
+// 			newObject = Block.create(info);
+// 			break;
+// 		default:
+// 			console.log("Unknown static Object Type");
+// 	}
+// 	if(newObject != null){
+// 		Grid.addObject(state.staticObjects, newObject);
+// 		state.delta.push({change:"addStaticObject", obj:newObject});
+// 	}
+// }//addStaticObject
 
 exports.removePlayer = (state, info)=>{
 	delete state.players[info.socketId];
@@ -246,7 +246,7 @@ function clone(state){
 	newStateObj.debug = state.debug;
 	newStateObj.actions = [];
 	newStateObj.delta = [];
-	newStateObj.staticObjects = state.staticObjects; //intentionally a reference
+	// newStateObj.staticObjects = state.staticObjects; //intentionally a reference
 	state.actions.forEach((action)=>{
 		newStateObj.actions.push(Utilities.cloneObject(action));
 	});
@@ -334,6 +334,7 @@ exports.package = ({
 			tick: state.tick,
 			time: state.time,
 			players: state.players,
+			myPlayer: state.players[playerId],
 			delta: state.delta,
 			//staticObjects: state.staticObjects
 		}

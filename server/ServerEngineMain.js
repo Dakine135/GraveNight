@@ -1,4 +1,5 @@
 var StateManager = require('./StateManager.js');
+var World = require('../shared/World.js');
 
 module.exports = class Engine {
   constructor({
@@ -24,7 +25,8 @@ module.exports = class Engine {
     this.nanosecondsIntoMiliseconds = 1/this.millisecondsIntoNanoseconds;
 
     //for MainLoop
-    this.ticRate = ticRate * this.millisecondsIntoNanoseconds;
+    this.tickRateMS = ticRate;
+    this.ticRate = this.tickRateMS * this.millisecondsIntoNanoseconds;
     this.previousTime = this.getCurrentTimeInNanoseconds();
     this.targertNextTickTime = this.getCurrentTimeInNanoseconds();
     this.acumulatedTime = 0;
@@ -33,6 +35,9 @@ module.exports = class Engine {
     let now = this.getCurrentTimeInNanoseconds();
     let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
     this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds});
+
+    //World, static objects, world gen
+    this.world = World.create();
   }//constructor
 
   getCurrentTimeInNanoseconds() {
@@ -60,7 +65,7 @@ module.exports = class Engine {
         if((this.tickCount % 1) == 0){
           if(this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${(deltaTime * this.nanosecondsIntoMiliseconds)}`);
         }
-        this.update(this.ticRate);
+        this.update(this.tickRateMS);
 
       }
     }
@@ -83,6 +88,7 @@ module.exports = class Engine {
   }
 
   update(deltaTime){
+    // console.log("deltaTime update:", deltaTime);
     this.stateManager.createNextState(this.tickCount, deltaTime);
     this.sendGameStateToClients(this.tickCount);
   }
@@ -129,10 +135,10 @@ module.exports = class Engine {
     let bottomWorld = {x:0, y:(height/2), width:width, height:thickness};
     let leftWorld = {x:-(width/2), y:0, width:thickness, height:height};
     let rightWorld = {x:(width/2), y:0, width:thickness, height:height};
-    this.stateManager.addBlock(topWorld);
-    this.stateManager.addBlock(bottomWorld);
-    this.stateManager.addBlock(leftWorld);
-    this.stateManager.addBlock(rightWorld);
+    World.addBlock(this.world, topWorld);
+    World.addBlock(this.world, bottomWorld);
+    World.addBlock(this.world, leftWorld);
+    World.addBlock(this.world, rightWorld);
 
     //add random blocks
     let startPointX = -((width/2)-(thickness/2));
@@ -144,7 +150,7 @@ module.exports = class Engine {
         //for every 50px block
         let chance = Math.random();
         if(chance < 0.01){ //1%
-          this.stateManager.addBlock({x:x, y:y, width:thickness, height:thickness});
+          World.addBlock(this.world, {x:x, y:y, width:thickness, height:thickness});
         }
 
       }
