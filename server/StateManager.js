@@ -15,12 +15,13 @@ module.exports = class StateManager{
         if(this.debug) console.log('Creating State Manager');
     }
 
-    createNextState(tick, currentTime){
-        this.currentTime = currentTime;
+    createNextState(tick, deltaTime){
+        this.currentTime = this.currentTime + deltaTime;
     	if(tick != (this.currentState.tick + 1)) Utilities.error('tick out of sync somehow');
     	let newState = State.createNextState(this.currentState, this.currentTime);
     	this.currentState = newState;
     	this.states[tick] = newState;
+        if(tick>100) delete this.states[tick-100]; //only store last 100 ticks for memory
     	if(this.debug) console.log(State.toString(newState, {verbose:this.verbose}));
     }
 

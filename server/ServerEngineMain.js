@@ -60,7 +60,7 @@ module.exports = class Engine {
         if((this.tickCount % 1) == 0){
           if(this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${(deltaTime * this.nanosecondsIntoMiliseconds)}`);
         }
-        this.update(timeInMiliseconds);
+        this.update(this.ticRate);
 
       }
     }
@@ -82,8 +82,8 @@ module.exports = class Engine {
     this.running = false;
   }
 
-  update(currentTime){
-    this.stateManager.createNextState(this.tickCount, currentTime);
+  update(deltaTime){
+    this.stateManager.createNextState(this.tickCount, deltaTime);
     this.sendGameStateToClients(this.tickCount);
   }
 
