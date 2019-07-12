@@ -1,10 +1,13 @@
 import StatesManager from './js/StateManagerClient.js';
+import State from '../shared/State.js';
 import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
 import Lighting from './js/lighting.js';
 import Hud from './js/hud.js';
 import World from '../shared/World.js';
+import Block from '../shared/Block.js';
+import Hitbox from '../shared/Block.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
@@ -26,7 +29,8 @@ var NETWORK;
 var CAMERA;
 var LIGHTING;
 var HUD;
-var WORLD = null;
+var WORLD = {};
+var RENDERDISTANCE = 500; //letter set
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -63,8 +67,7 @@ let sketch = (sk)=>{
       stateInterpolation: true,
       clientSimulation: false, //not really working atm
       sk:sk,
-      CAMERA: CAMERA,
-      LIGHTING: LIGHTING
+      CAMERA: CAMERA
     });
     NETWORK = new Networking({
       debug:false, 
@@ -129,12 +132,36 @@ let sketch = (sk)=>{
     sk.rect(origin.x,origin.y,20,20);
     sk.text(0+","+0,origin.x, origin.y);
 
+    //Main state, players
     STATES.draw(deltaTime);
+
+    //World drawing
+    if(WORLD != null && WORLD.grid != null){
+      let objectsToDraw = World.getObjects({
+        world:WORLD,
+        x:myPlayer.x,
+        y:myPlayer.y,
+        distance:500
+      });
+      // console.log("objectsToDraw:",objectsToDraw);
+      for(var id in objectsToDraw){
+        let object = objectsToDraw[id];
+        switch(object.type){
+          case "block":
+            Block.draw(object, sk, CAMERA);
+            break;
+          default:
+            console.log("Object not recognized to Draw");
+        }
+      }
+    }//if World has been received from Server
+
+    //Lighting Stuff
     LIGHTING.update();
     let ligthingOffset = CAMERA.translate(0,0);
     let offsetX = ligthingOffset.x;
     let offsetY = ligthingOffset.y;
-    LIGHTING.draw(offsetX, offsetY, STATES.frameState);
+    LIGHTING.draw(offsetX, offsetY, STATES.frameState, State, Hitbox);
     
 
     //once a second
@@ -142,10 +169,11 @@ let sketch = (sk)=>{
       // console.log(STATES.state);
       NETWORK.updateServerTimeDiffernce();
       HUD.update({
-        FrameRate:frames,
-        Ping:NETWORK.ping,
+        FrameRate: frames,
+        ScreenSize: sk.windowWidth+", "+sk.windowHeight,
+        Ping: NETWORK.ping,
         ServerUPS: STATES.serverUpdatesPerSecond,
-        timeDiffernce:NETWORK.timeDiffernce
+        timeDiffernce: NETWORK.timeDiffernce
       });
       lastSecond = currentTime;
       frames = 0;

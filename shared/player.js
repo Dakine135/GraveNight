@@ -7,8 +7,8 @@ exports.create = ({
 		socketId = Utilities.error('No socketId given'),
 		name = getRandomName(),
 		//TODO BUG, Currently you can spawn inside a box and get stuck
-		x = ((Math.random()*1900)-1000),
-		y = ((Math.random()*1900)-1000),
+		x = ((Math.random()*950)-450),
+		y = ((Math.random()*950)-450),
 		cursorX = 500,
 		cursorY = 500,
 		speedMultiplier = 300, //increments "pixels" per second

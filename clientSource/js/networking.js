@@ -34,12 +34,14 @@ module.exports = class Networking{
 
     reciveWorld(data){
         console.log("world:",data);
-        this.WORLD = World.create({
+        World.create({
               width:data.width,
               height:data.height,
-              gridsize:data.gridsize
+              gridsize:data.gridsize,
+              saveTo: this.WORLD
         });
         this.WORLD.grid = data.grid;
+        this.STATES.nextState.world = this.WORLD;
         console.log(this.WORLD.grid);
     }
 

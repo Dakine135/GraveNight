@@ -3,6 +3,7 @@ const Block = require('./Block.js');
 const Hitbox = require('./Hitbox.js');
 const Utilities = require('./Utilities.js');
 const Grid = require('./Grid.js');
+const World = require('./World.js');
 //const Objects = require('./Objects.js'); //Doesnt exist yet
 
 exports.createStartState = ({
@@ -16,9 +17,8 @@ exports.createStartState = ({
 		time: startTime,
 		debug: debug,
 		players: {},
-		// staticObjects: [],
-		actions: [],
-		// delta: []
+		world: world,
+		actions: []
 	};
 }//create Start state
 
@@ -31,7 +31,7 @@ exports.createNextState = (previousState, currentTime)=>{
 	newStateObj.tick = previousState.tick + 1;
 	newStateObj.time = currentTime;
 	newStateObj.debug = previousState.debug;
-	// newStateObj.staticObjects = previousState.staticObjects; //intentionally a reference
+	newStateObj.world = previousState.world; //intentionally a reference
 	newStateObj.players = Object.assign({}, previousState.players);
 	newStateObj.actions = [];
 	// newStateObj.delta = [];
@@ -143,52 +143,49 @@ function updatePlayerNetworkData(state, data){
 }
 exports.updatePlayerNetworkData = updatePlayerNetworkData;
 
-/*
-	Get all hit-boxes in range
-*/
-// function getObjectsInRange(state, obj){
-// 	let objectsInRange = [];
-// 	for(var id in state.players){
-// 		let player = state.players[id];
-// 		if(obj.type === 'player' && obj.id === id){
-// 			//don't count yourself as another object
-// 			continue;
-// 		}
-// 		let dist = Math.max(player.width, player.height);
-// 		dist += Math.max(obj.width, obj.height);
-// 		let diffX = Math.abs(player.x - obj.x);
-// 		let diffY = Math.abs(player.y - obj.y); 
-// 		if(diffX <= dist && diffY <= dist) objectsInRange.push(player);
-// 	}//players
-// 	for(var id in state.blocks){
-// 		let block = state.blocks[id];
-// 		if(obj.type === 'block' && obj.id === id){
-// 			//don't count yourself as another object
-// 			continue;
-// 		}
-// 		let dist = Math.max(block.width, block.height);
-// 		dist += Math.max(obj.width, obj.height);
-// 		let diffX = Math.abs(block.x - obj.x);
-// 		let diffY = Math.abs(block.y - obj.y); 
-// 		if(diffX <= dist && diffY <= dist) objectsInRange.push(block);
-// 	}//blocks
-// 	return objectsInRange;
-// }
-// exports.getObjectsInRange = getObjectsInRange;
+function getObjectsInRange({
+		state=null, 
+		x=0,
+		y=0,
+		distance=50
+	}){
+	//get objects in World
+	let objectsInRange = World.getObjects({
+		world: state.world, 
+		x: x, 
+		y: y, 
+		distance: distance
+	});
+	//get other players in Range
+	for(var id in state.players){
+		let player = state.players[id];
+		//skip over if yourself
+		if(player.x == x && player.y == y) continue;
+		//check distance and add if in range.
+	}
+	return objectsInRange;
+}
+exports.getObjectsInRange = getObjectsInRange;
 
 /*
  	Return what you are colliding with or null
 */
 function getColliding(state, obj){
-	// let objectsInRange = getObjectsInRange(state, obj);
-	let objectsInRange = [];
+	let objectsInRange = getObjectsInRange({
+		state:state, 
+		x: obj.x,
+		y: obj.y,
+		distance: 50
+	});
+	// console.log("objectsInRange get colliding:", objectsInRange);
 	let colliding = null;
-	objectsInRange.forEach((otherObj)=>{
+	for(var id in objectsInRange){
+		let otherObj = objectsInRange[id];
 		let collisionBool = Hitbox.colliding(obj, otherObj);
 		if(collisionBool){
 			colliding=otherObj;
 		} 
-	});
+	}
 	return colliding;
 }
 exports.getColliding = getColliding;
@@ -230,8 +227,7 @@ function clone(state){
 	newStateObj.time = state.time;
 	newStateObj.debug = state.debug;
 	newStateObj.actions = [];
-	// newStateObj.delta = [];
-	// newStateObj.staticObjects = state.staticObjects; //intentionally a reference
+	newStateObj.world = state.world //intentionally a reference
 	state.actions.forEach((action)=>{
 		newStateObj.actions.push(Utilities.cloneObject(action));
 	});
@@ -260,7 +256,7 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 	newStateObj.debug = startState.debug;
 	newStateObj.actions = [];
 	newStateObj.players = {};
-	// newStateObj.blocks = startState.blocks;
+	newStateObj.world = startState.world; //intentionally a reference
 	for(var id in startState.players){
 		let intermediatePlayer = Utilities.cloneObject(startState.players[id]);
 		if(endState.players[id] != null){

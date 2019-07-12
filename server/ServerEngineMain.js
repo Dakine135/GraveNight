@@ -34,7 +34,6 @@ module.exports = class Engine {
     //StateManager
     let now = this.getCurrentTimeInNanoseconds();
     let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
-    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds});
 
     //World, static objects, world gen
     this.world = World.create({
@@ -43,7 +42,9 @@ module.exports = class Engine {
       gridsize:50
     });
     World.createBounderies(this.world);
-    // World.randomWorld(this.world);
+    World.randomWorld(this.world);
+
+    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds, world:this.world});
   }//constructor
 
   getCurrentTimeInNanoseconds() {

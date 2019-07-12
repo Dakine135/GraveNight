@@ -5,14 +5,23 @@ const Block = require('./Block.js');
 exports.create = ({
 	width=1000,
 	height=1000,
-	gridsize=50
+	gridsize=50,
+	blockCount=0,
+	saveTo=null
 })=>{
+	if(saveTo){
+		saveTo.width = width,
+		saveTo.height = height,
+		saveTo.gridsize = gridsize,
+		saveTo.blockCount = blockCount,
+		saveTo.grid={}
+	}
 	return {
 		width: width,
 		height: height,
 		gridsize: gridsize,
 		blockCount:0,
-		grid:[]
+		grid:{}
 	}
 }
 
@@ -27,7 +36,6 @@ function addStaticObject(world, info){
 	}
 	if(newObject != null){
 		Grid.addObject(world.grid, newObject);
-		// state.delta.push({change:"addStaticObject", obj:newObject});
 	}
 }//addStaticObject
 exports.addStaticObject = addStaticObject;
@@ -53,8 +61,11 @@ function createBounderies(world){
 exports.createBounderies = createBounderies;
 
 function randomWorld(world){
-	// createBounderies(world);
-
+	//avoid rendering block in spawn area around origin
+	let spawnAreaStartX = -500;
+	let spawnAreaStartY = -500;
+	let spawnAreaEndX = 500;
+	let spawnAreaEndY = 500;
     //add random blocks
     let startPointX = -((world.width/2)-(world.gridsize/2));
     let endPointX = (world.width/2)-(world.gridsize/2);
@@ -62,14 +73,29 @@ function randomWorld(world){
     let endPointY = (world.height/2)-(world.gridsize/2);
     for(var x=startPointX; x<endPointX; x+=world.gridsize){
       for(var y=startPointY; y<endPointY; y+=world.gridsize){
-        //for every 50px block
+        //for every gridsize px block
+        if(spawnAreaStartY < y && y < spawnAreaEndY &&
+           spawnAreaStartX < x && x < spawnAreaEndX) continue;
         let chance = Math.random();
-        if(chance < 0.01){ //1%
+        if(chance < 0.1){ //1%
           addBlock(world, {x:x, y:y, width:world.gridsize, height:world.gridsize});
         }
-
-      }
-    }
+      }//loop through rows
+    }//loop through columns
 }//random Blocks
 exports.randomWorld = randomWorld;
 
+exports.getObjects = ({
+	world=Utilities.error('getObjects needs world'),
+	x=0,
+	y=0,
+	distance=500
+})=>{
+	// console.log("world in getObjects:", world);
+	return Grid.getObjects({
+		grid:world.grid,
+		x:x,
+		y:y,
+		distance:distance
+	})
+}//getObjects

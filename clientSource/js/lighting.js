@@ -1,4 +1,8 @@
-// import Utilities from '../../shared/Utilities.js';
+const Hitbox = require('../../shared/Hitbox.js');
+const Utilities = require('../../shared/Utilities.js');
+const Grid = require('../../shared/Grid.js');
+const World = require('../../shared/World.js');
+
 module.exports = class lighting{
 	constructor({
 		debug=false,
@@ -41,7 +45,7 @@ module.exports = class lighting{
 
 	}//update
 
-	draw(offsetX, offsetY, state){
+	draw(offsetX, offsetY, state, stateFunc, hitboxFunc){
 		// console.log("drawing lighting");
 		this.render.globalCompositeOperation = "source-over";
 		this.offscreenRender.globalCompositeOperation = "source-over";
@@ -95,7 +99,14 @@ module.exports = class lighting{
         	x = player.width/2;
         	y = player.height/2;
         	this.offscreenRender.rotate(player.angle);
-        	this.drawLightCone({x:x, y:y, intensity:(player.energy*2),state:state});
+        	this.drawLightCone({
+        		x:x, 
+        		y:y, 
+        		intensity:(player.energy*2), 
+        		state:state, 
+        		stateFunc:stateFunc,
+        		hitboxFunc: hitboxFunc
+        	});
         	this.offscreenRender.restore();
         }
 
@@ -132,33 +143,55 @@ module.exports = class lighting{
 		x, 
 		y,
 		intensity,
-		state
+		state,
+		stateFunc,
+		hitboxFunc
 	}){
 		if(intensity<=0){
 			return;
 		}
 		// the triangle
 		var numDiv = 20;
-		//var 
+		if(state == null || state.world == null) return;
+		let objectsInRange = stateFunc.getObjectsInRange({
+			state: state, 
+			x: x, 
+			y: y, 
+			distance: 100
+		});
+		console.log(Object.keys(objectsInRange).length);
+		// console.log(objectsInRange);
 		for(var i=0;i<=numDiv;i++){
-		this.offscreenRender.beginPath();
-		this.offscreenRender.moveTo(x, y);
-		var toY1 = (y-(intensity*0.5))+(intensity*(i/numDiv));
-		var toY2 = (y-(intensity*0.5))+(intensity*(i/numDiv))+(intensity*1/numDiv)+1;
-		this.offscreenRender.lineTo(x+intensity, toY1);
-		this.offscreenRender.lineTo(x+intensity, toY2);
-		this.offscreenRender.closePath();
-		// the fill color
-		let gradient = this.offscreenRender.createRadialGradient(
-			x, y, (intensity*0.2), x, y, intensity);
-    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
-    	gradient.addColorStop(0,"rgba(255, 255, 255, 0.9)");
-    	gradient.addColorStop(0.6,"rgba(255, 255, 255, 0.9)");
-    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
-    	//this.offscreenRender.noStroke();
-    	this.offscreenRender.fillStyle = gradient;
-		this.offscreenRender.fill();
+
+			var toY1 = (y-(intensity*0.5))+(intensity*(i/numDiv));
+			var toY2 = (y-(intensity*0.5))+(intensity*(i/numDiv))+(intensity*1/numDiv);
+			let middleOfBeamEnd = toY2 - ((toY2-toY1)/2);
+			// console.log("Y1, Y2, Middle", toY1, toY2, middleOfBeamEnd);
+			let line = {x1:x, y1:y, x2:x, y2:middleOfBeamEnd};
+			
+			// hitboxFunc
+
+			//draw light beam
+			this.offscreenRender.beginPath();
+			this.offscreenRender.moveTo(x, y);
+			
+			this.offscreenRender.lineTo(x+intensity, toY1);
+			this.offscreenRender.lineTo(x+intensity, toY2);
+			this.offscreenRender.closePath();
+			// the fill color
+			let gradient = this.offscreenRender.createRadialGradient(
+				x, y, (intensity*0.2), x, y, intensity);
+	    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
+	    	gradient.addColorStop(0,"rgba(255, 255, 255, 0.9)");
+	    	gradient.addColorStop(0.6,"rgba(255, 255, 255, 0.9)");
+	    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
+	    	this.offscreenRender.fillStyle = "white";
+			this.offscreenRender.fill();
 		}
+	}
+
+	getIntersection(box, line){
+
 	}
 
 

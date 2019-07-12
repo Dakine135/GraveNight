@@ -3,10 +3,10 @@ const State = require('../shared/State.js');
 const Utilities = require('../shared/Utilities.js');
 
 module.exports = class StateManager{
-    constructor({debug=false, debugState=false, verbose=false, startTime=0}){
+    constructor({debug=false, debugState=false, verbose=false, startTime=0, world=null}){
         this.states = {};
         this.blockCount = 0;
-        let startState = State.createStartState({debug:debugState, startTime:startTime});
+        let startState = State.createStartState({debug:debugState, startTime:startTime, world:world});
         this.currentState = startState;
         this.states[0] = startState;
         this.currentTime = 0;

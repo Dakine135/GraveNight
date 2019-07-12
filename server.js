@@ -29,7 +29,7 @@ var gameEngine = new Engine(config);
 // });
 
 //trying to be hacky about sockets not starting until bundle was created
-let waitTime = 5000;
+let waitTime = 6000;
 console.log(`Wait ${waitTime} then startSocketIO`);
 setTimeout(startSocketIO, waitTime);
 
