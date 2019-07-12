@@ -1,5 +1,4 @@
 import StatesManager from './js/StateManagerClient.js';
-import State from '../shared/State.js';
 import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
@@ -7,7 +6,6 @@ import Lighting from './js/lighting.js';
 import Hud from './js/hud.js';
 import World from '../shared/World.js';
 import Block from '../shared/Block.js';
-import Hitbox from '../shared/Block.js';
 // import Player from '../shared/player.js';
 import * as p5 from './js/p5.min.js';
 
@@ -30,7 +28,7 @@ var CAMERA;
 var LIGHTING;
 var HUD;
 var WORLD = {};
-var RENDERDISTANCE = 500; //letter set
+var RENDERDISTANCE = 400; //letter set
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -161,7 +159,7 @@ let sketch = (sk)=>{
     let ligthingOffset = CAMERA.translate(0,0);
     let offsetX = ligthingOffset.x;
     let offsetY = ligthingOffset.y;
-    LIGHTING.draw(offsetX, offsetY, STATES.frameState, State, Hitbox);
+    LIGHTING.draw(offsetX, offsetY, STATES.frameState);
     
 
     //once a second

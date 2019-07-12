@@ -149,6 +149,7 @@ function getObjectsInRange({
 		y=0,
 		distance=50
 	}){
+	// console.log(state);
 	//get objects in World
 	let objectsInRange = World.getObjects({
 		world: state.world, 
@@ -157,12 +158,12 @@ function getObjectsInRange({
 		distance: distance
 	});
 	//get other players in Range
-	for(var id in state.players){
-		let player = state.players[id];
-		//skip over if yourself
-		if(player.x == x && player.y == y) continue;
-		//check distance and add if in range.
-	}
+	// for(var id in state.players){
+	// 	let player = state.players[id];
+	// 	//skip over if yourself
+	// 	if(player.x == x && player.y == y) continue;
+	// 	//check distance and add if in range.
+	// }
 	return objectsInRange;
 }
 exports.getObjectsInRange = getObjectsInRange;

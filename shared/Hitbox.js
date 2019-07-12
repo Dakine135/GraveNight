@@ -34,14 +34,28 @@ function translate({
 	hitbox=null, 
 	angle=0 //not yet implemented
 }){
-	let translatedHitbox = Utilities.cloneObject(hitbox);
-	translatedHitbox.top = translatedHitbox.top + y;
+	let translatedHitbox    = Utilities.cloneObject(hitbox);
+	translatedHitbox.top    = translatedHitbox.top + y;
 	translatedHitbox.bottom = translatedHitbox.bottom + y;
-	translatedHitbox.left = translatedHitbox.left + x;
-	translatedHitbox.right = translatedHitbox.right + x;
+	translatedHitbox.left   = translatedHitbox.left + x;
+	translatedHitbox.right  = translatedHitbox.right + x;
 	return translatedHitbox;
 }; //translate
 exports.translate = translate;
+
+function getCorners(obj){
+	let hitbox = getHitbox(obj);
+	console.log("hitbox: ",hitbox);
+	let width  = hitbox.right  - hitbox.left;
+	let height = hitbox.bottom - hitbox.top;
+	return {
+		topLeft:     {x: hitbox.left, y: hitbox.top},
+		topRight:    {x: hitbox.right, y: hitbox.top},
+		bottomLeft:  {x: hitbox.left, y: hitbox.bottom},
+		bottomRight: {x: hitbox.right, y: hitbox.bottom}
+	};
+}
+exports.getCorners = getCorners;
 
 function getHitbox(obj){
 	return translate({
@@ -51,3 +65,4 @@ function getHitbox(obj){
 		angle: obj.angle
 	});
 }
+exports.getHitbox = getHitbox;

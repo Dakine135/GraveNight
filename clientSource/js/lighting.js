@@ -2,6 +2,7 @@ const Hitbox = require('../../shared/Hitbox.js');
 const Utilities = require('../../shared/Utilities.js');
 const Grid = require('../../shared/Grid.js');
 const World = require('../../shared/World.js');
+const State = require('../../shared/State.js');
 
 module.exports = class lighting{
 	constructor({
@@ -45,7 +46,7 @@ module.exports = class lighting{
 
 	}//update
 
-	draw(offsetX, offsetY, state, stateFunc, hitboxFunc){
+	draw(offsetX, offsetY, state){
 		// console.log("drawing lighting");
 		this.render.globalCompositeOperation = "source-over";
 		this.offscreenRender.globalCompositeOperation = "source-over";
@@ -92,7 +93,7 @@ module.exports = class lighting{
         	let x = player.x + offsetX;
         	let y = player.y + offsetY;
         	// console.log("player light:",player);
-        	this.drawLightPoint({x:x, y:y, intensity:(player.energy/4)});
+        	this.drawLightPoint({x:x, y:y, intensity:(player.energy/2)});
         	//flashlight location
         	this.offscreenRender.save();
         	this.offscreenRender.translate(x, y);
@@ -101,11 +102,11 @@ module.exports = class lighting{
         	this.offscreenRender.rotate(player.angle);
         	this.drawLightCone({
         		x:x, 
-        		y:y, 
+        		y:y,
+        		worldX:(x + offsetX),
+        		worldY:(y + offsetY), 
         		intensity:(player.energy*2), 
-        		state:state, 
-        		stateFunc:stateFunc,
-        		hitboxFunc: hitboxFunc
+        		state:state
         	});
         	this.offscreenRender.restore();
         }
@@ -142,21 +143,22 @@ module.exports = class lighting{
 	drawLightCone({
 		x, 
 		y,
+		worldX,
+		worldY,
 		intensity,
-		state,
-		stateFunc,
-		hitboxFunc
+		state
 	}){
 		if(intensity<=0){
 			return;
 		}
 		// the triangle
+		// console.log(this.offscreenRender.getTransform());
 		var numDiv = 20;
 		if(state == null || state.world == null) return;
-		let objectsInRange = stateFunc.getObjectsInRange({
+		let objectsInRange = State.getObjectsInRange({
 			state: state, 
-			x: x, 
-			y: y, 
+			x: worldX, 
+			y: worldY, 
 			distance: 100
 		});
 		console.log(Object.keys(objectsInRange).length);
@@ -168,8 +170,12 @@ module.exports = class lighting{
 			let middleOfBeamEnd = toY2 - ((toY2-toY1)/2);
 			// console.log("Y1, Y2, Middle", toY1, toY2, middleOfBeamEnd);
 			let line = {x1:x, y1:y, x2:x, y2:middleOfBeamEnd};
+			for(var id in objectsInRange){
+				let object = objectsInRange[id];
+				let corners = Hitbox.getCorners(object);
+				let collisionPoint = this.getIntersection(corners, line);
+			}
 			
-			// hitboxFunc
 
 			//draw light beam
 			this.offscreenRender.beginPath();
@@ -190,8 +196,8 @@ module.exports = class lighting{
 		}
 	}
 
-	getIntersection(box, line){
-
+	getIntersection(corners, line){
+		console.log("corners:",corners);
 	}
 
 
