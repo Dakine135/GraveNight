@@ -161,8 +161,9 @@ module.exports = class lighting{
 			y: worldY, 
 			distance: 100
 		});
-		console.log(Object.keys(objectsInRange).length);
+		// console.log(Object.keys(objectsInRange).length);
 		// console.log(objectsInRange);
+		let maxIntensity = intensity;
 		for(var i=0;i<=numDiv;i++){
 
 			var toY1 = (y-(intensity*0.5))+(intensity*(i/numDiv));
@@ -170,13 +171,26 @@ module.exports = class lighting{
 			let middleOfBeamEnd = toY2 - ((toY2-toY1)/2);
 			// console.log("Y1, Y2, Middle", toY1, toY2, middleOfBeamEnd);
 			let line = {x1:x, y1:y, x2:x, y2:middleOfBeamEnd};
+			let closestCollision = false;
+			let closestDist = Infinity;
 			for(var id in objectsInRange){
 				let object = objectsInRange[id];
 				let corners = Hitbox.getCorners(object);
-				let collisionPoint = this.getIntersection(corners, line);
+				let collision = this.getIntersection(corners, line);
+				if(collision){
+					let dist = Hitbox.dist(collision, {x:line.x1, y:line.y1});
+					if(closestDist > dist){
+						closestDist = dist;
+						closestCollision = collision;
+					}
+				}
+			}
+
+			if(closestCollision){
+				console.log("collision at",closestCollision);
+				intensity = closestDist;
 			}
 			
-
 			//draw light beam
 			this.offscreenRender.beginPath();
 			this.offscreenRender.moveTo(x, y);
@@ -193,12 +207,52 @@ module.exports = class lighting{
 	    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
 	    	this.offscreenRender.fillStyle = "white";
 			this.offscreenRender.fill();
+			intensity = maxIntensity;
 		}
 	}
 
 	getIntersection(corners, line){
-		console.log("corners:",corners);
-	}
-
+		// console.log("corners:",corners);
+		let boxLineTop = {x1:corners.topLeft.x, y1:corners.topLeft.y, 
+						x2:corners.topRight.x, y2:corners.topRight.y};
+		let boxLineRight = {x1:corners.topRight.x, y1:corners.topRight.y, 
+						x2:corners.bottomRight.x, y2:corners.bottomRight.y};
+		let boxLineBottom = {x1:corners.bottomRight.x, y1:corners.bottomRight.y, 
+						x2:corners.bottomLeft.x, y2:corners.bottomLeft.y};
+		let boxLineLeft = {x1:corners.bottomLeft.x, y1:corners.bottomLeft.y, 
+						x2:corners.topLeft.x, y2:corners.topLeft.y};
+		let intersection = false;
+		let closestDist = Infinity;
+		let top = Hitbox.collideLineLine(line, boxLineTop);
+		if(top){
+			intersection = top;
+			closestDist = Hitbox.dist(top, {x:line.x1, y:line.y1});
+		}
+		let right = Hitbox.collideLineLine(line, boxLineRight);
+		if(right){
+			let dist = Hitbox.dist(right, {x:line.x1, y:line.y1});
+			if(dist < closestDist){
+				intersection = right;
+				closestDist = dist;
+			}
+		}
+		let bottom = Hitbox.collideLineLine(line, boxLineBottom);
+		if(bottom){
+			let dist = Hitbox.dist(bottom, {x:line.x1, y:line.y1});
+			if(dist < closestDist){
+				intersection = bottom;
+				closestDist = dist;
+			}
+		}
+		let left = Hitbox.collideLineLine(line, boxLineLeft);
+		if(left){
+			let dist = Hitbox.dist(left, {x:line.x1, y:line.y1});
+			if(dist < closestDist){
+				intersection = left;
+				closestDist = dist;
+			}
+		}
+		return intersection;
+	}//get intersection
 
 }//lighting class
