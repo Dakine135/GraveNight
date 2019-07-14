@@ -49,6 +49,9 @@ function getCorners(obj){
 	let width  = hitbox.right  - hitbox.left;
 	let height = hitbox.bottom - hitbox.top;
 	return {
+		id:          obj.id,
+		x:           obj.x,
+		y: 			 obj.y,
 		topLeft:     {x: hitbox.left, y: hitbox.top},
 		topRight:    {x: hitbox.right, y: hitbox.top},
 		bottomLeft:  {x: hitbox.left, y: hitbox.bottom},

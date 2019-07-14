@@ -21,14 +21,15 @@ import * as p5 from './js/p5.min.js';
 
 
 console.log("index.js loaded in bundle");
-var STATES;
-var CONTROLS;
-var NETWORK;
-var CAMERA;
-var LIGHTING;
-var HUD;
+var STATES = {};
+var CONTROLS = {};
+var NETWORK = {};
+var CAMERA = {};
+var LIGHTING = {};
+var HUD = {};
 var WORLD = {};
-var RENDERDISTANCE = 400; //letter set
+var RENDERDISTANCE = 400; //latter set by window size
+var FRAMERATE = 10;
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -52,13 +53,6 @@ let sketch = (sk)=>{
       width: sk.windowWidth, 
       height: sk.windowHeight
     });
-    LIGHTING = new Lighting({
-      width: sk.windowWidth, 
-      height: sk.windowHeight,
-      darkness:1 //darkness level 0-1
-    });
-    LIGHTING.createLightSource({});
-    // LIGHTING.createLightSource({x:500,y:500, size:300});
     STATES = new StatesManager({
       debug:false, 
       debugState:false,
@@ -79,9 +73,18 @@ let sketch = (sk)=>{
       STATES:STATES, 
       CAMERA: CAMERA
     });
+    LIGHTING = new Lighting({
+      width: sk.windowWidth, 
+      height: sk.windowHeight,
+      CONTROLS: CONTROLS,
+      CAMERA: CAMERA,
+      darkness:1 //darkness level 0-1
+    });
+    LIGHTING.createLightSource({}); //defaults to 0,0
+    // LIGHTING.createLightSource({x:500,y:500, size:300});
     sk.angleMode(sk.RADIANS);
     sk.rectMode(sk.CENTER);
-    sk.frameRate(60); //default and max is 60
+    sk.frameRate(FRAMERATE); //default and max is 60
     console.log("End P5 Setup");
   } //setup
 
@@ -119,14 +122,14 @@ let sketch = (sk)=>{
 
     //draw line between player and cursor
     if(myPlayer != null){
-      let playerLocOnScreen = CAMERA.translate(myPlayer.x, myPlayer.y);
+      let playerLocOnScreen = CAMERA.translate({x: myPlayer.x, y: myPlayer.y});
       sk.line(
         playerLocOnScreen.x, playerLocOnScreen.y, 
         mouse.x, mouse.y);
     }
 
     //square at 0,0
-    let origin = CAMERA.translate(0,0);
+    let origin = CAMERA.translate({x:0, y:0});
     sk.rect(origin.x,origin.y,20,20);
     sk.text(0+","+0,origin.x, origin.y);
 
@@ -156,10 +159,7 @@ let sketch = (sk)=>{
 
     //Lighting Stuff
     LIGHTING.update();
-    let ligthingOffset = CAMERA.translate(0,0);
-    let offsetX = ligthingOffset.x;
-    let offsetY = ligthingOffset.y;
-    LIGHTING.draw(offsetX, offsetY, STATES.frameState);
+    LIGHTING.draw(STATES.frameState);
     
 
     //once a second

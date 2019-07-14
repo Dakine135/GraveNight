@@ -23,12 +23,34 @@ module.exports = class Camera{
 		this.goalY = y;
 	}
 
-	translate(x, y){
+	translate({x=0, y=0}){
 		let orgiginX = this.x - (this.width/2);
 		let orgiginY = this.y - (this.height/2);
 		let tx = Math.round(x - orgiginX);
 		let ty = Math.round(y - orgiginY);
 		return {x:tx, y:ty};
+	}
+
+	rotatePoint({
+		center={x:0, y:0}, 
+		point={x:0, y:0}, 
+		angle=0
+	}){
+		let s = Math.sin(angle);
+		let c = Math.cos(angle);
+
+		// translate point back to origin:
+		point.x -= center.x;
+		point.y -= center.y;
+
+		// rotate point
+		let xnew = point.x * c - point.y * s;
+		let ynew = point.x * s + point.y * c;
+
+		// translate point back:
+		point.x = xnew + center.x;
+		point.y = ynew + center.y;
+		return point;
 	}
 
 	update(){

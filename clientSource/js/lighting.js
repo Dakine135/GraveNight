@@ -10,11 +10,15 @@ module.exports = class lighting{
 		divId="lighting-layer",
 		width=0,
 		height=0,
-		darkness=0.9
+		darkness=0.9,
+		CAMERA=null,
+		CONTROLS=null
 	}){
 		this.width = width;
 		this.height = height;
 		this.darkness=darkness;
+		this.CONTROLS = CONTROLS;
+		this.CAMERA = CAMERA;
 		this.canvas = document.getElementById(divId);
 		this.render = this.canvas.getContext("2d");
 		this.offscreenCanvas = document.createElement('canvas');
@@ -46,8 +50,9 @@ module.exports = class lighting{
 
 	}//update
 
-	draw(offsetX, offsetY, state){
+	draw(state){
 		// console.log("drawing lighting");
+
 		this.render.globalCompositeOperation = "source-over";
 		this.offscreenRender.globalCompositeOperation = "source-over";
 		//clear the canvas
@@ -80,9 +85,9 @@ module.exports = class lighting{
         //draw light sources
         for(var id in this.lightSources){
         	let light = this.lightSources[id];
-        	let x = light.x + offsetX;
-        	let y = light.y + offsetY;
-        	this.drawLightPoint({x:x, y:y, intensity:light.intensity});
+        	// let x = light.x + this.offsetX;
+        	// let y = light.y + this.offsetY;
+        	this.drawLightPoint({x:light.x, y:light.y, intensity:light.intensity});
         	
         }
 
@@ -90,25 +95,34 @@ module.exports = class lighting{
         for(var id in state.players){
         	let player = state.players[id];
         	//placeholder for player energy eventually
-        	let x = player.x + offsetX;
-        	let y = player.y + offsetY;
+        	// let x = player.x + this.offsetX;
+        	// let y = player.y + this.offsetY;
         	// console.log("player light:",player);
-        	this.drawLightPoint({x:x, y:y, intensity:(player.energy/2)});
+        	//old light point draw
         	//flashlight location
-        	this.offscreenRender.save();
-        	this.offscreenRender.translate(x, y);
-        	x = player.width/2;
-        	y = player.height/2;
-        	this.offscreenRender.rotate(player.angle);
+        	// this.offscreenRender.save();
+        	// this.offscreenRender.translate(x, y);
+        	let x = (player.x + player.width/2);
+        	let y = (player.y + player.height/2);
+        	let rotatedPoint = this.CAMERA.rotatePoint({
+        		center:{x: player.x, y: player.y},
+        		point:{x:x, y:y},
+        		angle: player.angle
+        	});
+        	this.drawLightPoint({
+        		x: player.x, 
+        		y: player.y, 
+        		intensity:(player.energy/2)
+        	});
+        	// this.offscreenRender.rotate(player.angle);
         	this.drawLightCone({
-        		x:x, 
-        		y:y,
-        		worldX:(x + offsetX),
-        		worldY:(y + offsetY), 
+        		x: rotatedPoint.x, 
+        		y: rotatedPoint.y,
+        		angle: player.angle,
         		intensity:(player.energy*2), 
         		state:state
         	});
-        	this.offscreenRender.restore();
+        	// this.offscreenRender.restore();
         }
 
         this.render.globalCompositeOperation = "xor";
@@ -124,17 +138,23 @@ module.exports = class lighting{
 		if(intensity<=0){
 			return;
 		}
-		x = Math.round(x);
-		y = Math.round(y);
+		let originP = {
+			x: Math.round(x),
+			y: Math.round(y)
+		}
+		let originPTrans = this.CAMERA.translate(originP);
+
 		this.offscreenRender.save();
 		this.offscreenRender.beginPath();
-    	let gradient = this.offscreenRender.createRadialGradient(x, y, (intensity*0.6), x, y, intensity);
-    	gradient.addColorStop(0,"rgba(255, 255, 255, 0.9)");
-    	gradient.addColorStop(0.3,"rgba(255, 255, 255, 0.7)");
-    	gradient.addColorStop(0.7,"rgba(255, 255, 255, 0.5)");
-    	gradient.addColorStop(1,"rgba(255, 255, 255, 0.1)");
+    	let gradient = this.offscreenRender.createRadialGradient(
+    		originPTrans.x, originPTrans.y, 0, 
+    		originPTrans.x, originPTrans.y, intensity);
+    	gradient.addColorStop(0,  "rgba(255, 255, 255, 0.9)");
+    	gradient.addColorStop(0.4,"rgba(255, 255, 255, 0.9)");
+    	// gradient.addColorStop(0.7,"rgba(255, 255, 255, 0.5)");
+    	gradient.addColorStop(1,  "rgba(255, 255, 255, 0)");
     	this.offscreenRender.fillStyle = gradient;
-    	this.offscreenRender.arc(x, y, intensity, 0, Math.PI*2);
+    	this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 0, Math.PI*2);
     	this.offscreenRender.closePath();
     	this.offscreenRender.fill();
     	this.offscreenRender.restore();
@@ -143,71 +163,146 @@ module.exports = class lighting{
 	drawLightCone({
 		x, 
 		y,
-		worldX,
-		worldY,
+		angle,
 		intensity,
 		state
 	}){
 		if(intensity<=0){
 			return;
 		}
-		// the triangle
-		// console.log(this.offscreenRender.getTransform());
+		let originP = {
+			x: Math.round(x),
+			y: Math.round(y)
+		} 
+		let originPTrans = this.CAMERA.translate(originP);
+		
 		var numDiv = 20;
 		if(state == null || state.world == null) return;
+		//TODO optimization, get objects needs to take direction into account
 		let objectsInRange = State.getObjectsInRange({
 			state: state, 
-			x: worldX, 
-			y: worldY, 
-			distance: 100
+			x: originP.x, 
+			y: originP.y, 
+			distance: 300
 		});
-		// console.log(Object.keys(objectsInRange).length);
+		// console.log("search from: ", worldX, worldY);
+		// console.log("Number of Objects in Range:",
+		// 	Math.floor(originP.x), 
+		// 	Math.floor(originP.y),
+		// 	Object.keys(objectsInRange).length
+		// );
 		// console.log(objectsInRange);
-		let maxIntensity = intensity;
-		for(var i=0;i<=numDiv;i++){
+		// let maxIntensity = intensity;
+		let offsetAmount = intensity/numDiv;
+		for(var i=0;i<numDiv;i++){
 
-			var toY1 = (y-(intensity*0.5))+(intensity*(i/numDiv));
-			var toY2 = (y-(intensity*0.5))+(intensity*(i/numDiv))+(intensity*1/numDiv);
-			let middleOfBeamEnd = toY2 - ((toY2-toY1)/2);
-			// console.log("Y1, Y2, Middle", toY1, toY2, middleOfBeamEnd);
-			let line = {x1:x, y1:y, x2:x, y2:middleOfBeamEnd};
-			let closestCollision = false;
-			let closestDist = Infinity;
+			let pointLeft =  {x: originP.x+intensity,
+						  	  y: (originP.y-(intensity*0.5))+offsetAmount*i};
+
+			let pointRight = {x: originP.x+intensity,
+						  	  y: (originP.y-(intensity*0.5))+offsetAmount*(i+1)};
+
+			let pLRotated = this.CAMERA.rotatePoint({
+				center: originP,
+				point: pointLeft,
+				angle: angle
+			});
+			let pRRotated = this.CAMERA.rotatePoint({
+				center: originP,
+				point: pointRight,
+				angle: angle
+			});
+
+			let closestCollisionL = false;
+			let closestCollisionR = false;
+			let closestDistL = Infinity;
+			let closestDistR = Infinity;
+			//for object glow
+			let objectsGlowing = {};
+			let closestObjIdL = null;
+			let closestObjIdR = null;
 			for(var id in objectsInRange){
 				let object = objectsInRange[id];
 				let corners = Hitbox.getCorners(object);
-				let collision = this.getIntersection(corners, line);
-				if(collision){
-					let dist = Hitbox.dist(collision, {x:line.x1, y:line.y1});
-					if(closestDist > dist){
-						closestDist = dist;
-						closestCollision = collision;
+				// console.log("corners:",corners);
+				let collisionL = this.getIntersection(corners, {x1: originP.x, y1: originP.y,
+																x2: pLRotated.x, y2: pLRotated.y});
+				let collisionR = this.getIntersection(corners, {x1: originP.x, y1: originP.y,
+																x2: pRRotated.x, y2: pRRotated.y});
+				if(collisionL){
+					// console.log("collision in loop for all objects:", collision);
+					let dist = Hitbox.dist(collisionL, originP);
+					if(closestDistL > dist){
+						closestObjIdL = corners;
+						closestDistL = dist;
+						closestCollisionL = collisionL;
+					}
+				}
+				if(collisionR){
+					// console.log("collision in loop for all objects:", collision);
+					let dist = Hitbox.dist(collisionR, originP);
+					if(closestDistR > dist){
+						closestObjIdR = corners;
+						closestDistR = dist;
+						closestCollisionR = collisionR;
 					}
 				}
 			}
 
-			if(closestCollision){
-				console.log("collision at",closestCollision);
-				intensity = closestDist;
+			if(closestCollisionL){
+				//calculate "lost" intensity
+				let lostIntensity = Math.floor((intensity - closestDistL)/10);
+				if(objectsGlowing[closestObjIdL.id] == null){
+					objectsGlowing[closestObjIdL.id] = {
+						x: closestObjIdL.x,
+						y: closestObjIdL.y,
+						intensity: lostIntensity
+					};
+				} else {
+					objectsGlowing[closestObjIdL.id].intensity += lostIntensity;
+				}
+				pLRotated = closestCollisionL;
+			}
+			if(closestCollisionR){
+				//calculate "lost" intensity
+				let lostIntensity = Math.floor((intensity - closestDistR)/10);
+				if(objectsGlowing[closestObjIdR.id] == null){
+					objectsGlowing[closestObjIdR.id] = {
+						x: closestObjIdR.x,
+						y: closestObjIdR.y,
+						intensity: lostIntensity
+					}
+				} else {
+					objectsGlowing[closestObjIdR.id].intensity += lostIntensity;
+				}
+				pRRotated = closestCollisionR;
 			}
 			
 			//draw light beam
+			//translate to screen location
+			pLRotated = this.CAMERA.translate(pLRotated);
+			pRRotated = this.CAMERA.translate(pRRotated);
 			this.offscreenRender.beginPath();
-			this.offscreenRender.moveTo(x, y);
+			this.offscreenRender.moveTo(originPTrans.x, originPTrans.y);
 			
-			this.offscreenRender.lineTo(x+intensity, toY1);
-			this.offscreenRender.lineTo(x+intensity, toY2);
+			this.offscreenRender.lineTo(pLRotated.x, pLRotated.y);
+			this.offscreenRender.lineTo(pRRotated.x, pRRotated.y);
 			this.offscreenRender.closePath();
 			// the fill color
 			let gradient = this.offscreenRender.createRadialGradient(
-				x, y, (intensity*0.2), x, y, intensity);
+				originPTrans.x, originPTrans.y, (intensity*0.2), originPTrans.x, originPTrans.y, intensity);
 	    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
 	    	gradient.addColorStop(0,"rgba(255, 255, 255, 0.9)");
 	    	gradient.addColorStop(0.6,"rgba(255, 255, 255, 0.9)");
 	    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
-	    	this.offscreenRender.fillStyle = "white";
+	    	this.offscreenRender.fillStyle = gradient;
 			this.offscreenRender.fill();
-			intensity = maxIntensity;
+			
+			//draw glowingObjects
+			// console.log(Object.keys(objectsGlowing).length);
+			for(var id in objectsGlowing){
+				this.drawLightPoint(objectsGlowing[id]);
+			}
 		}
 	}
 

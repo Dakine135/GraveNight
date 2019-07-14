@@ -28,6 +28,8 @@ exports.addObject = (grid, obj)=>{
 	if(grid == null) Utilities.error('Grid addObject needs a grid');
 	//TODO needs to add obj to multiple buckets if it is contained in multiple
 	//width and height not taken into account, only center point
+
+	//TODO would also we great to support an angle or direction
 	//grid buckets will be 100x100
 	//floor objects location to nearest 100 to get index
 	let bucketSize = 100;

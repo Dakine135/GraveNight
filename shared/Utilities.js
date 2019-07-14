@@ -11,6 +11,12 @@ function randomColor(){
 }
 exports.randomColor = randomColor;
 
+exports.midPoint = (point1, point2)=>{
+    let middleX = point2.x - ((point2.x-point2.x)/2);
+    let middleY = point2.y - ((point2.y-point1.y)/2);
+   return {x: middleX, y: middleY};
+}
+
 function cloneObject(obj){
 	//make a new object to return
 	let newObj = {};

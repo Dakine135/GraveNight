@@ -30,7 +30,7 @@ exports.create = ({
 exports.draw = (obj, render, CAMERA)=>{
 	render.push(); // Start a new drawing state
 	render.noStroke();
-	let translatedLocation = CAMERA.translate(obj.x, obj.y);
+	let translatedLocation = CAMERA.translate({x: obj.x, y: obj.y});
 	render.translate(translatedLocation.x, translatedLocation.y);
 	//draw block
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
