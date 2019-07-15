@@ -149,7 +149,7 @@ module.exports = class lighting{
     	let gradient = this.offscreenRender.createRadialGradient(
     		originPTrans.x, originPTrans.y, 0, 
     		originPTrans.x, originPTrans.y, intensity);
-    	gradient.addColorStop(0,  "rgba(255, 255, 255, 0.9)");
+    	gradient.addColorStop(0,  "rgba(255, 255, 255, 1)");
     	gradient.addColorStop(0.4,"rgba(255, 255, 255, 0.9)");
     	// gradient.addColorStop(0.7,"rgba(255, 255, 255, 0.5)");
     	gradient.addColorStop(1,  "rgba(255, 255, 255, 0)");
@@ -176,14 +176,14 @@ module.exports = class lighting{
 		} 
 		let originPTrans = this.CAMERA.translate(originP);
 		
-		var numDiv = 20;
+		var numDiv = 30;
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
 		let objectsInRange = State.getObjectsInRange({
 			state: state, 
 			x: originP.x, 
 			y: originP.y, 
-			distance: 300
+			distance: 500
 		});
 		// console.log("search from: ", worldX, worldY);
 		// console.log("Number of Objects in Range:",
@@ -280,6 +280,7 @@ module.exports = class lighting{
 			
 			//draw light beam
 			//translate to screen location
+			this.offscreenRender.save();
 			pLRotated = this.CAMERA.translate(pLRotated);
 			pRRotated = this.CAMERA.translate(pRRotated);
 			this.offscreenRender.beginPath();
@@ -297,14 +298,24 @@ module.exports = class lighting{
 	    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
 	    	this.offscreenRender.fillStyle = gradient;
 			this.offscreenRender.fill();
+			this.offscreenRender.restore();
 			
 			//draw glowingObjects
 			// console.log(Object.keys(objectsGlowing).length);
 			for(var id in objectsGlowing){
+				let objOnScreen = this.CAMERA.translate({x:objectsGlowing[id].x,
+														 y:objectsGlowing[id].y});
+				this.offscreenRender.save();
+				this.offscreenRender.fillStyle = "rgba(255, 255, 255, 1)";
+				this.offscreenRender.fillRect(
+					(objOnScreen.x - 25), 
+					(objOnScreen.y - 25), 
+					50,50);
+				this.offscreenRender.restore();
 				this.drawLightPoint(objectsGlowing[id]);
-			}
-		}
-	}
+			}// each glowing object
+		}//for every light beam
+	}//drawLightCone
 
 	getIntersection(corners, line){
 		// console.log("corners:",corners);

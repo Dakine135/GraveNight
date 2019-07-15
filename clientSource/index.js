@@ -29,7 +29,7 @@ var LIGHTING = {};
 var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 400; //latter set by window size
-var FRAMERATE = 10;
+var FRAMERATE = 60;
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -78,7 +78,7 @@ let sketch = (sk)=>{
       height: sk.windowHeight,
       CONTROLS: CONTROLS,
       CAMERA: CAMERA,
-      darkness:1 //darkness level 0-1
+      darkness:0.95 //darkness level 0-1
     });
     LIGHTING.createLightSource({}); //defaults to 0,0
     // LIGHTING.createLightSource({x:500,y:500, size:300});
@@ -93,6 +93,7 @@ let sketch = (sk)=>{
     //TODO make lighting and camera and GUI, and such resize with window as well
     sk.resizeCanvas(sk.windowWidth, sk.windowHeight);
     console.log("Resize: ",sk.windowWidth, sk.windowHeight);
+    RENDERDISTANCE = Math.max(sk.windowWidth, sk.windowHeight);
   } //window Resized
 
   sk.keyPressed = ()=>{
@@ -142,7 +143,7 @@ let sketch = (sk)=>{
         world:WORLD,
         x:myPlayer.x,
         y:myPlayer.y,
-        distance:500
+        distance: RENDERDISTANCE
       });
       // console.log("objectsToDraw:",objectsToDraw);
       for(var id in objectsToDraw){
