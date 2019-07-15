@@ -28,7 +28,7 @@ var CAMERA = {};
 var LIGHTING = {};
 var HUD = {};
 var WORLD = {};
-var RENDERDISTANCE = 400; //latter set by window size
+var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
 var p5Canvas;
 
