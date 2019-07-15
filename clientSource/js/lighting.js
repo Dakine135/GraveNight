@@ -32,6 +32,10 @@ module.exports = class lighting{
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
+	resize(){
+
+	}
+
 	createLightSource({
 		id=0,
 		x=0,
@@ -75,18 +79,9 @@ module.exports = class lighting{
         this.offscreenRender.beginPath();
         this.offscreenRender.restore();
 
-        
-        //fill black
-        // this.offscreenRender.save();
-        // this.offscreenRender.fillStyle = "rgba(0, 0, 0,"+ this.darkness +")";
-        // this.offscreenRender.fillRect(0,0,this.width,this.height);
-        // this.offscreenRender.restore();
-
         //draw light sources
         for(var id in this.lightSources){
         	let light = this.lightSources[id];
-        	// let x = light.x + this.offsetX;
-        	// let y = light.y + this.offsetY;
         	this.drawLightPoint({x:light.x, y:light.y, intensity:light.intensity});
         	
         }
@@ -94,14 +89,6 @@ module.exports = class lighting{
         //draw Player lights
         for(var id in state.players){
         	let player = state.players[id];
-        	//placeholder for player energy eventually
-        	// let x = player.x + this.offsetX;
-        	// let y = player.y + this.offsetY;
-        	// console.log("player light:",player);
-        	//old light point draw
-        	//flashlight location
-        	// this.offscreenRender.save();
-        	// this.offscreenRender.translate(x, y);
         	let x = (player.x + player.width/2);
         	let y = (player.y + player.height/2);
         	let rotatedPoint = this.CAMERA.rotatePoint({
@@ -114,7 +101,6 @@ module.exports = class lighting{
         		y: player.y, 
         		intensity:(player.energy/2)
         	});
-        	// this.offscreenRender.rotate(player.angle);
         	this.drawLightCone({
         		x: rotatedPoint.x, 
         		y: rotatedPoint.y,
@@ -122,7 +108,6 @@ module.exports = class lighting{
         		intensity:(player.energy*2), 
         		state:state
         	});
-        	// this.offscreenRender.restore();
         }
 
         this.render.globalCompositeOperation = "xor";
@@ -177,14 +162,14 @@ module.exports = class lighting{
 		} 
 		let originPTrans = this.CAMERA.translate(originP);
 		
-		var numDiv = 50;
+		var numDiv = 20;
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
 		let objectsInRange = State.getObjectsInRange({
 			state: state, 
 			x: originP.x, 
 			y: originP.y, 
-			distance: 500
+			distance: intensity
 		});
 		// console.log("search from: ", worldX, worldY);
 		// console.log("Number of Objects in Range:",
@@ -192,8 +177,6 @@ module.exports = class lighting{
 		// 	Math.floor(originP.y),
 		// 	Object.keys(objectsInRange).length
 		// );
-		// console.log(objectsInRange);
-		// let maxIntensity = intensity;
 		let offsetAmount = intensity/numDiv;
 		let halfIntensity = intensity*0.5;
 		for(var i=0;i<numDiv;i++){
@@ -232,7 +215,6 @@ module.exports = class lighting{
 				let collisionR = this.getIntersection(corners, {x1: originP.x, y1: originP.y,
 																x2: pRRotated.x, y2: pRRotated.y});
 				if(collisionL){
-					// console.log("collision in loop for all objects:", collision);
 					let dist = Hitbox.dist(collisionL, originP);
 					if(closestDistL > dist){
 						closestObjIdL = corners;
@@ -241,7 +223,6 @@ module.exports = class lighting{
 					}
 				}
 				if(collisionR){
-					// console.log("collision in loop for all objects:", collision);
 					let dist = Hitbox.dist(collisionR, originP);
 					if(closestDistR > dist){
 						closestObjIdR = corners;
@@ -253,7 +234,7 @@ module.exports = class lighting{
 
 			if(closestCollisionL){
 				//calculate "lost" intensity
-				let lostIntensity = (intensity - closestDistL)/1000;
+				let lostIntensity = (intensity - closestDistL)/(numDiv/4);
 				if(objectsGlowing[closestObjIdL.id] == null){
 					objectsGlowing[closestObjIdL.id] = {
 						x: closestObjIdL.x,
@@ -262,13 +243,13 @@ module.exports = class lighting{
 					};
 				} else {
 					objectsGlowing[closestObjIdL.id].intensity += lostIntensity;
-					if(objectsGlowing[closestObjIdL.id].intensity > 100) objectsGlowing[closestObjIdL.id].intensity = 100;
+					if(objectsGlowing[closestObjIdL.id].intensity > intensity) objectsGlowing[closestObjIdL.id].intensity = intensity;
 				}
 				pLRotated = closestCollisionL;
 			}
 			if(closestCollisionR){
 				//calculate "lost" intensity
-				let lostIntensity = (intensity - closestDistR)/1000;
+				let lostIntensity = (intensity - closestDistR)/(numDiv/4);
 				if(objectsGlowing[closestObjIdR.id] == null){
 					objectsGlowing[closestObjIdR.id] = {
 						x: closestObjIdR.x,
@@ -277,7 +258,7 @@ module.exports = class lighting{
 					}
 				} else {
 					objectsGlowing[closestObjIdR.id].intensity += lostIntensity;
-					if(objectsGlowing[closestObjIdR.id].intensity > 100) objectsGlowing[closestObjIdR.id].intensity = 100;
+					if(objectsGlowing[closestObjIdR.id].intensity > intensity) objectsGlowing[closestObjIdR.id].intensity = intensity;
 				}
 				pRRotated = closestCollisionR;
 			}
@@ -310,8 +291,16 @@ module.exports = class lighting{
 			for(var id in objectsGlowing){
 				let objOnScreen = this.CAMERA.translate({x:objectsGlowing[id].x,
 														 y:objectsGlowing[id].y});
+				let alpha = Utilities.mapNum({
+					input: objectsGlowing[id].intensity,
+					start1: 0,
+					end1: intensity,
+					start2: 0,
+					end2: 1
+				});
+				// if(objectsGlowing[id].intensity>50) console.log(objectsGlowing[id].intensity, "=>", alpha);
 				this.offscreenRender.save();
-				this.offscreenRender.fillStyle = "rgba(255, 255, 255, 1)";
+				this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
 				this.offscreenRender.fillRect(
 					(objOnScreen.x - 25), 
 					(objOnScreen.y - 25), 
