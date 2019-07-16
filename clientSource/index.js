@@ -30,7 +30,7 @@ var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
-var DARKNESS = 0.97; //1 full dark, 0 full light
+var DARKNESS = 0.98; //1 full dark, 0 full light
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -75,6 +75,7 @@ let sketch = (sk)=>{
       CAMERA: CAMERA
     });
     LIGHTING = new Lighting({
+      debug: false,
       width: sk.windowWidth, 
       height: sk.windowHeight,
       CONTROLS: CONTROLS,
@@ -133,7 +134,7 @@ let sketch = (sk)=>{
 
     //square at 0,0
     let origin = CAMERA.translate({x:0, y:0});
-    sk.rect(origin.x,origin.y,20,20);
+    sk.rect(origin.x-10,origin.y-10,20,20);
     sk.text(0+","+0,origin.x, origin.y);
 
     //Main state, players

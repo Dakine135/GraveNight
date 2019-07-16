@@ -32,7 +32,7 @@ module.exports = class lighting{
 		this.debug = debug;
 		this.lightSources = {};
 		this.lightCalculationsLastFrame = 0;
-		this.precision = 25; //increment by when checking for light collision, lower is more intensive, but more accurate (should only be needed for small objects)
+		this.precision = 20; //increment by when checking for light collision, lower is more intensive, but more accurate (should only be needed for small objects)
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
@@ -183,8 +183,10 @@ module.exports = class lighting{
 		// 	Object.keys(objectsInRange).length
 		// );
 		
-		let widthOfCone    = Math.PI*0.3; //maybe scale on intensity somehow
+		let widthOfCone    = Math.PI*0.5; //maybe scale on intensity somehow
 		let increment      = widthOfCone/this.precision;
+		let blockedLimit   = 0; //this is to keep track and 
+		                        //dont make points at corners that are behind other blocks
 		let startAngle     = angle - (widthOfCone/2);
 		let endAngle       = startAngle + widthOfCone;
 		let startPoint     = this.CAMERA.rotatePoint({
@@ -204,7 +206,7 @@ module.exports = class lighting{
 	        // increment: increment
 	    });
 	    let lightCalculations = 0;
-		for(var i=0; i<=widthOfCone; i=i+increment){
+		for(var i=0; i<=widthOfCone; i=i){
 			lightCalculations++;
 
 			let pRotated = this.CAMERA.rotatePoint({
@@ -230,8 +232,8 @@ module.exports = class lighting{
 				let object = objectsInRange[id];
 				let corners = Hitbox.getCorners(object);
 				// console.log("corners:",corners);
-				let collision = this.getIntersection(corners, {x1: originP.x, y1: originP.y,
-																x2: pRotated.x, y2: pRotated.y});
+				let collision = this.getIntersection(corners, {x1: originP.x,  y1: originP.y,
+															   x2: pRotated.x, y2: pRotated.y});
 				if(collision){
 					let dist = Hitbox.dist(collision.point, originP);
 					if(closestDist > dist){
@@ -260,26 +262,118 @@ module.exports = class lighting{
 				//make points at the corners of the box
 				let point1 = {x: closestSegment.x1, y: closestSegment.y1};
 				let point2 = {x: closestSegment.x2, y: closestSegment.y2};
-				listofPoints.push(this.CAMERA.translate(point1));
-				listofPoints.push(this.CAMERA.translate(point2));
-				// pRotated = closestCollision;
-				// listofPoints.push(this.CAMERA.translate(pRotated));
-			} else {
-				listofPoints.push(this.CAMERA.translate(pRotated));
+				let angleCollisionToPoint1 = Utilities.calculateAngle({
+												point1:startPoint, 
+												point2: point1,
+												centerPoint:originP});
+				let angleCollisionToPoint2 = Utilities.calculateAngle({
+												point1:startPoint, 
+												point2: point2,
+											    centerPoint:originP});
+				if(angleCollisionToPoint1 < 0) 
+					angleCollisionToPoint1 = angleCollisionToPoint1 + Math.PI*2;
+				if(angleCollisionToPoint2 < 0 && angleCollisionToPoint2 < -5) 
+					angleCollisionToPoint2 = angleCollisionToPoint2 + Math.PI*2;
+
+				//add points at the corners if within cone
+				if(angleCollisionToPoint1 < widthOfCone &&
+				   angleCollisionToPoint1 > blockedLimit){
+					point1 = this.CAMERA.translate(point1);
+					point1.color = "green"; //for debug
+					point1.angle = angleCollisionToPoint1;
+					listofPoints.push(point1);
+				}
+				if(angleCollisionToPoint2 < widthOfCone &&
+				   angleCollisionToPoint2 > blockedLimit){
+					point2 = this.CAMERA.translate(point2);
+					point2.color = "green"; //for debug
+					point2.angle = angleCollisionToPoint2;
+					listofPoints.push(point2);
+				}
+				if(angleCollisionToPoint1 > angleCollisionToPoint2){
+					blockedLimit = angleCollisionToPoint1;
+				} else blockedLimit = angleCollisionToPoint2;
+				i=blockedLimit+0.01;
+
+				if(this.debug){
+					//draw actual collision point in red
+					let pRotatedAngle = Utilities.calculateAngle({
+													point1: startPoint, 
+													point2: pRotated,
+												    centerPoint:originP});
+					if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+					pRotated = this.CAMERA.translate(closestCollision);
+					pRotated.color = "red";
+					pRotated.angle = pRotatedAngle;
+					listofPoints.push(pRotated);
+				}
+
+			}//closest collision if hit
+			else{
+				let pRotatedAngle = Utilities.calculateAngle({
+												point1: startPoint, 
+												point2: pRotated,
+											    centerPoint:originP});
+				if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+				pRotated = this.CAMERA.translate(pRotated);
+				pRotated.color = "yellow";
+				pRotated.angle = pRotatedAngle;
+				listofPoints.push(pRotated);
+				if(i != widthOfCone && (i+increment) > widthOfCone) i = widthOfCone;
+				else i=i+increment;
+
 			}
-			
-			
+			// listofPoints.push(pRotated);
 			
 		}//for every light beam
 		this.lightCalculationsLastFrame = lightCalculations;
+
+		listofPoints.sort((a,b)=>{
+			return a.angle-b.angle;
+		});
 
 		//draw cone mask with collision
 		this.offscreenRender.save();
 		this.offscreenRender.beginPath();
 		this.offscreenRender.moveTo(originPTrans.x, originPTrans.y);
+		let index = 0; //debug
+		let lastPoint = originPTrans; //debug
 		listofPoints.forEach((point)=>{
 			this.offscreenRender.lineTo(point.x, point.y);
-		});
+			//debug
+			if(this.debug){
+				this.render.strokeStyle = "white";
+				this.render.beginPath();
+				this.render.moveTo(lastPoint.x, lastPoint.y);
+				this.render.lineTo(point.x, point.y);
+				lastPoint = point;
+				this.render.closePath();
+				this.render.stroke();
+				this.render.fillStyle = point.color;
+				this.render.beginPath();
+				this.render.arc(point.x, point.y, 10, 0, 2*Math.PI);
+				this.render.closePath();
+				this.render.fill();
+				this.render.fillStyle = "blue";
+				this.render.font = "10px Arial";
+				this.render.textAlign = "center"; 
+				this.render.fillText(index, point.x, point.y);
+				this.render.fillStyle = "white";
+				this.render.textAlign = "left";
+				this.render.fillText(Math.round(point.angle*100)/100, point.x+10, point.y);
+				index++;
+			}
+		}); //for each point
+		//debug
+		if(this.debug){
+			this.render.strokeStyle = "white";
+			this.render.beginPath();
+			this.render.moveTo(lastPoint.x, lastPoint.y);
+			this.render.lineTo(originPTrans.x, originPTrans.y);
+			this.render.closePath();
+			this.render.stroke();
+		}
+
 		this.offscreenRender.closePath();
 		// the fill color
 		let gradient = this.offscreenRender.createRadialGradient(
@@ -295,26 +389,26 @@ module.exports = class lighting{
 
 		//draw glowingObjects
 		// console.log(Object.keys(objectsGlowing).length);
-		// for(var id in objectsGlowing){
-		// 	let objOnScreen = this.CAMERA.translate({x:objectsGlowing[id].x,
-		// 											 y:objectsGlowing[id].y});
-		// 	let alpha = Utilities.mapNum({
-		// 		input: objectsGlowing[id].intensity,
-		// 		start1: 0,
-		// 		end1: intensity,
-		// 		start2: 0,
-		// 		end2: 1
-		// 	});
-		// 	// if(objectsGlowing[id].intensity>50) console.log(objectsGlowing[id].intensity, "=>", alpha);
-		// 	this.offscreenRender.save();
-		// 	this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
-		// 	this.offscreenRender.fillRect(
-		// 		(objOnScreen.x - 25), 
-		// 		(objOnScreen.y - 25), 
-		// 		50,50);
-		// 	this.offscreenRender.restore();
-		// 	// this.drawLightPoint(objectsGlowing[id]);
-		// }// each glowing object
+		for(var id in objectsGlowing){
+			let objOnScreen = this.CAMERA.translate({x:objectsGlowing[id].x,
+													 y:objectsGlowing[id].y});
+			let alpha = Utilities.mapNum({
+				input: objectsGlowing[id].intensity,
+				start1: 0,
+				end1: intensity,
+				start2: 0,
+				end2: 1
+			});
+			// if(objectsGlowing[id].intensity>50) console.log(objectsGlowing[id].intensity, "=>", alpha);
+			this.offscreenRender.save();
+			this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
+			this.offscreenRender.fillRect(
+				(objOnScreen.x - 25), 
+				(objOnScreen.y - 25), 
+				50,50);
+			this.offscreenRender.restore();
+			// this.drawLightPoint(objectsGlowing[id]);
+		}// each glowing object
 
 	}//drawLightCone
 

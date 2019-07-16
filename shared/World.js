@@ -77,7 +77,7 @@ function randomWorld(world){
         if(spawnAreaStartY < y && y < spawnAreaEndY &&
            spawnAreaStartX < x && x < spawnAreaEndX) continue;
         let chance = Math.random();
-        if(chance < 0.1){ //10%
+        if(chance < 0.05){
           addBlock(world, {x:x, y:y, width:world.gridsize, height:world.gridsize});
         }
       }//loop through rows

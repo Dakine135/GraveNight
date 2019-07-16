@@ -22,7 +22,7 @@ exports.create = ({
 			right: width/2
 		}),
 		color = Utilities.randomColor(),
-		energy = 300
+		energy = 250
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -206,8 +206,8 @@ exports.draw = (obj, render, CAMERA)=>{
 	//player location for debugging
 	render.fill(0);
 	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.height);
-	let angleText = Math.round(obj.angle*10)/10+"";
-	if(obj.angle < 0) angleText += " ("+(Math.round((obj.angle + Math.PI*2)*10)/10)+")";
+	let angleText = Math.round(obj.angle*100)/100+"";
+	if(obj.angle < 0) angleText += " ("+(Math.round((obj.angle + Math.PI*2)*100)/100)+")";
 	render.text(angleText, 0, obj.height*1.5);
 
 	//rotate for player direction facing

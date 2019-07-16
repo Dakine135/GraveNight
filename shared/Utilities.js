@@ -17,11 +17,16 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
-exports.calculateAngle = ({point1, point2})=>{
-    let diffX = point1.x - point2.x;
-    let diffY = point1.y - point2.y;
+exports.calculateAngle = ({point1, point2, centerPoint={x:0,y:0}})=>{
+
+    // let diffX = (point1.x - centerPoint.x) - (point2.x - centerPoint.x);
+    // let diffY = (point1.y - centerPoint.y) - (point2.y - centerPoint.y);
+    // let diffX = point1.x - point2.x;
+    // let diffY = point1.y - point2.y;
     // angle in radians
-    return Math.atan2(diffY, diffX);
+    // return Math.atan2(diffY, diffX);
+    return Math.atan2(point2.y - centerPoint.y, point2.x - centerPoint.x) -
+           Math.atan2(point1.y - centerPoint.y, point1.x - centerPoint.x);
 }
 
 exports.mapNum = ({input, start1, end1, start2, end2 })=>{
