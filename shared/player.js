@@ -175,6 +175,7 @@ function calculateAndSetAngleMutate(obj){
 	let diffY = obj.cursorY - obj.y;
 	// angle in radians
 	var angleRadians = Math.atan2(diffY, diffX);
+	// if(angleRadians < 0) angleRadians = (angleRadians + Math.PI*2);
 	// angle in degrees
 	// var angleDeg = angleRadians * 180 / Math.PI;
 	obj.angle = angleRadians;
@@ -205,18 +206,21 @@ exports.draw = (obj, render, CAMERA)=>{
 	//player location for debugging
 	render.fill(0);
 	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.height);
+	let angleText = Math.round(obj.angle*10)/10+"";
+	if(obj.angle < 0) angleText += " ("+(Math.round((obj.angle + Math.PI*2)*10)/10)+")";
+	render.text(angleText, 0, obj.height*1.5);
 
 	//rotate for player direction facing
 	render.rotate(obj.angle);
 	//draw main body
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.rect (0, 0, obj.width, obj.height);
+	render.rect (-obj.width/2, -obj.height/2, obj.width, obj.height);
 	//draw eyes
 	render.fill(0, 0, 255);
 	render.circle(15, 10, 10);
 	render.circle(15, -10, 10);
 	//draw flashlight
 	render.fill(0);
-	render.rect(25, 25, 20, 10);
+	render.rect(15, 20, 20, 10);
 	render.pop(); // Restore original state
 }

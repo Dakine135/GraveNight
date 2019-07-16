@@ -30,6 +30,7 @@ var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
+var DARKNESS = 0.97; //1 full dark, 0 full light
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -78,12 +79,13 @@ let sketch = (sk)=>{
       height: sk.windowHeight,
       CONTROLS: CONTROLS,
       CAMERA: CAMERA,
-      darkness:0.95 //darkness level 0-1
+      HUD: HUD,
+      darkness: DARKNESS //darkness level 0-1
     });
     LIGHTING.createLightSource({}); //defaults to 0,0
     // LIGHTING.createLightSource({x:500,y:500, size:300});
     sk.angleMode(sk.RADIANS);
-    sk.rectMode(sk.CENTER);
+    // sk.rectMode(sk.CENTER);
     sk.frameRate(FRAMERATE); //default and max is 60
     console.log("End P5 Setup");
   } //setup

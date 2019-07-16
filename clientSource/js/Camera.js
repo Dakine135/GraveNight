@@ -39,18 +39,21 @@ module.exports = class Camera{
 		let s = Math.sin(angle);
 		let c = Math.cos(angle);
 
+		//make copy
+		let newPoint = {x: point.x, y: point.y}; 
+
 		// translate point back to origin:
-		point.x -= center.x;
-		point.y -= center.y;
+		newPoint.x -= center.x;
+		newPoint.y -= center.y;
 
 		// rotate point
-		let xnew = point.x * c - point.y * s;
-		let ynew = point.x * s + point.y * c;
+		let xnew = newPoint.x * c - newPoint.y * s;
+		let ynew = newPoint.x * s + newPoint.y * c;
 
 		// translate point back:
-		point.x = xnew + center.x;
-		point.y = ynew + center.y;
-		return point;
+		newPoint.x = xnew + center.x;
+		newPoint.y = ynew + center.y;
+		return newPoint;
 	}
 
 	update(){

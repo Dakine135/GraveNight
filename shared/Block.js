@@ -34,6 +34,6 @@ exports.draw = (obj, render, CAMERA)=>{
 	render.translate(translatedLocation.x, translatedLocation.y);
 	//draw block
 	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.rect (0, 0, obj.width, obj.height);
+	render.rect (-obj.width/2, -obj.height/2, obj.width, obj.height);
 	render.pop();
 }//draw

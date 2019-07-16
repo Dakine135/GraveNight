@@ -17,6 +17,13 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
+exports.calculateAngle = ({point1, point2})=>{
+    let diffX = point1.x - point2.x;
+    let diffY = point1.y - point2.y;
+    // angle in radians
+    return Math.atan2(diffY, diffX);
+}
+
 exports.mapNum = ({input, start1, end1, start2, end2 })=>{
     if(input<start1) input = start1;
     else if(input>end1) input = end1;
