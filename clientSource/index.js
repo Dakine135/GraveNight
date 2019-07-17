@@ -75,7 +75,7 @@ let sketch = (sk)=>{
       CAMERA: CAMERA
     });
     LIGHTING = new Lighting({
-      debug: false,
+      debug: true,
       width: sk.windowWidth, 
       height: sk.windowHeight,
       CONTROLS: CONTROLS,
@@ -146,7 +146,9 @@ let sketch = (sk)=>{
         world:WORLD,
         x:myPlayer.x,
         y:myPlayer.y,
-        distance: RENDERDISTANCE
+        distance: RENDERDISTANCE,
+        angle: myPlayer.angle,
+        fieldOfView: Math.PI/2 //90 degrees
       });
       // console.log("objectsToDraw:",objectsToDraw);
       for(var id in objectsToDraw){
@@ -162,8 +164,8 @@ let sketch = (sk)=>{
     }//if World has been received from Server
 
     //Lighting Stuff
-    LIGHTING.update();
-    LIGHTING.draw(STATES.frameState);
+    // LIGHTING.update();
+    // LIGHTING.draw(STATES.frameState);
     
 
     //once a second

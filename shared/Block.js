@@ -7,12 +7,7 @@ exports.create = ({
 	y=0,
 	width = 50,
 	height = 50,
-	hitbox = Hitbox.create({
-			top: -height/2,
-			bottom: height/2,
-			left: -width/2,
-			right: width/2
-		}),
+	angle=0,
 	color = {r: 255, g:0, b:0}
 })=>{
 	return {
@@ -22,7 +17,14 @@ exports.create = ({
 		y:y,
 		width:width,
 		height:height,
-		hitbox: hitbox,
+		hitbox: Hitbox.create({
+			id:id,
+			x:x,
+			y:y,
+			width:width,
+			height:height,
+			angle:angle,
+		}),
 		color:color
 	}
 } //create

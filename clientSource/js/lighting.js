@@ -105,12 +105,15 @@ module.exports = class lighting{
         		y: player.y, 
         		intensity:(player.energy/2)
         	});
+        	let brightness = 0.9;
+        	if(this.debug) brightness = 0.5;
         	this.drawLightCone({
         		x: rotatedPoint.x, 
         		y: rotatedPoint.y,
         		angle: player.angle, //player.angle
         		intensity:(player.energy*2), 
-        		state:state
+        		state:state,
+        		brightness: brightness
         	});
         }
 
@@ -157,6 +160,7 @@ module.exports = class lighting{
 		y,
 		angle,
 		intensity,
+		brightness = 0.9,
 		state
 	}){
 		if(intensity<=0){
@@ -176,13 +180,8 @@ module.exports = class lighting{
 			y: originP.y, 
 			distance: intensity
 		});
-		// console.log("search from: ", worldX, worldY);
-		// console.log("Number of Objects in Range:",
-		// 	Math.floor(originP.x), 
-		// 	Math.floor(originP.y),
-		// 	Object.keys(objectsInRange).length
-		// );
 		
+		//setup variables for loop and such
 		let widthOfCone    = Math.PI*0.5; //maybe scale on intensity somehow
 		let increment      = widthOfCone/this.precision;
 		let blockedLimit   = 0; //this is to keep track and 
@@ -197,32 +196,25 @@ module.exports = class lighting{
 							});
 		let objectsGlowing = {};
 		let listofPoints   = [];
-		this.HUD.update({
-	        lightCalculationsPerFrame: this.lightCalculationsLastFrame,
-	        // startAngle: Math.round(startAngle*100)/100,
-	        // endAngle: Math.round(endAngle*100)/100,
-	        // startPoint: `${Math.round(startPoint.x)},${Math.round(startPoint.y)}`,
-	        // endPoint:   `${Math.round(endPoint.x)},${Math.round(endPoint.y)}`,
-	        // increment: increment
-	    });
+		if(this.debug){
+			this.HUD.update({
+		        lightCalculationsPerFrame: this.lightCalculationsLastFrame,
+		        ObjectsInRangeLighting: Object.keys(objectsInRange).length
+		    });
+		}
 	    let lightCalculations = 0;
 		for(var i=0; i<=widthOfCone; i=i){
 			lightCalculations++;
 
+			//current point/angle we are checking
+			//like in individual light beam
 			let pRotated = this.CAMERA.rotatePoint({
 								center: originP,
 								point: startPoint,
 								angle: i
 							});
 
-			// let pointTest = this.CAMERA.translate(pRotated);
-			// this.render.save();
-			// this.render.beginPath();
-			// this.render.moveTo(originPTrans.x, originPTrans.y);
-			// this.render.lineTo(pointTest.x, pointTest.y);
-			// this.render.stroke();
-			// this.render.restore();
-
+			//check all objects in range for collision
 			let closestCollision = false;
 			let closestSegment = null;
 			let closestDist = Infinity;
@@ -230,14 +222,14 @@ module.exports = class lighting{
 			let closestObj = null;
 			for(var id in objectsInRange){
 				let object = objectsInRange[id];
-				let corners = Hitbox.getCorners(object);
+				// let corners = Hitbox.getCorners(object);
 				// console.log("corners:",corners);
-				let collision = this.getIntersection(corners, {x1: originP.x,  y1: originP.y,
+				let collision = this.getIntersection(object.hitbox, {x1: originP.x,  y1: originP.y,
 															   x2: pRotated.x, y2: pRotated.y});
 				if(collision){
-					let dist = Hitbox.dist(collision.point, originP);
+					let dist = Utilities.dist(collision.point, originP);
 					if(closestDist > dist){
-						closestObj = corners;
+						closestObj = object;
 						closestDist = dist;
 						closestCollision = collision.point;
 						closestSegment = collision.line;
@@ -380,8 +372,8 @@ module.exports = class lighting{
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity);
     	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
-    	gradient.addColorStop(0,"rgba(255, 255, 255, 0.9)");
-    	gradient.addColorStop(0.6,"rgba(255, 255, 255, 0.9)");
+    	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+    	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
     	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
     	this.offscreenRender.fillStyle = gradient;
 		this.offscreenRender.fill();
@@ -429,11 +421,11 @@ module.exports = class lighting{
 		if(top){
 			intersection = top;
 			intersectingSegment = boxLineTop;
-			closestDist = Hitbox.dist(top, {x:line.x1, y:line.y1});
+			closestDist = Utilities.dist(top, {x:line.x1, y:line.y1});
 		}
 		let right = Hitbox.collideLineLine(line, boxLineRight);
 		if(right){
-			let dist = Hitbox.dist(right, {x:line.x1, y:line.y1});
+			let dist = Utilities.dist(right, {x:line.x1, y:line.y1});
 			if(dist < closestDist){
 				intersection = right;
 				intersectingSegment = boxLineRight;
@@ -442,7 +434,7 @@ module.exports = class lighting{
 		}
 		let bottom = Hitbox.collideLineLine(line, boxLineBottom);
 		if(bottom){
-			let dist = Hitbox.dist(bottom, {x:line.x1, y:line.y1});
+			let dist = Utilities.dist(bottom, {x:line.x1, y:line.y1});
 			if(dist < closestDist){
 				intersection = bottom;
 				intersectingSegment = boxLineBottom;
@@ -451,7 +443,7 @@ module.exports = class lighting{
 		}
 		let left = Hitbox.collideLineLine(line, boxLineLeft);
 		if(left){
-			let dist = Hitbox.dist(left, {x:line.x1, y:line.y1});
+			let dist = Utilities.dist(left, {x:line.x1, y:line.y1});
 			if(dist < closestDist){
 				intersection = left;
 				intersectingSegment = boxLineLeft;

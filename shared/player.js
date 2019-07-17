@@ -15,12 +15,6 @@ exports.create = ({
 		angle = 0,
 		width = 50,
 		height = 50,
-		hitbox = Hitbox.create({
-			top: -height/2,
-			bottom: height/2,
-			left: -width/2,
-			right: width/2
-		}),
 		color = Utilities.randomColor(),
 		energy = 250
 	}) => {
@@ -37,7 +31,14 @@ exports.create = ({
 		vY: 0,
 		width: width,
 		height: height,
-		hitbox: hitbox,
+		hitbox: Hitbox.create({
+			id:socketId,
+			x:x,
+			y:y,
+			width:width,
+			height:height,
+			angle:angle,
+		}),
 		speedMultiplier: speedMultiplier,
 		angle: angle,
 		color: color,
@@ -69,6 +70,7 @@ exports.updateCreateNew = (obj, currentTime)=>{
 	newObj.y += newObj.moveByY;
 	newObj.cursorX += newObj.moveByX;
 	newObj.cursorY += newObj.moveByY;
+	Hitbox.moveTo(newObj, newObj.x, newObj.y);
 	//reset accumulated movement
 	newObj.moveByX = 0;
 	newObj.moveByY = 0;

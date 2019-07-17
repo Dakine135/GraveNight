@@ -17,6 +17,14 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
+function dist(point1, point2){
+    let diffX = Math.abs(point1.x - point2.x);
+    let diffY = Math.abs(point1.y - point2.y);
+    let distance = Math.sqrt((Math.pow(diffX, 2) + Math.pow(diffY,2)), 2);
+    return distance;
+}
+exports.dist = dist;
+
 exports.calculateAngle = ({point1, point2, centerPoint={x:0,y:0}})=>{
 
     // let diffX = (point1.x - centerPoint.x) - (point2.x - centerPoint.x);

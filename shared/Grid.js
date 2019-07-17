@@ -42,9 +42,11 @@ exports.addObject = (grid, obj)=>{
 
 exports.getObjects = ({
 	grid=Utilities.error('getObjects needs Grid'),
-	x=0,
-	y=0,
-	distance=500
+	x           = 0,
+	y           = 0,
+	distance    = 500,
+	angle       = 0,
+	fieldOfView = (Math.PI*2) //default full 360, aka all around
 })=>{
 	let bucketSize  = 100;
 	let startIndexX = x - distance;

@@ -1,82 +1,112 @@
 var Utilities = require('../shared/Utilities.js');
 
 exports.create = ({
-	top = 0,
-	bottom = 0,
-	left = 0,
-	right = 0
+	id=0,
+	x=0,
+	y=0,
+	width=50,
+	height=50,
+	angle=0
 })=>{
+	let top    = y - (height/2);
+	let bottom = y + (height/2);
+	let left   = x - (width/2);
+	let right  = x + (width/2)
 	return {
-		top: top,
+		id: id,
+		x:  x,
+		y:  y,
+		width: width,
+		height:height,
+		angle: angle,
+		top:    top,
 		bottom: bottom,
-		left: left,
-		right: right
+		left:   left,
+		right:  right,
+		topLeft:     {x: left, y: top},
+		topRight:    {x: right, y: top},
+		bottomLeft:  {x: left, y: bottom},
+		bottomRight: {x: right, y: bottom}
 	}
 } //create
 
+function moveTo(obj, x, y){
+	obj.hitbox.x = x;
+	obj.hitbox.y = y;
+	update(obj);
+}
+exports.moveTo = moveTo;
+
+function update(obj){
+	let hitbox = obj.hitbox;
+	let top    = hitbox.y - (hitbox.height/2);
+	let bottom = hitbox.y + (hitbox.height/2);
+	let left   = hitbox.x - (hitbox.width/2);
+	let right  = hitbox.x + (hitbox.width/2);
+
+	hitbox.top    = top,
+	hitbox.bottom = bottom,
+	hitbox.left   = left,
+	hitbox.right  = right,
+	hitbox.topLeft     = {x: left, y: top},
+	hitbox.topRight    = {x: right, y: top},
+	hitbox.bottomLeft  = {x: left, y: bottom},
+	hitbox.bottomRight = {x: right, y: bottom}
+}
+
 function colliding(obj1, obj2) {
-	let hitbox1 = getHitbox(obj1);
-	let hitbox2 = getHitbox(obj2);
+	//doesnt take angle into account yet.
+	let hitbox1 = obj1.hitbox;
+	let hitbox2 = obj2.hitbox;
+
+	let roughColliding = false;
 	// console.log("In colliding:", hitbox1, hitbox2);
 	if(hitbox1.top > hitbox2.bottom ||
 	   hitbox1.bottom < hitbox2.top ||
 	   hitbox1.right < hitbox2.left ||
 	   hitbox1.left > hitbox2.right) {
-		return false;
-	}
-	return true;
+		roughColliding = false;
+	} else roughColliding = true;
+
+	// if(roughColliding){
+	// 	//TODO make more granular colliding with collision points and such
+	// }
+	
+	return roughColliding;
 } //colliding
 exports.colliding = colliding;
 
-function translate({
-	x=0, 
-	y=0, 
-	hitbox=null, 
-	angle=0 //not yet implemented
-}){
-	let translatedHitbox    = Utilities.cloneObject(hitbox);
-	translatedHitbox.top    = translatedHitbox.top + y;
-	translatedHitbox.bottom = translatedHitbox.bottom + y;
-	translatedHitbox.left   = translatedHitbox.left + x;
-	translatedHitbox.right  = translatedHitbox.right + x;
-	return translatedHitbox;
-}; //translate
-exports.translate = translate;
+// function translate({
+// 	x=0, 
+// 	y=0, 
+// 	hitbox=null, 
+// 	angle=0 //not yet implemented
+// }){
+// 	let translatedHitbox    = Utilities.cloneObject(hitbox);
+// 	translatedHitbox.top    = translatedHitbox.top + y;
+// 	translatedHitbox.bottom = translatedHitbox.bottom + y;
+// 	translatedHitbox.left   = translatedHitbox.left + x;
+// 	translatedHitbox.right  = translatedHitbox.right + x;
+// 	return translatedHitbox;
+// }; //translate
+// exports.translate = translate;
 
-function getCorners(obj){
-	let hitbox = getHitbox(obj);
-	// console.log("hitbox: ",hitbox);
-	let width  = hitbox.right  - hitbox.left;
-	let height = hitbox.bottom - hitbox.top;
-	return {
-		id:          obj.id,
-		x:           obj.x,
-		y: 			 obj.y,
-		topLeft:     {x: hitbox.left, y: hitbox.top},
-		topRight:    {x: hitbox.right, y: hitbox.top},
-		bottomLeft:  {x: hitbox.left, y: hitbox.bottom},
-		bottomRight: {x: hitbox.right, y: hitbox.bottom}
-	};
-}
-exports.getCorners = getCorners;
-
-function getHitbox(obj){
-	return translate({
-		x: obj.x,
-		y: obj.y,
-		hitbox: obj.hitbox,
-		angle: obj.angle
-	});
-}
-exports.getHitbox = getHitbox;
-
-function dist(point1, point2){
-	let diffX = Math.abs(point1.x - point2.x);
-	let diffY = Math.abs(point1.y - point2.y);
-	let distance = Math.sqrt((Math.pow(diffX, 2) + Math.pow(diffY,2)), 2);
-	return distance;
-}
-exports.dist = dist;
+// function getCorners(obj){
+// 	let hitbox = obj.hitbox;
+// 	// console.log("hitbox: ",hitbox);
+// 	let width  = hitbox.right  - hitbox.left;
+// 	let height = hitbox.bottom - hitbox.top;
+// 	return {
+// 		id:          obj.id,
+// 		x:           obj.x,
+// 		y: 			 obj.y,
+// 		topLeft:     {x: hitbox.left, y: hitbox.top},
+// 		topRight:    {x: hitbox.right, y: hitbox.top},
+// 		bottomLeft:  {x: hitbox.left, y: hitbox.bottom},
+// 		bottomRight: {x: hitbox.right, y: hitbox.bottom}
+// 	};
+// }
+// exports.getCorners = getCorners;
 
 function collideLineLine(line1, line2) {
 
