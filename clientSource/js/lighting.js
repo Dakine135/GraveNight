@@ -183,7 +183,8 @@ module.exports = class lighting{
 		
 		//setup variables for loop and such
 		let widthOfCone    = Math.PI*0.5; //maybe scale on intensity somehow
-		let increment      = widthOfCone/this.precision;
+		// let increment      = widthOfCone/this.precision;
+		let increment      = 0.1;
 		let blockedLimit   = 0; //this is to keep track and 
 		                        //dont make points at corners that are behind other blocks
 		let startAngle     = angle - (widthOfCone/2);
@@ -192,7 +193,7 @@ module.exports = class lighting{
 								center: originP,
 								point: {x: originP.x+intensity,
 										y: originP.y},
-								angle: startAngle
+								angle: angle
 							});
 		let objectsGlowing = {};
 		let listofPoints   = [];
@@ -203,122 +204,131 @@ module.exports = class lighting{
 		    });
 		}
 	    let lightCalculations = 0;
-		for(var i=0; i<=widthOfCone; i=i){
-			lightCalculations++;
+	    listofPoints = this.getLightPoints({
+	    	width:     widthOfCone,
+	    	origin:    originP,
+	    	point:     startPoint,
+	    	startPoint:startPoint,
+	    	increment: increment,
+	    	intensity: intensity,
+	    	objects:   objectsInRange
+	    });
+		// for(var i=0; i<=widthOfCone; i=i){
+		// 	lightCalculations++;
 
-			//current point/angle we are checking
-			//like in individual light beam
-			let pRotated = this.CAMERA.rotatePoint({
-								center: originP,
-								point: startPoint,
-								angle: i
-							});
+		// 	//current point/angle we are checking
+		// 	//like in individual light beam
+		// 	let pRotated = this.CAMERA.rotatePoint({
+		// 						center: originP,
+		// 						point: startPoint,
+		// 						angle: i
+		// 					});
 
-			//check all objects in range for collision
-			let closestCollision = false;
-			let closestSegment = null;
-			let closestDist = Infinity;
-			//for object glow
-			let closestObj = null;
-			for(var id in objectsInRange){
-				let object = objectsInRange[id];
-				// let corners = Hitbox.getCorners(object);
-				// console.log("corners:",corners);
-				let collision = this.getIntersection(object.hitbox, {x1: originP.x,  y1: originP.y,
-															   x2: pRotated.x, y2: pRotated.y});
-				if(collision){
-					let dist = Utilities.dist(collision.point, originP);
-					if(closestDist > dist){
-						closestObj = object;
-						closestDist = dist;
-						closestCollision = collision.point;
-						closestSegment = collision.line;
-					}
-				}
-			}//for objects in range
+		// 	//check all objects in range for collision
+		// 	let closestCollision = false;
+		// 	let closestSegment = null;
+		// 	let closestDist = Infinity;
+		// 	//for object glow
+		// 	let closestObj = null;
+		// 	for(var id in objectsInRange){
+		// 		let object = objectsInRange[id];
+		// 		// let corners = Hitbox.getCorners(object);
+		// 		// console.log("corners:",corners);
+		// 		let collision = this.getIntersection(object.hitbox, {x1: originP.x,  y1: originP.y,
+		// 													   x2: pRotated.x, y2: pRotated.y});
+		// 		if(collision){
+		// 			let dist = Utilities.dist(collision.point, originP);
+		// 			if(closestDist > dist){
+		// 				closestObj = object;
+		// 				closestDist = dist;
+		// 				closestCollision = collision.point;
+		// 				closestSegment = collision.line;
+		// 			}
+		// 		}
+		// 	}//for objects in range
 
-			if(closestCollision){
-				//calculate "lost" intensity
-				let lostIntensity = (intensity - closestDist);
-				if(objectsGlowing[closestObj.id] == null){
-					objectsGlowing[closestObj.id] = {
-						x: closestObj.x,
-						y: closestObj.y,
-						intensity: lostIntensity
-					};
-				} else {
-					objectsGlowing[closestObj.id].intensity += lostIntensity;
-					if(objectsGlowing[closestObj.id].intensity > intensity) objectsGlowing[closestObj.id].intensity = intensity;
-				}
+		// 	if(closestCollision){
+		// 		//calculate "lost" intensity
+		// 		let lostIntensity = (intensity - closestDist);
+		// 		if(objectsGlowing[closestObj.id] == null){
+		// 			objectsGlowing[closestObj.id] = {
+		// 				x: closestObj.x,
+		// 				y: closestObj.y,
+		// 				intensity: lostIntensity
+		// 			};
+		// 		} else {
+		// 			objectsGlowing[closestObj.id].intensity += lostIntensity;
+		// 			if(objectsGlowing[closestObj.id].intensity > intensity) objectsGlowing[closestObj.id].intensity = intensity;
+		// 		}
 
-				//make points at the corners of the box
-				let point1 = {x: closestSegment.x1, y: closestSegment.y1};
-				let point2 = {x: closestSegment.x2, y: closestSegment.y2};
-				let angleCollisionToPoint1 = Utilities.calculateAngle({
-												point1:startPoint, 
-												point2: point1,
-												centerPoint:originP});
-				let angleCollisionToPoint2 = Utilities.calculateAngle({
-												point1:startPoint, 
-												point2: point2,
-											    centerPoint:originP});
-				if(angleCollisionToPoint1 < 0) 
-					angleCollisionToPoint1 = angleCollisionToPoint1 + Math.PI*2;
-				if(angleCollisionToPoint2 < 0 && angleCollisionToPoint2 < -5) 
-					angleCollisionToPoint2 = angleCollisionToPoint2 + Math.PI*2;
+		// 		//make points at the corners of the box
+		// 		let point1 = {x: closestSegment.x1, y: closestSegment.y1};
+		// 		let point2 = {x: closestSegment.x2, y: closestSegment.y2};
+		// 		let angleCollisionToPoint1 = Utilities.calculateAngle({
+		// 										point1:startPoint, 
+		// 										point2: point1,
+		// 										centerPoint:originP});
+		// 		let angleCollisionToPoint2 = Utilities.calculateAngle({
+		// 										point1:startPoint, 
+		// 										point2: point2,
+		// 									    centerPoint:originP});
+		// 		if(angleCollisionToPoint1 < 0) 
+		// 			angleCollisionToPoint1 = angleCollisionToPoint1 + Math.PI*2;
+		// 		if(angleCollisionToPoint2 < 0 && angleCollisionToPoint2 < -5) 
+		// 			angleCollisionToPoint2 = angleCollisionToPoint2 + Math.PI*2;
 
-				//add points at the corners if within cone
-				if(angleCollisionToPoint1 < widthOfCone &&
-				   angleCollisionToPoint1 > blockedLimit){
-					point1 = this.CAMERA.translate(point1);
-					point1.color = "green"; //for debug
-					point1.angle = angleCollisionToPoint1;
-					listofPoints.push(point1);
-				}
-				if(angleCollisionToPoint2 < widthOfCone &&
-				   angleCollisionToPoint2 > blockedLimit){
-					point2 = this.CAMERA.translate(point2);
-					point2.color = "green"; //for debug
-					point2.angle = angleCollisionToPoint2;
-					listofPoints.push(point2);
-				}
-				if(angleCollisionToPoint1 > angleCollisionToPoint2){
-					blockedLimit = angleCollisionToPoint1;
-				} else blockedLimit = angleCollisionToPoint2;
-				i=blockedLimit+0.01;
+		// 		//add points at the corners if within cone
+		// 		if(angleCollisionToPoint1 < widthOfCone &&
+		// 		   angleCollisionToPoint1 > blockedLimit){
+		// 			point1 = this.CAMERA.translate(point1);
+		// 			point1.color = "green"; //for debug
+		// 			point1.angle = angleCollisionToPoint1;
+		// 			listofPoints.push(point1);
+		// 		}
+		// 		if(angleCollisionToPoint2 < widthOfCone &&
+		// 		   angleCollisionToPoint2 > blockedLimit){
+		// 			point2 = this.CAMERA.translate(point2);
+		// 			point2.color = "green"; //for debug
+		// 			point2.angle = angleCollisionToPoint2;
+		// 			listofPoints.push(point2);
+		// 		}
+		// 		if(angleCollisionToPoint1 > angleCollisionToPoint2){
+		// 			blockedLimit = angleCollisionToPoint1;
+		// 		} else blockedLimit = angleCollisionToPoint2;
+		// 		i=blockedLimit+0.01;
 
-				if(this.debug){
-					//draw actual collision point in red
-					let pRotatedAngle = Utilities.calculateAngle({
-													point1: startPoint, 
-													point2: pRotated,
-												    centerPoint:originP});
-					if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
-					pRotated = this.CAMERA.translate(closestCollision);
-					pRotated.color = "red";
-					pRotated.angle = pRotatedAngle;
-					listofPoints.push(pRotated);
-				}
+		// 		if(this.debug){
+		// 			//draw actual collision point in red
+		// 			let pRotatedAngle = Utilities.calculateAngle({
+		// 											point1: startPoint, 
+		// 											point2: pRotated,
+		// 										    centerPoint:originP});
+		// 			if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+		// 			pRotated = this.CAMERA.translate(closestCollision);
+		// 			pRotated.color = "red";
+		// 			pRotated.angle = pRotatedAngle;
+		// 			listofPoints.push(pRotated);
+		// 		}
 
-			}//closest collision if hit
-			else{
-				let pRotatedAngle = Utilities.calculateAngle({
-												point1: startPoint, 
-												point2: pRotated,
-											    centerPoint:originP});
-				if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
-				pRotated = this.CAMERA.translate(pRotated);
-				pRotated.color = "yellow";
-				pRotated.angle = pRotatedAngle;
-				listofPoints.push(pRotated);
-				if(i != widthOfCone && (i+increment) > widthOfCone) i = widthOfCone;
-				else i=i+increment;
+		// 	}//closest collision if hit
+		// 	else{
+		// 		let pRotatedAngle = Utilities.calculateAngle({
+		// 										point1: startPoint, 
+		// 										point2: pRotated,
+		// 									    centerPoint:originP});
+		// 		if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+		// 		pRotated = this.CAMERA.translate(pRotated);
+		// 		pRotated.color = "yellow";
+		// 		pRotated.angle = pRotatedAngle;
+		// 		listofPoints.push(pRotated);
+		// 		if(i != widthOfCone && (i+increment) > widthOfCone) i = widthOfCone;
+		// 		else i=i+increment;
 
-			}
-			// listofPoints.push(pRotated);
+		// 	}
+		// 	// listofPoints.push(pRotated);
 			
-		}//for every light beam
-		this.lightCalculationsLastFrame = lightCalculations;
+		// }//for every light beam
+		// this.lightCalculationsLastFrame = lightCalculations;
 
 		listofPoints.sort((a,b)=>{
 			return a.angle-b.angle;
@@ -403,6 +413,160 @@ module.exports = class lighting{
 		}// each glowing object
 
 	}//drawLightCone
+
+	getLightPoints({width, origin, angle, point, startPoint, 
+		increment, intensity, objects, progressCCW=0, progressCW=0}){
+		
+			let pointsToReturn = [];
+			//get point collision
+			//check all objects in range for collision
+			let closestCollision = false;
+			let closestSegment = null;
+			let closestDist = Infinity;
+			//for object glow
+			let closestObj = null;
+			// for(var id in objects){
+			// 	let object = objects[id];
+			// 	let collision = this.getIntersection(object.hitbox, {x1: origin.x,  y1: origin.y,
+			// 												         x2: point.x,   y2: point.y});
+			// 	if(collision){
+			// 		let dist = Utilities.dist(collision.point, origin);
+			// 		if(closestDist > dist){
+			// 			closestObj = object;
+			// 			closestDist = dist;
+			// 			closestCollision = collision.point;
+			// 			closestSegment = collision.line;
+			// 		}
+			// 	}
+			// }//for objects in range
+
+			if(false){ //closestCollision
+				//calculate "lost" intensity
+				// let lostIntensity = (intensity - closestDist);
+				// if(objectsGlowing[closestObj.id] == null){
+				// 	objectsGlowing[closestObj.id] = {
+				// 		x: closestObj.x,
+				// 		y: closestObj.y,
+				// 		intensity: lostIntensity
+				// 	};
+				// } else {
+				// 	objectsGlowing[closestObj.id].intensity += lostIntensity;
+				// 	if(objectsGlowing[closestObj.id].intensity > intensity) objectsGlowing[closestObj.id].intensity = intensity;
+				// }
+
+				//make points at the corners of the box
+				// let point1 = {x: closestSegment.x1, y: closestSegment.y1};
+				// let point2 = {x: closestSegment.x2, y: closestSegment.y2};
+				// let angleCollisionToPoint1 = Utilities.calculateAngle({
+				// 								point1:startPoint, 
+				// 								point2: point1,
+				// 								centerPoint:originP});
+				// let angleCollisionToPoint2 = Utilities.calculateAngle({
+				// 								point1:startPoint, 
+				// 								point2: point2,
+				// 							    centerPoint:originP});
+				// if(angleCollisionToPoint1 < 0) 
+				// 	angleCollisionToPoint1 = angleCollisionToPoint1 + Math.PI*2;
+				// if(angleCollisionToPoint2 < 0 && angleCollisionToPoint2 < -5) 
+				// 	angleCollisionToPoint2 = angleCollisionToPoint2 + Math.PI*2;
+
+				// //add points at the corners if within cone
+				// if(angleCollisionToPoint1 < widthOfCone &&
+				//    angleCollisionToPoint1 > blockedLimit){
+				// 	point1 = this.CAMERA.translate(point1);
+				// 	point1.color = "green"; //for debug
+				// 	point1.angle = angleCollisionToPoint1;
+				// 	listofPoints.push(point1);
+				// }
+				// if(angleCollisionToPoint2 < widthOfCone &&
+				//    angleCollisionToPoint2 > blockedLimit){
+				// 	point2 = this.CAMERA.translate(point2);
+				// 	point2.color = "green"; //for debug
+				// 	point2.angle = angleCollisionToPoint2;
+				// 	listofPoints.push(point2);
+				// }
+				// if(angleCollisionToPoint1 > angleCollisionToPoint2){
+				// 	blockedLimit = angleCollisionToPoint1;
+				// } else blockedLimit = angleCollisionToPoint2;
+				// i=blockedLimit+0.01;
+
+				// if(this.debug){
+				// 	//draw actual collision point in red
+				// 	let pRotatedAngle = Utilities.calculateAngle({
+				// 									point1: startPoint, 
+				// 									point2: pRotated,
+				// 								    centerPoint:origin});
+				// 	if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+				// 	pRotated = this.CAMERA.translate(closestCollision);
+				// 	pRotated.color = "red";
+				// 	pRotated.angle = pRotatedAngle;
+				// 	listofPoints.push(pRotated);
+				// }
+
+			}//closest collision if hit
+			else{
+				//point just goes out to max length (intensity)
+				let pointsCW = [];
+				if(increment < width){
+					let nextCWpoint = this.CAMERA.rotatePoint({
+										center: origin,
+										point: point,
+										angle: increment
+									});
+					pointsCW  = this.getLightPoints({
+				    	width:     width/2,
+				    	origin:    origin,
+				    	point:     startPoint,
+				    	startPoint:startPoint,
+				    	increment: increment,
+				    	intensity: intensity,
+				    	objects:   objects
+				    });
+				} else {
+					// let nextCWpoint = this.CAMERA.rotatePoint({
+					// 					center: origin,
+					// 					point: point,
+					// 					angle: increment
+					// 				});
+				}
+				let pointsCCW = [];
+				if(increment < width){
+				    let nextCCWpoint = this.CAMERA.rotatePoint({
+										center: origin,
+										point: point,
+										angle: -increment
+									});
+					pointsCCW = this.getLightPoints({
+				    	width:     width/2,
+				    	origin:    origin,
+				    	point:     startPoint,
+				    	startPoint:startPoint,
+				    	increment: increment,
+				    	intensity: intensity,
+				    	objects:   objects
+				    });
+				} else {
+					
+				}
+
+				// if(i != widthOfCone && (i+increment) > widthOfCone) i = widthOfCone;
+				// else i=i+increment;
+
+
+				let pRotatedAngle = Utilities.calculateAngle({
+												point1: startPoint, 
+												point2: point,
+											    centerPoint:origin});
+				if(pRotatedAngle < 0) pRotatedAngle = pRotatedAngle + Math.PI*2;
+				point = this.CAMERA.translate(point);
+				point.color = "yellow";
+				point.angle = pRotatedAngle;
+				pointsCW = pointsCW.concat(pointsCCW);
+				pointsToReturn.push(point);
+				return pointsToReturn;
+			}
+			// listofPoints.push(pRotated);
+	}
 
 	getIntersection(corners, line){
 		// console.log("corners:",corners);

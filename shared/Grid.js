@@ -1,10 +1,6 @@
 const Utilities = require('./Utilities.js');
 
-// exports.createGrid = ({
-// 	bucketSize=500
-// })=>{
-// 	return
-// }
+var bucketSize = 100;
 
 function getBucketIndex(x,y, bucketSize){
 	return{
@@ -32,7 +28,20 @@ exports.addObject = (grid, obj)=>{
 	//TODO would also we great to support an angle or direction
 	//grid buckets will be 100x100
 	//floor objects location to nearest 100 to get index
-	let bucketSize = 100;
+	// let minX = obj.x - (obj.width/2);
+	// let maxX = obj.x + (obj.width/2);
+	// let bucketsX = [];
+	// while(minX < maxX){
+	// 	bucketsX.push(minX);
+	// 	minX+=bucketSize;
+	// }
+	// let minY = obj.y - (obj.height/2);
+	// let maxY = obj.y + (obj.height/2);
+	// let bucketsY = [];
+	// while(minY < maxY){
+	// 	bucketsY.push(minY);
+	// 	minY+=bucketSize;
+	// }
 	let bucketIndex = getBucketIndex(obj.x, obj.y, bucketSize);
 	console.log("addObject to bucket:", bucketIndex.x, bucketIndex.y);
 	if(grid[bucketIndex.x] == null) grid[bucketIndex.x] = {};
@@ -48,7 +57,7 @@ exports.getObjects = ({
 	angle       = 0,
 	fieldOfView = (Math.PI*2) //default full 360, aka all around
 })=>{
-	let bucketSize  = 100;
+	// let bucketSize  = 100;
 	let startIndexX = x - distance;
 	let startIndexY = y - distance;
 	let endIndexX   = x + distance;
@@ -58,8 +67,14 @@ exports.getObjects = ({
 	let objectsInRange = {};
 	while(currentX <= endIndexX){
 		while(currentY <= endIndexY){
-			let objectsFound = getBucket(grid, currentX, currentY, bucketSize);
-			objectsInRange = {...objectsInRange, ...objectsFound};
+			let objectsInBucket = getBucket(grid, currentX, currentY, bucketSize);
+			for(var id in objectsInBucket){
+				let object = objectsInBucket[id];
+				if(Utilities.dist({x:x, y:y},{x:object.x, y:object.y}) < distance){
+					objectsInRange[id] = object;
+				}
+			}
+			// objectsInRange = {...objectsInRange, ...objectsInBucket};
 			currentY += bucketSize;
 		}
 		currentY = startIndexY;

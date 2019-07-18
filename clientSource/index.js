@@ -43,12 +43,13 @@ let sketch = (sk)=>{
     console.log("Start P5 Setup");
     console.log("Screen Size: ", sk.windowWidth, sk.windowHeight);
     p5Canvas = sk.createCanvas(sk.windowWidth, sk.windowHeight); //full screen
+    RENDERDISTANCE = Math.max(sk.windowWidth, sk.windowHeight)*0.6;
     p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
     CAMERA = new Camera({
       x:0,y:0, 
       width:sk.windowWidth, 
       height:sk.windowHeight,
-      speed:0.2
+      speed:0.1
     });
     HUD = new Hud({
       width: sk.windowWidth, 
@@ -141,11 +142,12 @@ let sketch = (sk)=>{
     STATES.draw(deltaTime);
 
     //World drawing
+    let objectsToDraw = {};
     if(WORLD != null && WORLD.grid != null){
-      let objectsToDraw = World.getObjects({
+      objectsToDraw = World.getObjects({
         world:WORLD,
-        x:myPlayer.x,
-        y:myPlayer.y,
+        x:CAMERA.x,
+        y:CAMERA.y,
         distance: RENDERDISTANCE,
         angle: myPlayer.angle,
         fieldOfView: Math.PI/2 //90 degrees
@@ -164,8 +166,8 @@ let sketch = (sk)=>{
     }//if World has been received from Server
 
     //Lighting Stuff
-    // LIGHTING.update();
-    // LIGHTING.draw(STATES.frameState);
+    LIGHTING.update();
+    LIGHTING.draw(STATES.frameState);
     
 
     //once a second
@@ -177,7 +179,9 @@ let sketch = (sk)=>{
         ScreenSize: sk.windowWidth+", "+sk.windowHeight,
         Ping: NETWORK.ping,
         ServerUPS: STATES.serverUpdatesPerSecond,
-        timeDiffernce: NETWORK.timeDiffernce
+        timeDiffernce: NETWORK.timeDiffernce,
+        objectsToDraw: Object.keys(objectsToDraw).length,
+        RENDERDISTANCE: RENDERDISTANCE
       });
       lastSecond = currentTime;
       frames = 0;

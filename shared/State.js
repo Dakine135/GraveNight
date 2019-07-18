@@ -267,6 +267,8 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 			intermediatePlayer.x = intermediatePlayer.x - (diffX * percent);
 			let diffY = intermediatePlayer.y - playerEnd.y;
 			intermediatePlayer.y = intermediatePlayer.y - (diffY * percent);
+
+			//TODO check for but when rotated through Math.PI
 			let diffAngle = intermediatePlayer.angle - playerEnd.angle;
 			intermediatePlayer.angle = intermediatePlayer.angle - (diffAngle * percent);
 		}
