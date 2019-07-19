@@ -16,7 +16,7 @@ exports.create = ({
 		width = 50,
 		height = 50,
 		color = Utilities.randomColor(),
-		energy = 250
+		energy = 200
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -177,7 +177,7 @@ function calculateAndSetAngleMutate(obj){
 	let diffY = obj.cursorY - obj.y;
 	// angle in radians
 	var angleRadians = Math.atan2(diffY, diffX);
-	// if(angleRadians < 0) angleRadians = (angleRadians + Math.PI*2);
+	if(angleRadians < 0) angleRadians = (angleRadians + Math.PI*2);
 	// angle in degrees
 	// var angleDeg = angleRadians * 180 / Math.PI;
 	obj.angle = angleRadians;

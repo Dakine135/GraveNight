@@ -26,15 +26,26 @@ function dist(point1, point2){
 exports.dist = dist;
 
 exports.calculateAngle = ({point1, point2, centerPoint={x:0,y:0}})=>{
+    if(point1.x === point2.x && point1.y === point2.y) return 0;
 
-    // let diffX = (point1.x - centerPoint.x) - (point2.x - centerPoint.x);
-    // let diffY = (point1.y - centerPoint.y) - (point2.y - centerPoint.y);
-    // let diffX = point1.x - point2.x;
-    // let diffY = point1.y - point2.y;
-    // angle in radians
-    // return Math.atan2(diffY, diffX);
-    return Math.atan2(point2.y - centerPoint.y, point2.x - centerPoint.x) -
-           Math.atan2(point1.y - centerPoint.y, point1.x - centerPoint.x);
+    let p1Trans = {x: point1.x - centerPoint.x, y: point1.y - centerPoint.y};
+    let p2Trans = {x: point2.x - centerPoint.x, y: point2.y - centerPoint.y};
+    // let diffX   = p1Trans.x - p2Trans.x;
+    // let diffY   = p1Trans.y - p2Trans.y;
+    // var angleRadians = Math.atan2(diffY, diffX);
+    let angleOfP1 = Math.atan2(p1Trans.y, p1Trans.x);
+    let angleOfP2 = Math.atan2(p2Trans.y, p2Trans.x);
+    if(angleOfP1 < 0) angleOfP1 = angleOfP1 + Math.PI*2;
+    if(angleOfP2 < 0) angleOfP2 = angleOfP2 + Math.PI*2;
+    let angleRadians = angleOfP2 - angleOfP1;
+    // if(angleRadians < 0) angleRadians = (angleRadians + Math.PI*2);
+    return angleRadians;
+    // let angleOfP1 = Math.atan2(p1Trans.x, p1Trans.y);
+    // let angleOfP2 = Math.atan2(point2.y - centerPoint.y, point2.x - centerPoint.x);
+    // if(angleOfP1 < 0) angleOfP1 = angleOfP1 + Math.PI*2;
+    // if(angleOfP2 < 0) angleOfP2 = angleOfP2 + Math.PI*2;
+    //angle in radians
+    // return  angleOfP2 - angleOfP1;
 }
 
 exports.mapNum = ({input, start1, end1, start2, end2 })=>{
