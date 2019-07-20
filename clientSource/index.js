@@ -51,10 +51,6 @@ let sketch = (sk)=>{
       height:sk.windowHeight,
       speed:0.1
     });
-    HUD = new Hud({
-      width: sk.windowWidth, 
-      height: sk.windowHeight
-    });
     STATES = new StatesManager({
       debug:false, 
       debugState:false,
@@ -74,6 +70,11 @@ let sketch = (sk)=>{
       NETWORK:NETWORK, 
       STATES:STATES, 
       CAMERA: CAMERA
+    });
+    HUD = new Hud({
+      width: sk.windowWidth, 
+      height: sk.windowHeight,
+      CONTROLS: CONTROLS
     });
     LIGHTING = new Lighting({
       debug: true,
@@ -110,6 +111,7 @@ let sketch = (sk)=>{
 
   sk.mouseMoved = ()=>{
     CONTROLS.mouseMoved(sk.mouseX, sk.mouseY, sk);
+    HUD.update({mouseX: sk.mouseX, mouseY: sk.mouseY});
   }
 
   //runs every frame of animation
@@ -174,7 +176,7 @@ let sketch = (sk)=>{
     if(currentTime % lastSecond >= 1000){
       // console.log(STATES.state);
       NETWORK.updateServerTimeDiffernce();
-      HUD.update({
+      HUD.debugUpdate({
         FrameRate: frames,
         ScreenSize: sk.windowWidth+", "+sk.windowHeight,
         Ping: NETWORK.ping,
@@ -188,26 +190,6 @@ let sketch = (sk)=>{
     }
 
     HUD.draw();
-
-
-    //draw cross-hair
-    let size = 10;
-    if(CONTROLS.rightClickPressed){
-      sk.ellipse(mouse.x, mouse.y, size*2, size*2);
-    }
-    if(CONTROLS.leftClickPressed){
-      sk.ellipse(mouse.x, mouse.y, size/2, size/2);
-    }
-    sk.stroke(100);
-    sk.line(mouse.x-size, mouse.y, mouse.x+size, mouse.y);
-    sk.line(mouse.x, mouse.y-size, mouse.x, mouse.y+size);
-    sk.textSize(10);
-    sk.textAlign(sk.CENTER);
-    //location on screen
-    sk.text(mouse.x+","+mouse.y,mouse.x, mouse.y-size);
-    //location in world
-    let mouseWorld = CONTROLS.translateScreenLocToWorld(mouse.x, mouse.y);
-    sk.text(mouseWorld.x+","+mouseWorld.y,mouse.x, mouse.y+size);
 
     
   }  //draw

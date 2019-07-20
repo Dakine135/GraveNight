@@ -206,7 +206,7 @@ module.exports = class lighting{
 		let objectsGlowing = {};
 		let listofPoints   = [];
 		if(this.debug){
-			this.HUD.update({
+			this.HUD.debugUpdate({
 		        lightPoints: this.lightPoints,
 		        ObjectsInRangeLighting: Object.keys(objectsInRange).length
 		    });
