@@ -74,14 +74,14 @@ module.exports = class HUD{
 	    this.render.moveTo(this.mouseX, this.mouseY-size);
 	    this.render.lineTo(this.mouseX, this.mouseY+size);
 	    this.render.stroke();
-	    this.render.font = "10px Arial";
+	    this.render.font = size+"px Arial";
 		this.render.strokeStyle = "white";
 		this.render.textAlign = "center";
 	    //location on screen
 	    this.render.fillText(this.mouseX+","+this.mouseY, this.mouseX, this.mouseY-size);
 	    //location in world
 	    let mouseWorld = this.CONTROLS.translateScreenLocToWorld(this.mouseX, this.mouseY);
-	    this.render.fillText(mouseWorld.x+","+mouseWorld.y, this.mouseX, this.mouseY+size);
+	    this.render.fillText(mouseWorld.x+","+mouseWorld.y, this.mouseX, this.mouseY+(size*2));
 	    this.render.restore();
 		
 	}//draw

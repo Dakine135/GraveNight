@@ -186,7 +186,7 @@ module.exports = class lighting{
 		//setup variables for loop and such
 		let widthOfCone    = Math.PI*0.5; //maybe scale on intensity somehow
 		// let increment      = widthOfCone/this.precision;
-		let increment      = 0.1;
+		let increment      = 0.5;
 		let blockedLimit   = 0; //this is to keep track and 
 		                        //dont make points at corners that are behind other blocks
 		let startAngle     = angle - (widthOfCone/2);
@@ -203,6 +203,12 @@ module.exports = class lighting{
 										y: originP.y},
 								angle: angle
 							});
+		let endPoint       = this.CAMERA.rotatePoint({
+								center: originP,
+								point: {x: originP.x+intensity,
+										y: originP.y},
+								angle: endAngle
+							});
 		let objectsGlowing = {};
 		let listofPoints   = [];
 		if(this.debug){
@@ -216,9 +222,12 @@ module.exports = class lighting{
 	    listofPoints = this.getLightPoints({
 	    	width:     widthOfCone,
 	    	origin:    originP,
-	    	point:     middlePoint,
+	    	// point:     middlePoint,
 	    	startPoint:startPoint,
-	    	mainWidth: widthOfCone,
+	    	endPoint:  endPoint,
+	    	mainStartPoint: startPoint,
+	    	// startAngle:startAngle,
+	    	// endAngle:  (startAngle+widthOfCone),
 	    	increment: increment,
 	    	intensity: intensity,
 	    	objects:   objectsInRange
@@ -429,20 +438,20 @@ module.exports = class lighting{
 
 	}//drawLightCone
 
-	getLightPoints({width, origin, point, startPoint, mainWidth, 
-		increment, intensity, objects, progressCCW=0, progressCW=0}){
+	getLightPoints({width, origin, startPoint, endPoint, mainStartPoint,
+		increment, intensity, objects}){
 		
-		// let middleP = this.CAMERA.rotatePoint({
-		// 						center: origin,
-		// 						point: point,
-		// 						angle: width/2
-		// 					});
-		point.angle = this.calculateAngle({
-								point1: point,
-								point2: startPoint,
-								centerPoint: origin,
-								width: width
+		let middleP = this.CAMERA.rotatePoint({
+								center: origin,
+								point: startPoint,
+								angle: width/2
 							});
+		// point.angle = this.calculateAngle({
+		// 						point1: point,
+		// 						point2: startPoint,
+		// 						centerPoint: origin,
+		// 						width: width
+		// 					});
 		
 		let pointsToReturn = [];
 		//get point collision
@@ -452,22 +461,22 @@ module.exports = class lighting{
 		let closestDist = Infinity;
 		//for object glow
 		let closestObj = null;
-		// for(var id in objects){
-		// 	let object = objects[id];
-		// 	let collision = this.getIntersection(object.hitbox, {x1: origin.x,  y1: origin.y,
-		// 												         x2: point.x,   y2: point.y});
-		// 	if(collision){
-		// 		let dist = Utilities.dist(collision.point, origin);
-		// 		if(closestDist > dist){
-		// 			closestObj = object;
-		// 			closestDist = dist;
-		// 			closestCollision = collision.point;
-		// 			closestSegment = collision.line;
-		// 		}
-		// 	}
-		// }//for objects in range
+		for(var id in objects){
+			let object = objects[id];
+			let collision = this.getIntersection(object.hitbox, {x1: origin.x,  y1: origin.y,
+														         x2: middleP.x,   y2: middleP.y});
+			if(collision){
+				let dist = Utilities.dist(collision.point, origin);
+				if(closestDist > dist){
+					closestObj = object;
+					closestDist = dist;
+					closestCollision = collision.point;
+					closestSegment = collision.line;
+				}
+			}
+		}//for objects in range
 
-		if(false){ //closestCollision
+		if(closestCollision){
 			//calculate "lost" intensity
 			// let lostIntensity = (intensity - closestDist);
 			// if(objectsGlowing[closestObj.id] == null){
@@ -482,40 +491,128 @@ module.exports = class lighting{
 			// }
 
 			//make points at the corners of the box
-			// let point1 = {x: closestSegment.x1, y: closestSegment.y1};
-			// let point2 = {x: closestSegment.x2, y: closestSegment.y2};
-			// let angleCollisionToPoint1 = Utilities.calculateAngle({
-			// 								point1:startPoint, 
-			// 								point2: point1,
-			// 								centerPoint:originP});
-			// let angleCollisionToPoint2 = Utilities.calculateAngle({
-			// 								point1:startPoint, 
-			// 								point2: point2,
-			// 							    centerPoint:originP});
-			// if(angleCollisionToPoint1 < 0) 
-			// 	angleCollisionToPoint1 = angleCollisionToPoint1 + Math.PI*2;
-			// if(angleCollisionToPoint2 < 0 && angleCollisionToPoint2 < -5) 
-			// 	angleCollisionToPoint2 = angleCollisionToPoint2 + Math.PI*2;
+			let point1 = {x: closestSegment.x1, y: closestSegment.y1};
+			let point2 = {x: closestSegment.x2, y: closestSegment.y2};
+			let angleCollisionToPoint1 = this.calculateAngle({
+											point1: mainStartPoint, 
+											point2: point1,
+											centerPoint:origin,
+											width});
+			let angleCollisionToPoint2 = this.calculateAngle({
+											point1: mainStartPoint, 
+											point2: point2,
+										    centerPoint:origin,
+										    width});
 
-			// //add points at the corners if within cone
-			// if(angleCollisionToPoint1 < widthOfCone &&
-			//    angleCollisionToPoint1 > blockedLimit){
-			// 	point1 = this.CAMERA.translate(point1);
-			// 	point1.color = "green"; //for debug
-			// 	point1.angle = angleCollisionToPoint1;
-			// 	listofPoints.push(point1);
-			// }
-			// if(angleCollisionToPoint2 < widthOfCone &&
-			//    angleCollisionToPoint2 > blockedLimit){
-			// 	point2 = this.CAMERA.translate(point2);
-			// 	point2.color = "green"; //for debug
-			// 	point2.angle = angleCollisionToPoint2;
-			// 	listofPoints.push(point2);
-			// }
-			// if(angleCollisionToPoint1 > angleCollisionToPoint2){
-			// 	blockedLimit = angleCollisionToPoint1;
-			// } else blockedLimit = angleCollisionToPoint2;
-			// i=blockedLimit+0.01;
+			let middleCW;
+			let middleCCW;
+			if(angleCollisionToPoint1 > angleCollisionToPoint2){
+				middleCW  = point1;
+				middleCCW = point2;
+			} else {
+				middleCW  = point2;
+				middleCCW = point1;
+			}
+
+			let pointsCW = [];
+			let pointsCCW = [];
+			if(width > increment*3){ //collision split
+				//ClockWise Side
+				let nextCWStart = this.CAMERA.rotatePoint({
+								center: origin,
+								point:  middleCW,
+								angle:  0.05
+							});
+				let nextWidth = this.calculateAngle({
+											point1: nextCWStart, 
+											point2: endPoint,
+										    centerPoint:origin,
+										    width});
+				pointsCW  = this.getLightPoints({
+						    	width:     nextWidth,
+						    	origin:    origin,
+						    	startPoint:nextCWStart,
+						    	endPoint:  endPoint,
+						    	mainStartPoint: mainStartPoint,
+						    	increment: increment,
+						    	intensity: intensity,
+						    	objects:   objects
+						    });
+				let nextCCWEnd = this.CAMERA.rotatePoint({
+								center: origin,
+								point:  middleCCW,
+								angle:  -0.05
+							});
+				nextWidth = this.calculateAngle({
+											point1: startPoint, 
+											point2: nextCCWEnd,
+										    centerPoint:origin,
+										    width});
+				pointsCCW = this.getLightPoints({
+						    	width:     nextWidth,
+						    	origin:    origin,
+						    	startPoint:startPoint,
+						    	endPoint:  nextCCWEnd,
+						    	mainStartPoint: mainStartPoint,
+						    	increment: increment,
+						    	intensity: intensity,
+						    	objects:   objects
+						    });
+			} else {
+				// let edgePointCCW = this.getViewPoint({
+				// 					point: startPoint, 
+				// 					color: "yellow",
+				// 					name: "L",
+				// 					startPoint: mainStartPoint, 
+				// 					origin: origin,
+				// 					width: width
+				// 				});
+				// let edgePointCW = this.getViewPoint({
+				// 					point: endPoint, 
+				// 					color: "yellow",
+				// 					name: "R", 
+				// 					startPoint: mainStartPoint, 
+				// 					origin: origin,
+				// 					width: width
+				// 				});
+				// pointsCW = [edgePointCCW, edgePointCW];
+				
+			}//edge for collision
+
+			//add points at the corners
+			let viewPointCollisionBox1 = this.getViewPoint({
+				point: point1, 
+				color: "green",
+				name: "C",
+				startPoint: mainStartPoint, 
+				origin: origin,
+				width: width
+			});
+			let viewPointCollisionBox2 = this.getViewPoint({
+				point: point2, 
+				color: "green",
+				name: "C",
+				startPoint: mainStartPoint, 
+				origin: origin,
+				width: width
+			});
+			pointsToReturn.push(viewPointCollisionBox1);
+			pointsToReturn.push(viewPointCollisionBox2);
+
+			//for debug, but does no effect
+			let middleViewPointCollision = this.getViewPoint({
+				point: closestCollision, 
+				color: "red",
+				name: "M",
+				startPoint: mainStartPoint, 
+				origin: origin,
+				width: width
+			});
+
+			pointsToReturn = pointsToReturn.concat(pointsCCW);
+			pointsToReturn = pointsToReturn.concat(pointsCW);
+			pointsToReturn.push(middleViewPointCollision);
+			return pointsToReturn;
 
 			// if(this.debug){
 			// 	//draw actual collision point in red
@@ -535,82 +632,78 @@ module.exports = class lighting{
 			let pointsCW = [];
 			let pointsCCW = [];
 			if(width > increment*3){
-				let nextCWpoint = this.CAMERA.rotatePoint({
+				//ClockWise Side
+				let nextCWStart = this.CAMERA.rotatePoint({
 								center: origin,
-								point:  point,
+								point:  middleP,
 								angle:  increment
 							});
-				nextCWpoint.angle = this.calculateAngle({
-								point1: nextCWpoint,
-								point2: startPoint,
-								centerPoint: origin,
-								width: width
-							});
+				// let nextCWEnd = this.CAMERA.rotatePoint({
+				// 				center: origin,
+				// 				point:  endPoint,
+				// 				angle:  increment
+				// 			});
 				pointsCW  = this.getLightPoints({
-						    	width:     ((width - point.angle) - increment),
+						    	width:     ((width/2) - increment),
 						    	origin:    origin,
-						    	point:     nextCWpoint,
-						    	startPoint:startPoint,
+						    	startPoint:nextCWStart,
+						    	endPoint:  endPoint,
+						    	mainStartPoint: mainStartPoint,
 						    	increment: increment,
 						    	intensity: intensity,
 						    	objects:   objects
 						    });
-				// let nextCCWpoint = this.CAMERA.rotatePoint({
-				// 				center: origin,
-				// 				point:  point,
-				// 				angle:  increment
-				// 			});
-				// pointsCCW = this.getLightPoints({
-				// 		    	width:     ((width - point.angle) - increment),
-				// 		    	origin:    origin,
-				// 		    	point:     nextCCWpoint,
-				// 		    	startPoint:startPoint,
-				// 		    	increment: increment,
-				// 		    	intensity: intensity,
-				// 		    	objects:   objects
-				// 		    });
+				let nextCCWEnd = this.CAMERA.rotatePoint({
+								center: origin,
+								point:  middleP,
+								angle:  -increment
+							});
+				pointsCCW = this.getLightPoints({
+						    	width:     ((width/2) - increment),
+						    	origin:    origin,
+						    	startPoint:startPoint,
+						    	endPoint:  nextCCWEnd,
+						    	mainStartPoint: mainStartPoint,
+						    	increment: increment,
+						    	intensity: intensity,
+						    	objects:   objects
+						    });
 			} else {
 				// let edgePointCCW = this.getViewPoint({
-				// 					point: point, 
+				// 					point: startPoint, 
 				// 					color: "yellow",
 				// 					name: "L",
-				// 					startPoint: startPoint, 
+				// 					startPoint: mainStartPoint, 
 				// 					origin: origin,
 				// 					width: width
 				// 				});
-				// let nextCWpoint = this.CAMERA.rotatePoint({
-				// 					center: origin,
-				// 					point: point,
-				// 					angle: width
-				// 				});
 				// let edgePointCW = this.getViewPoint({
-				// 					point: nextCWpoint, 
+				// 					point: endPoint, 
 				// 					color: "yellow",
 				// 					name: "R", 
-				// 					startPoint: startPoint, 
+				// 					startPoint: mainStartPoint, 
 				// 					origin: origin,
 				// 					width: width
 				// 				});
 				// pointsCW = [edgePointCCW, edgePointCW];
-				
 			}
 			
 			let middleViewPoint = this.getViewPoint({
-				point: point, 
+				point: middleP, 
 				color: "yellow",
 				name: "M",
-				startPoint: startPoint, 
+				startPoint: mainStartPoint, 
 				origin: origin,
 				width: width
 			});
 
 
-			pointsToReturn = pointsCW.concat(pointsCCW);
+			pointsToReturn = pointsToReturn.concat(pointsCCW);
+			pointsToReturn = pointsToReturn.concat(pointsCW);
 			pointsToReturn.push(middleViewPoint);
 			return pointsToReturn;
-		}
-		// listofPoints.push(pRotated);
-	}
+		}//no collision
+	} //get Points function
 
 	getViewPoint({point, color, name, startPoint, origin, width}){
 		let pAngle = this.calculateAngle({
