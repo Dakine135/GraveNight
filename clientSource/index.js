@@ -29,7 +29,7 @@ var LIGHTING = {};
 var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
-var FRAMERATE = 60;
+var FRAMERATE = 15;
 var DARKNESS = 0.98; //1 full dark, 0 full light
 var p5Canvas;
 
