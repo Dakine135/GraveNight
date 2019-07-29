@@ -29,7 +29,7 @@ var LIGHTING = {};
 var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
-var FRAMERATE = 15;
+var FRAMERATE = 30;
 var DARKNESS = 0.98; //1 full dark, 0 full light
 var p5Canvas;
 
@@ -168,7 +168,7 @@ let sketch = (sk)=>{
     }//if World has been received from Server
 
     //Lighting Stuff
-    LIGHTING.update();
+    LIGHTING.update(deltaTime);
     LIGHTING.draw(STATES.frameState);
     
 

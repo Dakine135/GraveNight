@@ -31,6 +31,7 @@ module.exports = class lighting{
 		this.canvas.height = this.height;
 		this.debug = debug;
 		this.lightSources = {};
+		this.objectsGlowing = {};
 		this.lightCalculationsLastFrame = 0;
 		this.lightPoints = 0;
 		this.orderPointsCreated = 0;
@@ -56,8 +57,19 @@ module.exports = class lighting{
 		}
 	}//create light source
 
-	update(){
-
+	update(deltaTime){
+		for(var id in this.objectsGlowing){
+			let object = this.objectsGlowing[id];
+			let pointsPerSecond = 50;
+			let loss = pointsPerSecond * (deltaTime/1000);
+			object.intensity -= loss;
+			if(object.intensity <= 0) delete this.objectsGlowing[id];
+		}
+		if(this.debug){
+			this.HUD.debugUpdate({
+		        glowingObjects: Object.keys(this.objectsGlowing).length
+		    });
+		}
 	}//update
 
 	draw(state){
@@ -119,9 +131,58 @@ module.exports = class lighting{
         	});
         }
 
+        //draw glowingObjects
+		// console.log(Object.keys(this.objectsGlowing).length);
+		for(var id in this.objectsGlowing){
+			let objOnScreen = this.CAMERA.translate({x:this.objectsGlowing[id].x,
+													 y:this.objectsGlowing[id].y});
+			let alpha = Utilities.mapNum({
+				input: this.objectsGlowing[id].intensity,
+				start1: 0,
+				end1: 1000,
+				start2: 0,
+				end2: 1
+			});
+			// if(this.objectsGlowing[id].intensity>50) console.log(this.objectsGlowing[id].intensity, "=>", alpha);
+			this.offscreenRender.save();
+			this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
+			this.offscreenRender.fillRect(
+				(objOnScreen.x - 25), 
+				(objOnScreen.y - 25), 
+				50,50);
+			if(this.debug){
+				this.render.fillStyle = "white";
+				this.render.font = "18px Arial";
+				this.render.textAlign = "center";
+				let text = Math.round(this.objectsGlowing[id].intensity);
+				this.render.fillText(text, objOnScreen.x, objOnScreen.y+50);
+			}
+			this.offscreenRender.restore();
+			// this.drawLightPoint(this.objectsGlowing[id]);
+		}// each glowing object
+
         this.render.globalCompositeOperation = "xor";
         this.render.drawImage(this.offscreenCanvas, 0, 0);
 	}//draw
+
+	addGowingObject({
+		intensity,
+		obj
+	}){
+		//TODO technically this is applied per frame and will be effected by frame rate
+		intensity = intensity/10;
+		if(this.objectsGlowing[obj.id] == null){
+			this.objectsGlowing[obj.id] = {
+				x: obj.x,
+				y: obj.y,
+				intensity: intensity
+			};
+		} else {
+			this.objectsGlowing[obj.id].intensity += intensity;
+			if(this.objectsGlowing[obj.id].intensity > 1000) 
+				this.objectsGlowing[obj.id].intensity = 1000;
+		}
+	}//add glowing objects
 
 	drawLightPoint({
 		x, 
@@ -184,7 +245,7 @@ module.exports = class lighting{
 		});
 		
 		//setup variables for loop and such
-		let widthOfCone    = Math.PI*0.5; //maybe scale on intensity somehow
+		let widthOfCone    = Math.PI*0.6; //maybe scale on intensity somehow
 		let startAngle     = angle - (widthOfCone/2);
 		let endAngle       = startAngle + widthOfCone;
 		let startPoint     = this.CAMERA.rotatePoint({
@@ -193,7 +254,6 @@ module.exports = class lighting{
 										y: origin.y},
 								angle: startAngle
 							});
-		let objectsGlowing = {};
 		let listofPoints   = [];
 		if(this.debug){
 			this.HUD.debugUpdate({
@@ -226,45 +286,162 @@ module.exports = class lighting{
 			});
 
 			if(collision.collision){
+				let collisionPoints = [];
 
+				//cascade down CW until you get a miss or hit the end of the cone
+				let collidingCW = true;
+				let nextCWAngle = collision.cwPoint.angle+0.01;
+				if(nextCWAngle > widthOfCone) collidingCW = false;
+				let limit = 0;
+				while(collidingCW && limit<50){
+					limit++;
+					if(limit >= 50) console.log("loop limit reached CW:", nextCWAngle);
+					let nextPoint = this.CAMERA.rotatePoint({
+								center: origin,
+								point: startPoint,
+								angle: nextCWAngle
+							});
+					//get point collision
+					let collisionCW = this.getCollision({
+						objects: objectsInRange, 
+						origin:  origin, 
+						point:   nextPoint, 
+						mainStartPoint: startPoint, 
+						width: widthOfCone
+					});
+					if(collisionCW.collision){
+						//calculate "lost" intensity
+						let lostIntensity = (intensity - collisionCW.dist);
+						this.addGowingObject({obj: collisionCW.object, intensity: lostIntensity});
 
-				//cascade down left and right until you get a miss or hit the end of the cone
+						let viewCollisionPointCW = this.getViewPoint({
+							point: collisionCW.collisionPoint, 
+							color: "green",
+							name: "H",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewCollisionPointCW);
+						let viewPointCollisionBox1 = this.getViewPoint({
+							point: collisionCW.cwPoint, 
+							color: "green",
+							name: "CW",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewPointCollisionBox1);
+						nextCWAngle = collisionCW.cwPoint.angle+0.01;
+						if(nextCWAngle > widthOfCone) collidingCW = false;
+					}// next angle has a collision
+					else{
+						collidingCW = false;
+						nextCWAngle = nextCWAngle + this.precision;
+						let viewPointCW = this.getViewPoint({
+							point: collisionCW.point, 
+							color: "yellow",
+							name: "M",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewPointCW);
+					}//end collision and loop
+				}//CW side of collision while loop
+				i=nextCWAngle;
+				
+
+				//cascade down CCW until you get a miss or hit the end of the cone
+				let collidingCCW = true;
+				let nextCCWAngle = collision.ccwPoint.angle-0.01;
+				if(nextCCWAngle <= 0) collidingCCW = false;
+				limit = 0;
+				while(collidingCCW && limit<50){
+					limit++;
+					if(limit >= 50) console.log("loop limit reached CCW:", nextCCWAngle);
+					let nextPoint = this.CAMERA.rotatePoint({
+								center: origin,
+								point: startPoint,
+								angle: nextCCWAngle
+							});
+					//get point collision
+					let collisionCCW = this.getCollision({
+						objects: objectsInRange, 
+						origin:  origin, 
+						point:   nextPoint, 
+						mainStartPoint: startPoint, 
+						width: widthOfCone
+					});
+					if(collisionCCW.collision){
+						//calculate "lost" intensity
+						let lostIntensity = (intensity - collisionCCW.dist);
+						this.addGowingObject({obj: collisionCCW.object, intensity: lostIntensity});
+			
+						let viewCollisionPointCW = this.getViewPoint({
+							point: collisionCCW.collisionPoint, 
+							color: "green",
+							name: "H",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewCollisionPointCW);
+						let viewPointCollisionBox1 = this.getViewPoint({
+							point: collisionCCW.ccwPoint, 
+							color: "green",
+							name: "CCW",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewPointCollisionBox1);
+						nextCCWAngle = collisionCCW.ccwPoint.angle-0.01;
+						if(nextCCWAngle <= 0) collidingCCW = false;
+					}// next angle has a collision
+					else{
+						collidingCCW = false;
+						let viewPointCCW = this.getViewPoint({
+							point: collisionCCW.point, 
+							color: "yellow",
+							name: "M",
+							startPoint: startPoint, 
+							origin: origin,
+							width: widthOfCone
+						});
+						collisionPoints.push(viewPointCCW);
+					}//end collision and loop
+				}//CW side of collision while loop
 
 
 				//calculate "lost" intensity
 				let lostIntensity = (intensity - collision.dist);
-				if(objectsGlowing[collision.object.id] == null){
-					objectsGlowing[collision.object.id] = {
-						x: collision.object.x,
-						y: collision.object.y,
-						intensity: lostIntensity
-					};
-				} else {
-					objectsGlowing[collision.object.id].intensity += lostIntensity;
-					if(objectsGlowing[collision.object.id].intensity > intensity) 
-						objectsGlowing[collision.object.id].intensity = intensity;
-				}
+				this.addGowingObject({obj: collision.object, intensity: lostIntensity});
 
 
 				//add points at the corners if within cone
-				let viewPointCollisionBox1 = this.getViewPoint({
-					point: collision.cwPoint, 
-					color: "green",
-					name: "CW",
-					startPoint: startPoint, 
-					origin: origin,
-					width: widthOfCone
-				});
-				listofPoints.push(viewPointCollisionBox1);
-				let viewPointCollisionBox2 = this.getViewPoint({
-					point: collision.ccwPoint, 
-					color: "green",
-					name: "CCW",
-					startPoint: startPoint, 
-					origin: origin,
-					width: widthOfCone
-				});
-				listofPoints.push(viewPointCollisionBox2);
+				if(collision.cwPoint.angle <= widthOfCone){
+					let viewPointCollisionBox1 = this.getViewPoint({
+						point: collision.cwPoint, 
+						color: "green",
+						name: "CW",
+						startPoint: startPoint, 
+						origin: origin,
+						width: widthOfCone
+					});
+					collisionPoints.push(viewPointCollisionBox1);
+				}
+				if(collision.ccwPoint.angle >= 0 && collision.collisionPoint.angle > 0){
+					let viewPointCollisionBox2 = this.getViewPoint({
+						point: collision.ccwPoint, 
+						color: "green",
+						name: "CCW",
+						startPoint: startPoint, 
+						origin: origin,
+						width: widthOfCone
+					});
+					collisionPoints.push(viewPointCollisionBox2);
+				}
 
 
 				if(this.debug){
@@ -277,9 +454,9 @@ module.exports = class lighting{
 						origin: origin,
 						width: widthOfCone
 					});
-					listofPoints.push(viewPointCollisionPoint);
+					collisionPoints.push(viewPointCollisionPoint);
 				}
-				// i=collision.cwPoint.angle+0.01;
+				listofPoints = listofPoints.concat(collisionPoints);
 
 			}//closest collision if hit
 			else{
@@ -316,6 +493,7 @@ module.exports = class lighting{
 			this.offscreenRender.lineTo(point.x, point.y);
 			//debug
 			if(this.debug){
+				this.render.save();
 				this.render.strokeStyle = "white";
 				this.render.beginPath();
 				this.render.moveTo(lastPoint.x, lastPoint.y);
@@ -338,6 +516,7 @@ module.exports = class lighting{
 				this.render.fillStyle = "white";
 				this.render.textAlign = "right";
 				this.render.fillText(point.count, point.x-12, point.y);
+				this.render.restore();
 				index++;
 			}
 		}); //for each point
@@ -363,29 +542,6 @@ module.exports = class lighting{
     	this.offscreenRender.fillStyle = gradient;
 		this.offscreenRender.fill();
 		this.offscreenRender.restore();
-
-		//draw glowingObjects
-		// console.log(Object.keys(objectsGlowing).length);
-		for(var id in objectsGlowing){
-			let objOnScreen = this.CAMERA.translate({x:objectsGlowing[id].x,
-													 y:objectsGlowing[id].y});
-			let alpha = Utilities.mapNum({
-				input: objectsGlowing[id].intensity,
-				start1: 0,
-				end1: intensity,
-				start2: 0,
-				end2: 1
-			});
-			// if(objectsGlowing[id].intensity>50) console.log(objectsGlowing[id].intensity, "=>", alpha);
-			this.offscreenRender.save();
-			this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
-			this.offscreenRender.fillRect(
-				(objOnScreen.x - 25), 
-				(objOnScreen.y - 25), 
-				50,50);
-			this.offscreenRender.restore();
-			// this.drawLightPoint(objectsGlowing[id]);
-		}// each glowing object
 
 	}//drawLightCone
 
