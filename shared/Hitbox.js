@@ -26,7 +26,8 @@ exports.create = ({
 		topLeft:     {x: left, y: top},
 		topRight:    {x: right, y: top},
 		bottomLeft:  {x: left, y: bottom},
-		bottomRight: {x: right, y: bottom}
+		bottomRight: {x: right, y: bottom},
+		points:      [{x: left, y: top}, {x: right, y: top}, {x: left, y: bottom}, {x: right, y: bottom}]
 	}
 } //create
 
@@ -44,14 +45,15 @@ function update(obj){
 	let left   = hitbox.x - (hitbox.width/2);
 	let right  = hitbox.x + (hitbox.width/2);
 
-	hitbox.top    = top,
-	hitbox.bottom = bottom,
-	hitbox.left   = left,
-	hitbox.right  = right,
-	hitbox.topLeft     = {x: left, y: top},
-	hitbox.topRight    = {x: right, y: top},
-	hitbox.bottomLeft  = {x: left, y: bottom},
-	hitbox.bottomRight = {x: right, y: bottom}
+	hitbox.top    = top;
+	hitbox.bottom = bottom;
+	hitbox.left   = left;
+	hitbox.right  = right;
+	hitbox.topLeft     = {x: left, y: top};
+	hitbox.topRight    = {x: right, y: top};
+	hitbox.bottomLeft  = {x: left, y: bottom};
+	hitbox.bottomRight = {x: right, y: bottom};
+	hitbox.points      = [hitbox.topLeft, hitbox.topRight, hitbox.bottomLeft, hitbox.bottomRight];
 }
 
 function colliding(obj1, obj2) {

@@ -17,6 +17,19 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
+exports.extendEndPoint = ({startPoint, endPoint, length})=>{
+    let currentlength = Math.sqrt(
+        Math.pow(startPoint.x - endPoint.x, 2.0) + 
+        Math.pow(startPoint.y - endPoint.y, 2.0)
+        );
+    let amount = length - currentlength;
+    let newEndPoint = {
+        x: endPoint.x + (endPoint.x - startPoint.x) / currentlength * amount,
+        y: endPoint.y + (endPoint.y - startPoint.y) / currentlength * amount
+    };
+    return newEndPoint;
+}
+
 function dist(point1, point2){
     let diffX = Math.abs(point1.x - point2.x);
     let diffY = Math.abs(point1.y - point2.y);
