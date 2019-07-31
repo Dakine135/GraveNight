@@ -77,7 +77,7 @@ let sketch = (sk)=>{
       CONTROLS: CONTROLS
     });
     LIGHTING = new Lighting({
-      debug: false,
+      debug: true,
       width: sk.windowWidth, 
       height: sk.windowHeight,
       CONTROLS: CONTROLS,

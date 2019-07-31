@@ -24,8 +24,8 @@ exports.extendEndPoint = ({startPoint, endPoint, length})=>{
         );
     let amount = length - currentlength;
     let newEndPoint = {
-        x: endPoint.x + (endPoint.x - startPoint.x) / currentlength * amount,
-        y: endPoint.y + (endPoint.y - startPoint.y) / currentlength * amount
+        x: endPoint.x + ((endPoint.x - startPoint.x) / currentlength * amount),
+        y: endPoint.y + ((endPoint.y - startPoint.y) / currentlength * amount)
     };
     return newEndPoint;
 }

@@ -18,6 +18,7 @@ module.exports = class lighting{
 		this.width = width;
 		this.height = height;
 		this.darkness=darkness;
+		if(debug) this.darkness = darkness*0.6;
 		this.CONTROLS = CONTROLS;
 		this.CAMERA = CAMERA;
 		this.HUD = HUD;
@@ -170,6 +171,7 @@ module.exports = class lighting{
 		intensity,
 		obj
 	}){
+		if(obj == null) return;
 		//TODO technically this is applied per frame and will be effected by frame rate
 		intensity = intensity/20;
 		if(this.objectsGlowing[obj.id] == null){
@@ -239,6 +241,20 @@ module.exports = class lighting{
 			y: Math.round(y)
 		} 
 		let originPTrans = this.CAMERA.translate(origin);
+
+		let widthOfCone    = Math.PI*0.7; //maybe scale on intensity somehow
+		let startAngle     = angle - (widthOfCone/2);
+		let endAngle       = startAngle + widthOfCone;
+		let startPoint     = this.CAMERA.rotatePoint({
+					center: origin,
+					point: {x: origin.x+intensity, y: origin.y},
+					angle: startAngle
+				});
+		let endPoint     	= this.CAMERA.rotatePoint({
+					center: origin,
+					point: {x: origin.x+intensity, y: origin.y},
+					angle: endAngle
+				});
 		
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
@@ -250,6 +266,35 @@ module.exports = class lighting{
 		});
 
 		let listofPoints = [];
+		//need at least 1
+		let startCollision = this.getCollision({
+			objects: objectsInRange, 
+			origin:  origin, 
+			point:   startPoint
+		});
+		let viewPointStart = this.getViewPoint({
+			point: startCollision.point,
+			edge:  !startCollision.collision,
+			color: (!startCollision.collision ? 'yellow' : 'red'),
+			name: "Start",
+			origin: origin
+		});
+		listofPoints.push(viewPointStart);
+
+		let endCollision = this.getCollision({
+			objects: objectsInRange, 
+			origin:  origin, 
+			point:   endPoint
+		});
+		let viewPointEnd = this.getViewPoint({
+			point: endCollision.point,
+			edge:  !endCollision.collision,
+			color: (!endCollision.collision ? 'yellow' : 'red'),
+			name: "End",
+			origin: origin
+		});
+		listofPoints.push(viewPointEnd);
+
 		
 		let lightCalculations = 0;
 		this.orderPointsCreated = 0;
@@ -268,7 +313,7 @@ module.exports = class lighting{
 				pRotatedCW = Utilities.extendEndPoint({
 					startPoint: origin, 
 					endPoint: pRotatedCW, 
-					length: intensity*2
+					length: intensity
 				});
 				let pRotatedCCW = this.CAMERA.rotatePoint({
 					center: origin,
@@ -278,7 +323,7 @@ module.exports = class lighting{
 				pRotatedCCW = Utilities.extendEndPoint({
 					startPoint: origin, 
 					endPoint: pRotatedCCW, 
-					length: intensity*2
+					length: intensity
 				});
 
 				let collisionCW = this.getCollision({
@@ -303,13 +348,15 @@ module.exports = class lighting{
 
 				let viewPointCW = this.getViewPoint({
 					point: collisionCW.point,
-					color: "yellow",
+					edge:  !collisionCW.collision,
+					color: (!collisionCW.collision ? 'yellow' : 'red'),
 					name: "CW",
 					origin: origin
 				});
 				listofPoints.push(viewPointCW);
 				let viewPoint = this.getViewPoint({
 					point: collision.point, 
+					edge:  !collision.collision,
 					color: "green",
 					name: "P",
 					origin: origin
@@ -317,7 +364,8 @@ module.exports = class lighting{
 				listofPoints.push(viewPoint);
 				let viewPointCCW = this.getViewPoint({
 					point: collisionCCW.point, 
-					color: "yellow",
+					edge:  !collisionCCW.collision,
+					color: (!collisionCCW.collision ? 'yellow' : 'red'),
 					name: "CCW",
 					origin: origin
 				});
@@ -326,246 +374,6 @@ module.exports = class lighting{
 		}
 
 
-
-
-
-
-
-
-
-
-
-		//setup variables for loop and such
-		// let widthOfCone    = Math.PI*0.6; //maybe scale on intensity somehow
-		// let startAngle     = angle - (widthOfCone/2);
-		// let endAngle       = startAngle + widthOfCone;
-		// let startPoint     = this.CAMERA.rotatePoint({
-		// 						center: origin,
-		// 						point: {x: origin.x+intensity,
-		// 								y: origin.y},
-		// 						angle: startAngle
-		// 					});
-		
-		// if(this.debug){
-		// 	this.HUD.debugUpdate({
-		//         lightPoints: this.lightPoints,
-		//         ObjectsInRangeLighting: Object.keys(objectsInRange).length
-		//     });
-		// }
-	 //    let lightCalculations = 0;
-	 //    this.orderPointsCreated = 0;
-
-
-		// for(var i=0; i<=widthOfCone; i=i){
-		// 	lightCalculations++;
-
-		// 	//current point/angle we are checking
-		// 	//like in individual light beam
-		// 	let pRotated = this.CAMERA.rotatePoint({
-		// 						center: origin,
-		// 						point: startPoint,
-		// 						angle: i
-		// 					});
-
-		// 	//get point collision
-		// 	let collision = this.getCollision({
-		// 		objects: objectsInRange, 
-		// 		origin:  origin, 
-		// 		point:   pRotated, 
-		// 		mainStartPoint: startPoint, 
-		// 		width: widthOfCone
-		// 	});
-
-		// 	if(collision.collision){
-		// 		let collisionPoints = [];
-
-		// 		//cascade down CW until you get a miss or hit the end of the cone
-		// 		let collidingCW = true;
-		// 		let nextCWAngle = collision.cwPoint.angle+0.01;
-		// 		if(nextCWAngle > widthOfCone) collidingCW = false;
-		// 		let limit = 0;
-		// 		while(collidingCW && limit<50){
-		// 			limit++;
-		// 			if(limit >= 50) console.log("loop limit reached CW:", nextCWAngle);
-		// 			let nextPoint = this.CAMERA.rotatePoint({
-		// 						center: origin,
-		// 						point: startPoint,
-		// 						angle: nextCWAngle
-		// 					});
-		// 			//get point collision
-		// 			let collisionCW = this.getCollision({
-		// 				objects: objectsInRange, 
-		// 				origin:  origin, 
-		// 				point:   nextPoint, 
-		// 				mainStartPoint: startPoint, 
-		// 				width: widthOfCone
-		// 			});
-		// 			if(collisionCW.collision){
-		// 				//calculate "lost" intensity
-		// 				let lostIntensity = (intensity - collisionCW.dist);
-		// 				this.addGowingObject({obj: collisionCW.object, intensity: lostIntensity});
-
-		// 				let viewCollisionPointCW = this.getViewPoint({
-		// 					point: collisionCW.collisionPoint, 
-		// 					color: "green",
-		// 					name: "H",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewCollisionPointCW);
-		// 				let viewPointCollisionBox1 = this.getViewPoint({
-		// 					point: collisionCW.cwPoint, 
-		// 					color: "green",
-		// 					name: "CW",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewPointCollisionBox1);
-		// 				nextCWAngle = collisionCW.cwPoint.angle+0.01;
-		// 				if(nextCWAngle > widthOfCone) collidingCW = false;
-		// 			}// next angle has a collision
-		// 			else{
-		// 				collidingCW = false;
-		// 				nextCWAngle = nextCWAngle + this.precision;
-		// 				let viewPointCW = this.getViewPoint({
-		// 					point: collisionCW.point, 
-		// 					color: "yellow",
-		// 					name: "M",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewPointCW);
-		// 			}//end collision and loop
-		// 		}//CW side of collision while loop
-		// 		i=nextCWAngle;
-				
-
-		// 		//cascade down CCW until you get a miss or hit the end of the cone
-		// 		let collidingCCW = true;
-		// 		let nextCCWAngle = collision.ccwPoint.angle-0.01;
-		// 		if(nextCCWAngle <= 0) collidingCCW = false;
-		// 		limit = 0;
-		// 		while(collidingCCW && limit<10){
-		// 			limit++;
-		// 			if(limit >= 10) console.log("loop limit reached CCW:", nextCCWAngle);
-		// 			let nextPoint = this.CAMERA.rotatePoint({
-		// 						center: origin,
-		// 						point: startPoint,
-		// 						angle: nextCCWAngle
-		// 					});
-		// 			//get point collision
-		// 			let collisionCCW = this.getCollision({
-		// 				objects: objectsInRange, 
-		// 				origin:  origin, 
-		// 				point:   nextPoint, 
-		// 				mainStartPoint: startPoint, 
-		// 				width: widthOfCone
-		// 			});
-		// 			if(collisionCCW.collision){
-		// 				//calculate "lost" intensity
-		// 				let lostIntensity = (intensity - collisionCCW.dist);
-		// 				this.addGowingObject({obj: collisionCCW.object, intensity: lostIntensity});
-			
-		// 				let viewCollisionPointCW = this.getViewPoint({
-		// 					point: collisionCCW.collisionPoint, 
-		// 					color: "green",
-		// 					name: "H",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewCollisionPointCW);
-		// 				let viewPointCollisionBox1 = this.getViewPoint({
-		// 					point: collisionCCW.ccwPoint, 
-		// 					color: "green",
-		// 					name: "CCW",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewPointCollisionBox1);
-		// 				nextCCWAngle = collisionCCW.ccwPoint.angle-0.01;
-		// 				if(nextCCWAngle <= 0) collidingCCW = false;
-		// 			}// next angle has a collision
-		// 			else{
-		// 				collidingCCW = false;
-		// 				let viewPointCCW = this.getViewPoint({
-		// 					point: collisionCCW.point, 
-		// 					color: "yellow",
-		// 					name: "M",
-		// 					startPoint: startPoint, 
-		// 					origin: origin,
-		// 					width: widthOfCone
-		// 				});
-		// 				collisionPoints.push(viewPointCCW);
-		// 			}//end collision and loop
-		// 		}//CW side of collision while loop
-
-
-		// 		//calculate "lost" intensity
-		// 		let lostIntensity = (intensity - collision.dist);
-		// 		this.addGowingObject({obj: collision.object, intensity: lostIntensity});
-
-
-		// 		//add points at the corners if within cone
-		// 		if(collision.cwPoint.angle <= widthOfCone){
-		// 			let viewPointCollisionBox1 = this.getViewPoint({
-		// 				point: collision.cwPoint, 
-		// 				color: "green",
-		// 				name: "CW",
-		// 				startPoint: startPoint, 
-		// 				origin: origin,
-		// 				width: widthOfCone
-		// 			});
-		// 			collisionPoints.push(viewPointCollisionBox1);
-		// 		}
-		// 		if(collision.ccwPoint.angle >= 0 && collision.collisionPoint.angle > 0){
-		// 			let viewPointCollisionBox2 = this.getViewPoint({
-		// 				point: collision.ccwPoint, 
-		// 				color: "green",
-		// 				name: "CCW",
-		// 				startPoint: startPoint, 
-		// 				origin: origin,
-		// 				width: widthOfCone
-		// 			});
-		// 			collisionPoints.push(viewPointCollisionBox2);
-		// 		}
-
-
-		// 		if(this.debug){
-		// 			//draw actual collision point in red
-		// 			let viewPointCollisionPoint = this.getViewPoint({
-		// 				point: collision.collisionPoint, 
-		// 				color: "red",
-		// 				name: "H",
-		// 				startPoint: startPoint, 
-		// 				origin: origin,
-		// 				width: widthOfCone
-		// 			});
-		// 			collisionPoints.push(viewPointCollisionPoint);
-		// 		}
-		// 		listofPoints = listofPoints.concat(collisionPoints);
-
-		// 	}//closest collision if hit
-		// 	else{
-		// 		let viewPoint = this.getViewPoint({
-		// 			point: pRotated, 
-		// 			color: "yellow",
-		// 			name: "M",
-		// 			startPoint: startPoint, 
-		// 			origin: origin,
-		// 			width: widthOfCone
-		// 		});
-		// 		listofPoints.push(viewPoint);
-		// 		if(i != widthOfCone && (i+this.precision) > widthOfCone) i = widthOfCone;
-		// 		else i=i+this.precision;
-
-		// 	}
-			
-		// }//for every light beam
 		this.lightCalculationsLastFrame = lightCalculations;
 
 		listofPoints.sort((a,b)=>{
@@ -583,18 +391,26 @@ module.exports = class lighting{
 		this.offscreenRender.beginPath();
 		// this.offscreenRender.moveTo(originPTrans.x, originPTrans.y);
 		let index = 0; //debug
-		let lastPoint = listofPoints[0]; //debug
+		let lastPoint = listofPoints[0];
 		listofPoints.forEach((point)=>{
-			this.offscreenRender.lineTo(point.x, point.y);
+			if(lastPoint.edge && point.edge){
+				//curve instead of line
+				this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 
+						lastPoint.angle, point.angle);
+			} else{
+				this.offscreenRender.lineTo(point.x, point.y);
+			}
 			//debug
 			if(this.debug){
 				this.render.save();
 				this.render.strokeStyle = "white";
-				this.render.beginPath();
-				this.render.moveTo(lastPoint.x, lastPoint.y);
-				this.render.lineTo(point.x, point.y);
-				lastPoint = point;
-				this.render.closePath();
+				if(lastPoint.edge && point.edge){
+					this.render.arc(originPTrans.x, originPTrans.y, intensity, 
+						lastPoint.angle, point.angle);
+				} else {
+					this.render.moveTo(lastPoint.x, lastPoint.y);
+					this.render.lineTo(point.x, point.y);
+				}
 				this.render.stroke();
 				this.render.fillStyle = point.color;
 				this.render.beginPath();
@@ -605,28 +421,44 @@ module.exports = class lighting{
 				this.render.font = "12px Arial";
 				this.render.textAlign = "center"; 
 				this.render.fillText(index, point.x, point.y);
-				this.render.fillStyle = "white";
-				this.render.textAlign = "left";
-				this.render.fillText(point.name+Math.round(point.angle*100)/100, point.x+12, point.y);
+				if(point.color == 'yellow'){
+					this.render.fillStyle = "white";
+					this.render.textAlign = "left";
+					this.render.fillText(point.name+Math.round(point.angle*100)/100, point.x+12, point.y);
+				}
 				this.render.fillStyle = "white";
 				this.render.textAlign = "right";
 				this.render.fillText(point.count, point.x-12, point.y);
 				this.render.restore();
 				index++;
 			}
+			lastPoint = point;
 		}); //for each point
 		//debug
-		// if(this.debug){
-		// 	this.render.strokeStyle = "white";
-		// 	this.render.beginPath();
-		// 	this.render.moveTo(lastPoint.x, lastPoint.y);
-		// 	this.render.lineTo(originPTrans.x, originPTrans.y);
-		// 	this.render.closePath();
-		// 	this.render.stroke();
-		// }
+		if(this.debug && listofPoints.length>0){
+			this.render.strokeStyle = "white";
+			this.render.beginPath();
+			if(lastPoint.edge && listofPoints[0].edge){
+				this.render.arc(originPTrans.x, originPTrans.y, intensity, 
+					lastPoint.angle, listofPoints[0].angle);
+			} else {
+				this.render.moveTo(lastPoint.x, lastPoint.y);
+				this.render.lineTo(listofPoints[0].x, listofPoints[0].y);
+			}
+			this.render.stroke();
+		}
+
+		if(lastPoint.edge && listofPoints[0].edge){
+			//curve instead of line
+			this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 
+				lastPoint.angle, listofPoints[0].angle);
+		} else{
+			this.offscreenRender.moveTo(lastPoint.x, lastPoint.y);
+			this.offscreenRender.lineTo(listofPoints[0].x, listofPoints[0].y);
+		}
 
 		this.offscreenRender.closePath();
-		// the fill color
+		// the fill gradient for cone
 		let gradient = this.offscreenRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity);
@@ -636,17 +468,52 @@ module.exports = class lighting{
     	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
     	this.offscreenRender.fillStyle = gradient;
 		this.offscreenRender.fill();
+		//fill outside of cone with black
+		let viewPointStartBlackout = this.getViewPoint({
+			point: startPoint,
+			edge:  true,
+			color: 'black',
+			name: "Black",
+			origin: origin
+		});
+		let viewPointEndBlackout = this.getViewPoint({
+			point: endPoint,
+			edge:  true,
+			color: 'black',
+			name: "Black",
+			origin: origin
+		});
+		this.offscreenRender.beginPath();
+		this.offscreenRender.moveTo(viewPointEndBlackout.x, viewPointEndBlackout.y);
+		this.offscreenRender.lineTo(originPTrans.x, originPTrans.y);
+		this.offscreenRender.lineTo(viewPointStartBlackout.x, viewPointStartBlackout.y);
+		this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, startAngle, endAngle, true);
+		this.offscreenRender.closePath();
+		this.offscreenRender.fillStyle = "black";
+		this.offscreenRender.globalCompositeOperation = 'destination-out';
+		this.offscreenRender.fill();
+		this.offscreenRender.globalCompositeOperation = "source-over";
+		let restIntensity = intensity*0.5;
+		let gradientRest = this.offscreenRender.createRadialGradient(
+			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
+			originPTrans.x, originPTrans.y, restIntensity);
+    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
+    	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+    	gradientRest.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
+    	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
+    	this.offscreenRender.fillStyle = gradientRest;
+		this.offscreenRender.fill();
 		this.offscreenRender.restore();
 
 	}//drawLightCone
 
-	getViewPoint({point, color, name, origin}){
-		let pAngle = Utilities.calculateAngle({
-										point1: point, 
-										point2: {x: origin.x+1, y:origin.y},
+	getViewPoint({point, edge, color, name, origin}){
+		let pAngle = this.calculateAngle({
+										point1: point,
 									    centerPoint:origin});
 		//translate to point for display
 		let viewPoint = this.CAMERA.translate(point);
+		viewPoint.edge = edge;
 		viewPoint.color = color;
 		viewPoint.angle = pAngle;
 		viewPoint.name = name;
@@ -656,12 +523,13 @@ module.exports = class lighting{
 	}
 
 	calculateAngle({point1, point2=null, centerPoint}){
-		if(point2==null) point2 = {x: centerPoint.x+1, y:centerPoint.y};
+		if(point2==null) point2 = {x: centerPoint.x+10, y:centerPoint.y};
 		let pAngle = Utilities.calculateAngle({
 										point1: point1, 
 										point2: point2,
 									    centerPoint:centerPoint});
 		// if(pAngle < 0) pAngle = pAngle + Math.PI*2;
+		if(pAngle < 0) pAngle = Math.abs(pAngle);
 		// if(pAngle > Math.PI) pAngle = Math.PI - pAngle;
 		// if(pAngle > width) pAngle = Math.PI*2 - pAngle;
 		//Could cause an issue when cone is wider than PI aka 180, maybe?
