@@ -70,7 +70,11 @@ exports.getObjects = ({
 			let objectsInBucket = getBucket(grid, currentX, currentY, bucketSize);
 			for(var id in objectsInBucket){
 				let object = objectsInBucket[id];
-				if(Utilities.dist({x:x, y:y},{x:object.x, y:object.y}) < distance){
+				let buffer = 0;
+				if(object.width) buffer = object.width;
+				if(object.height) buffer = Math.max(buffer, object.height);
+				let range = distance + (buffer/2);
+				if(Utilities.dist({x:x, y:y},{x:object.x, y:object.y}) < range){
 					objectsInRange[id] = object;
 				}
 			}

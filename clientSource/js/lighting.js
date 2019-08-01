@@ -265,7 +265,7 @@ module.exports = class lighting{
 			distance: intensity
 		});
 
-		let listofPoints = [];
+		let listOfPoints = [];
 		//need at least 1
 		let startCollision = this.getCollision({
 			objects: objectsInRange, 
@@ -279,7 +279,7 @@ module.exports = class lighting{
 			name: "Start",
 			origin: origin
 		});
-		listofPoints.push(viewPointStart);
+		listOfPoints.push(viewPointStart);
 
 		let endCollision = this.getCollision({
 			objects: objectsInRange, 
@@ -293,7 +293,7 @@ module.exports = class lighting{
 			name: "End",
 			origin: origin
 		});
-		listofPoints.push(viewPointEnd);
+		listOfPoints.push(viewPointEnd);
 
 		
 		let lightCalculations = 0;
@@ -353,7 +353,7 @@ module.exports = class lighting{
 					name: "CW",
 					origin: origin
 				});
-				listofPoints.push(viewPointCW);
+				listOfPoints.push(viewPointCW);
 				let viewPoint = this.getViewPoint({
 					point: collision.point, 
 					edge:  !collision.collision,
@@ -361,7 +361,7 @@ module.exports = class lighting{
 					name: "P",
 					origin: origin
 				});
-				listofPoints.push(viewPoint);
+				listOfPoints.push(viewPoint);
 				let viewPointCCW = this.getViewPoint({
 					point: collisionCCW.point, 
 					edge:  !collisionCCW.collision,
@@ -369,49 +369,140 @@ module.exports = class lighting{
 					name: "CCW",
 					origin: origin
 				});
-				listofPoints.push(viewPointCCW);
+				listOfPoints.push(viewPointCCW);
 			}.bind(this));
 		}
 
 
 		this.lightCalculationsLastFrame = lightCalculations;
 
-		listofPoints.sort((a,b)=>{
+		this.lightPoints = listOfPoints.length;
+		if(this.debug){
+			this.HUD.debugUpdate({
+		        lightPoints: this.lightPoints,
+		        ObjectsInRangeLighting: Object.keys(objectsInRange).length
+		    });
+		}
+
+		let lineOfSight = this.getLineOfSightPath({
+			listOfPoints:listOfPoints, 
+			origin:      originPTrans, 
+			intensity:   intensity,
+			coneStart:   startAngle,
+			coneEnd:     endAngle
+		});
+
+		// lineOfSight.closePath();
+		// the fill gradient for cone
+		let gradient = this.offscreenRender.createRadialGradient(
+			originPTrans.x, originPTrans.y, (intensity*0.2), 
+			originPTrans.x, originPTrans.y, intensity);
+    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
+    	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+    	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
+    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
+    	this.offscreenRender.fillStyle = gradient;
+		this.offscreenRender.fill(lineOfSight.all);
+	
+		let restIntensity = intensity*0.5;
+		let gradientRest = this.offscreenRender.createRadialGradient(
+			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
+			originPTrans.x, originPTrans.y, restIntensity);
+    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
+    	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+    	gradientRest.addColorStop(0.5,"rgba(255, 255, 255, "+brightness+")");
+    	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
+    	this.offscreenRender.fillStyle = gradientRest;
+		this.offscreenRender.fill(lineOfSight.all);
+		this.offscreenRender.restore();
+
+	}//drawLightCone
+
+	getViewPoint({point, edge, color, name, origin}){
+		let pAngle = this.calculateAngle({
+										point1: point,
+									    centerPoint:origin});
+		//translate to point for display
+		let viewPoint = this.CAMERA.translate(point);
+		viewPoint.edge = edge;
+		viewPoint.color = color;
+		viewPoint.angle = pAngle;
+		viewPoint.name = name;
+		viewPoint.count = this.orderPointsCreated;
+		this.orderPointsCreated++;
+		return viewPoint;
+	}
+
+	/*
+	Returns canvas path of the line of sight polygon, relative to canvas, not world
+	*/
+	getLineOfSightPath({listOfPoints, origin, intensity, coneStart, coneEnd}){
+		listOfPoints.sort((a,b)=>{
 			return a.angle-b.angle;
 		});
 
-		this.lightPoints = listofPoints.length;
-		this.HUD.debugUpdate({
-	        lightPoints: this.lightPoints,
-	        ObjectsInRangeLighting: Object.keys(objectsInRange).length
-	    });
-
-		//draw cone mask with collision
-		this.offscreenRender.save();
-		this.offscreenRender.beginPath();
-		// this.offscreenRender.moveTo(originPTrans.x, originPTrans.y);
+		// create Path of line-of-sight
+		let lineOfSight = {
+			all:      new Path2D(),
+			cone:     new Path2D(),
+			antiCone: new Path2D()
+		};
 		let index = 0; //debug
-		let lastPoint = listofPoints[0];
-		listofPoints.forEach((point)=>{
+		let lastPoint = listOfPoints[0];
+		let lastPointCone = listOfPoints[0];
+		let lastPointAntiCone = listOfPoints[0];
+		let coneStartPoint = null;
+		let coneEndPoint   = null;
+
+		let coneCrossesZero = coneStart > coneEnd;
+		//run through all points
+		listOfPoints.forEach((point)=>{
+			if(point.name === "Start"){
+				coneStartPoint = point;
+				// lastPointCone = point;
+				// lastPointAntiCone = point;
+			} 
+			if(point.name === "End"){
+				coneEndPoint   = point;
+				// lastPointCone = point;
+				// lastPointAntiCone = point;
+			}   
+
+			let pointInCone = false;
+			if(coneCrossesZero){
+				pointInCone = (coneStart < point.angle || point.angle < coneEnd);
+			} else {
+				pointInCone = (coneStart < point.angle && point.angle < coneEnd);
+			}
+
+			//main draw from point to point
 			if(lastPoint.edge && point.edge){
 				//curve instead of line
-				this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 
-						lastPoint.angle, point.angle);
+				lineOfSight.all.arc(origin.x, origin.y, intensity, lastPoint.angle, point.angle);
 			} else{
-				this.offscreenRender.lineTo(point.x, point.y);
+				lineOfSight.all.lineTo(point.x, point.y);
 			}
+
+			//for cone and antiCone draw from point to point
+			if(pointInCone){
+				if(lastPointCone && lastPointCone.edge && point.edge){
+					//curve instead of line
+					lineOfSight.cone.arc(origin.x, origin.y, intensity, lastPointCone.angle, point.angle);
+				} else{
+					lineOfSight.cone.lineTo(point.x, point.y);
+				}
+			} else { //point not in Cone
+				// if(lastPointAntiCone && lastPointAntiCone.edge && point.edge){
+				// 	//curve instead of line
+				// 	lineOfSight.antiCone.arc(origin.x, origin.y, intensity, lastPointAntiCone.angle, point.angle);
+				// } else{
+				// 	lineOfSight.antiCone.lineTo(point.x, point.y);
+				// }
+			} //end point not in cone
+
 			//debug
 			if(this.debug){
 				this.render.save();
-				this.render.strokeStyle = "white";
-				if(lastPoint.edge && point.edge){
-					this.render.arc(originPTrans.x, originPTrans.y, intensity, 
-						lastPoint.angle, point.angle);
-				} else {
-					this.render.moveTo(lastPoint.x, lastPoint.y);
-					this.render.lineTo(point.x, point.y);
-				}
-				this.render.stroke();
 				this.render.fillStyle = point.color;
 				this.render.beginPath();
 				this.render.arc(point.x, point.y, 10, 0, 2*Math.PI);
@@ -433,94 +524,54 @@ module.exports = class lighting{
 				index++;
 			}
 			lastPoint = point;
+			if(pointInCone) lastPointCone = point;
+			else lastPointAntiCone = point;
 		}); //for each point
-		//debug
-		if(this.debug && listofPoints.length>0){
-			this.render.strokeStyle = "white";
-			this.render.beginPath();
-			if(lastPoint.edge && listofPoints[0].edge){
-				this.render.arc(originPTrans.x, originPTrans.y, intensity, 
-					lastPoint.angle, listofPoints[0].angle);
-			} else {
-				this.render.moveTo(lastPoint.x, lastPoint.y);
-				this.render.lineTo(listofPoints[0].x, listofPoints[0].y);
-			}
-			this.render.stroke();
-		}
 
-		if(lastPoint.edge && listofPoints[0].edge){
+		//complete path from first and last point
+		if(lastPoint.edge && listOfPoints[0].edge){
 			//curve instead of line
-			this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 
-				lastPoint.angle, listofPoints[0].angle);
+			lineOfSight.all.arc(origin.x, origin.y, intensity, lastPoint.angle, listOfPoints[0].angle);
 		} else{
-			this.offscreenRender.moveTo(lastPoint.x, lastPoint.y);
-			this.offscreenRender.lineTo(listofPoints[0].x, listofPoints[0].y);
+			lineOfSight.all.moveTo(lastPoint.x, lastPoint.y);
+			lineOfSight.all.lineTo(listOfPoints[0].x, listOfPoints[0].y);
 		}
 
-		this.offscreenRender.closePath();
-		// the fill gradient for cone
-		let gradient = this.offscreenRender.createRadialGradient(
-			originPTrans.x, originPTrans.y, (intensity*0.2), 
-			originPTrans.x, originPTrans.y, intensity);
-    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
-    	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-    	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
-    	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
-    	this.offscreenRender.fillStyle = gradient;
-		this.offscreenRender.fill();
-		//fill outside of cone with black
-		let viewPointStartBlackout = this.getViewPoint({
-			point: startPoint,
-			edge:  true,
-			color: 'black',
-			name: "Black",
-			origin: origin
-		});
-		let viewPointEndBlackout = this.getViewPoint({
-			point: endPoint,
-			edge:  true,
-			color: 'black',
-			name: "Black",
-			origin: origin
-		});
-		this.offscreenRender.beginPath();
-		this.offscreenRender.moveTo(viewPointEndBlackout.x, viewPointEndBlackout.y);
-		this.offscreenRender.lineTo(originPTrans.x, originPTrans.y);
-		this.offscreenRender.lineTo(viewPointStartBlackout.x, viewPointStartBlackout.y);
-		this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, startAngle, endAngle, true);
-		this.offscreenRender.closePath();
-		this.offscreenRender.fillStyle = "black";
-		this.offscreenRender.globalCompositeOperation = 'destination-out';
-		this.offscreenRender.fill();
-		this.offscreenRender.globalCompositeOperation = "source-over";
-		let restIntensity = intensity*0.5;
-		let gradientRest = this.offscreenRender.createRadialGradient(
-			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
-			originPTrans.x, originPTrans.y, restIntensity);
-    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
-    	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-    	gradientRest.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
-    	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
-    	this.offscreenRender.fillStyle = gradientRest;
-		this.offscreenRender.fill();
-		this.offscreenRender.restore();
+		//complete paths cone and antiCone
+		if(coneCrossesZero){
 
-	}//drawLightCone
+		} else { // doesnt cross zero
+			if(lastPointCone.edge && coneEndPoint.edge){
+				lineOfSight.cone.arc(origin.x, origin.y, intensity, lastPointCone.angle, coneEndPoint.angle);
+			} else {
+				lineOfSight.cone.moveTo(lastPointCone.x, lastPointCone.y);
+				lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
+			}
+		}//end doesn't cross zero
 
-	getViewPoint({point, edge, color, name, origin}){
-		let pAngle = this.calculateAngle({
-										point1: point,
-									    centerPoint:origin});
-		//translate to point for display
-		let viewPoint = this.CAMERA.translate(point);
-		viewPoint.edge = edge;
-		viewPoint.color = color;
-		viewPoint.angle = pAngle;
-		viewPoint.name = name;
-		viewPoint.count = this.orderPointsCreated;
-		this.orderPointsCreated++;
-		return viewPoint;
-	}
+		//last bit of cone, inward towards origin
+		if(coneCrossesZero){
+			lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
+			lineOfSight.cone.lineTo(origin.x, origin.y);
+			lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
+		} else {
+			lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
+			lineOfSight.cone.lineTo(origin.x, origin.y);
+			lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
+		}
+
+		// lineOfSight.antiCone.moveTo(coneEndPoint.x, coneEndPoint.y);
+		// lineOfSight.antiCone.lineTo(origin.x, origin.y);
+		// lineOfSight.antiCone.lineTo(coneStartPoint.x, coneStartPoint.y);
+
+		if(this.debug){
+			this.render.strokeStyle = "blue";
+			this.render.stroke(lineOfSight.cone);
+			this.render.strokeStyle = "red";
+			this.render.stroke(lineOfSight.antiCone);
+		}
+		return lineOfSight;
+	}//getLineOfSightPath
 
 	calculateAngle({point1, point2=null, centerPoint}){
 		if(point2==null) point2 = {x: centerPoint.x+10, y:centerPoint.y};
