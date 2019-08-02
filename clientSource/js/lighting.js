@@ -248,7 +248,9 @@ module.exports = class lighting{
 
 		let widthOfCone    = Math.PI*0.7; //maybe scale on intensity somehow
 		let startAngle     = angle - (widthOfCone/2);
+		if(startAngle < 0) startAngle = startAngle + Math.PI*2;
 		let endAngle       = startAngle + widthOfCone;
+		if(endAngle > Math.PI*2) endAngle = endAngle - Math.PI*2;
 		let startPoint     = this.CAMERA.rotatePoint({
 					center: origin,
 					point: {x: origin.x+intensity, y: origin.y},
@@ -259,6 +261,13 @@ module.exports = class lighting{
 					point: {x: origin.x+intensity, y: origin.y},
 					angle: endAngle
 				});
+
+		if(this.debug){
+			this.HUD.debugUpdate({
+		        startAngle: startAngle,
+		        endAngle: endAngle
+		    });
+		}
 		
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
@@ -406,7 +415,7 @@ module.exports = class lighting{
     	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
     	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
     	this.offscreenRender.fillStyle = gradient;
-		this.offscreenRender.fill(lineOfSight.all);
+		this.offscreenRender.fill(lineOfSight.cone);
 	
 		let restIntensity = intensity*0.5;
 		let gradientRest = this.offscreenRender.createRadialGradient(
@@ -417,7 +426,7 @@ module.exports = class lighting{
     	gradientRest.addColorStop(0.5,"rgba(255, 255, 255, "+brightness+")");
     	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
     	this.offscreenRender.fillStyle = gradientRest;
-		this.offscreenRender.fill(lineOfSight.all);
+		this.offscreenRender.fill(lineOfSight.antiCone);
 		this.offscreenRender.restore();
 
 	}//drawLightCone
@@ -459,6 +468,11 @@ module.exports = class lighting{
 		let coneEndPoint   = null;
 
 		let coneCrossesZero = coneStart > coneEnd;
+		if(this.debug){
+			this.HUD.debugUpdate({
+		        coneCrossesZero: coneCrossesZero
+		    });
+		}
 		//run through all points
 		listOfPoints.forEach((point)=>{
 			if(point.name === "Start"){
@@ -474,9 +488,9 @@ module.exports = class lighting{
 
 			let pointInCone = false;
 			if(coneCrossesZero){
-				pointInCone = (coneStart > point.angle || point.angle < coneEnd);
+				pointInCone = ((coneStart < point.angle) || (point.angle < coneEnd));
 			} else {
-				pointInCone = (coneStart < point.angle && point.angle < coneEnd);
+				pointInCone = ((coneStart < point.angle) && (point.angle < coneEnd));
 			}
 
 			//main draw from point to point
@@ -556,15 +570,15 @@ module.exports = class lighting{
 		}//end doesn't cross zero
 
 		//last bit of cone, inward towards origin
-		if(coneCrossesZero){
-			lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
-			lineOfSight.cone.lineTo(origin.x, origin.y);
-			lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
-		} else {
-			lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
-			lineOfSight.cone.lineTo(origin.x, origin.y);
-			lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
-		}
+		// if(coneCrossesZero){
+		// 	lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
+		// 	lineOfSight.cone.lineTo(origin.x, origin.y);
+		// 	lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
+		// } else {
+		// 	lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
+		// 	lineOfSight.cone.lineTo(origin.x, origin.y);
+		// 	lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
+		// }
 
 		// lineOfSight.antiCone.moveTo(coneEndPoint.x, coneEndPoint.y);
 		// lineOfSight.antiCone.lineTo(origin.x, origin.y);
@@ -573,8 +587,8 @@ module.exports = class lighting{
 		if(this.debug){
 			this.render.strokeStyle = "blue";
 			this.render.stroke(lineOfSight.cone);
-			this.render.strokeStyle = "red";
-			this.render.stroke(lineOfSight.antiCone);
+			// this.render.strokeStyle = "red";
+			// this.render.stroke(lineOfSight.antiCone);
 		}
 		return lineOfSight;
 	}//getLineOfSightPath
