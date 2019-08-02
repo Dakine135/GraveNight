@@ -30,7 +30,8 @@ var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
-var DARKNESS = 0.98; //1 full dark, 0 full light
+var DARKNESS = 0.95; //1 full dark, 0 full light
+var BRIGHTNESS = 0.95;  //1 full white, 0 no light
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -83,7 +84,8 @@ let sketch = (sk)=>{
       CONTROLS: CONTROLS,
       CAMERA: CAMERA,
       HUD: HUD,
-      darkness: DARKNESS //darkness level 0-1
+      darkness: DARKNESS, //darkness level 0-1
+      brightness: BRIGHTNESS
     });
     LIGHTING.createLightSource({}); //defaults to 0,0
     // LIGHTING.createLightSource({x:500,y:500, size:300});

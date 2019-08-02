@@ -11,6 +11,7 @@ module.exports = class lighting{
 		width=0,
 		height=0,
 		darkness=0.9,
+		brightness=0.9,
 		CAMERA=null,
 		HUD=null,
 		CONTROLS=null
@@ -18,7 +19,11 @@ module.exports = class lighting{
 		this.width = width;
 		this.height = height;
 		this.darkness=darkness;
-		if(debug) this.darkness = darkness*0.6;
+		this.brightness=brightness;
+		if(debug){
+			this.darkness = darkness*0.6;
+			this.brightness = brightness*0.5;
+		}
 		this.CONTROLS = CONTROLS;
 		this.CAMERA = CAMERA;
 		this.HUD = HUD;
@@ -121,15 +126,13 @@ module.exports = class lighting{
         	// 	y: player.y, 
         	// 	intensity:(player.energy/2)
         	// });
-        	let brightness = 0.9;
-        	if(this.debug) brightness = 0.5;
         	this.drawLightCone({
         		x: rotatedPoint.x, 
         		y: rotatedPoint.y,
         		angle: player.angle, //player.angle
         		intensity:(player.energy*2), 
         		state:state,
-        		brightness: brightness
+        		brightness: this.brightness
         	});
         }
 
@@ -230,7 +233,8 @@ module.exports = class lighting{
 		y,
 		angle,
 		intensity,
-		brightness = 0.9,
+		brightness = this.brightness,
+		darkness   = this.darkness,
 		state
 	}){
 		if(intensity<=0){
@@ -470,7 +474,7 @@ module.exports = class lighting{
 
 			let pointInCone = false;
 			if(coneCrossesZero){
-				pointInCone = (coneStart < point.angle || point.angle < coneEnd);
+				pointInCone = (coneStart > point.angle || point.angle < coneEnd);
 			} else {
 				pointInCone = (coneStart < point.angle && point.angle < coneEnd);
 			}
@@ -503,7 +507,9 @@ module.exports = class lighting{
 			//debug
 			if(this.debug){
 				this.render.save();
-				this.render.fillStyle = point.color;
+				// this.render.fillStyle = point.color;
+				this.render.fillStyle = (pointInCone ? "blue" : "red");
+				if(point.name === "Start" || point.name === "End") this.render.fillStyle = "yellow";
 				this.render.beginPath();
 				this.render.arc(point.x, point.y, 10, 0, 2*Math.PI);
 				this.render.closePath();
