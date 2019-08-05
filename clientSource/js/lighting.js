@@ -462,10 +462,12 @@ module.exports = class lighting{
 		};
 		let index = 0; //debug
 		let lastPoint = listOfPoints[0];
-		let lastPointCone = listOfPoints[0];
-		let lastPointAntiCone = listOfPoints[0];
+		let lastPointCone = null;
+		let lastPointAntiCone = null;
 		let coneStartPoint = null;
 		let coneEndPoint   = null;
+		let crossedEnd = false;
+		let crossedStart = false;
 
 		let coneCrossesZero = coneStart > coneEnd;
 		if(this.debug){
@@ -477,13 +479,11 @@ module.exports = class lighting{
 		listOfPoints.forEach((point)=>{
 			if(point.name === "Start"){
 				coneStartPoint = point;
-				// lastPointCone = point;
-				// lastPointAntiCone = point;
+				crossedStart = true;
 			} 
 			if(point.name === "End"){
 				coneEndPoint   = point;
-				// lastPointCone = point;
-				// lastPointAntiCone = point;
+				crossedEnd = true;
 			}   
 
 			let pointInCone = false;
@@ -518,6 +518,23 @@ module.exports = class lighting{
 				// }
 			} //end point not in cone
 
+
+			//draw lines to origin and to start
+			if(crossedEnd && crossedStart){
+				//last bit of cone, inward towards origin
+				crossedEnd = false;
+				crossedStart = false;
+				if(coneCrossesZero){
+					lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
+					lineOfSight.cone.lineTo(origin.x, origin.y);
+					lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
+				} else {
+					lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
+					lineOfSight.cone.lineTo(origin.x, origin.y);
+					lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
+				}
+			}
+
 			//debug
 			if(this.debug){
 				this.render.save();
@@ -548,6 +565,8 @@ module.exports = class lighting{
 			else lastPointAntiCone = point;
 		}); //for each point
 
+		if(lastPointCone === null) lastPointCone = coneEndPoint;
+
 		//complete path from first and last point
 		if(lastPoint.edge && listOfPoints[0].edge){
 			//curve instead of line
@@ -568,17 +587,6 @@ module.exports = class lighting{
 				lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
 			}
 		}//end doesn't cross zero
-
-		//last bit of cone, inward towards origin
-		// if(coneCrossesZero){
-		// 	lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
-		// 	lineOfSight.cone.lineTo(origin.x, origin.y);
-		// 	lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
-		// } else {
-		// 	lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
-		// 	lineOfSight.cone.lineTo(origin.x, origin.y);
-		// 	lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
-		// }
 
 		// lineOfSight.antiCone.moveTo(coneEndPoint.x, coneEndPoint.y);
 		// lineOfSight.antiCone.lineTo(origin.x, origin.y);
