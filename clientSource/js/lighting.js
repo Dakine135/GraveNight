@@ -21,8 +21,8 @@ module.exports = class lighting{
 		this.darkness=darkness;
 		this.brightness=brightness;
 		if(debug){
-			this.darkness = darkness*0.6;
-			this.brightness = brightness*0.5;
+			this.darkness = darkness*0.7;
+			this.brightness = brightness*0.6;
 		}
 		this.CONTROLS = CONTROLS;
 		this.CAMERA = CAMERA;
@@ -283,7 +283,8 @@ module.exports = class lighting{
 		let startCollision = this.getCollision({
 			objects: objectsInRange, 
 			origin:  origin, 
-			point:   startPoint
+			point:   startPoint,
+			distance:intensity
 		});
 		let viewPointStart = this.getViewPoint({
 			point: startCollision.point,
@@ -297,7 +298,8 @@ module.exports = class lighting{
 		let endCollision = this.getCollision({
 			objects: objectsInRange, 
 			origin:  origin, 
-			point:   endPoint
+			point:   endPoint,
+			distance:intensity
 		});
 		let viewPointEnd = this.getViewPoint({
 			point: endCollision.point,
@@ -342,17 +344,20 @@ module.exports = class lighting{
 				let collisionCW = this.getCollision({
 					objects: objectsInRange, 
 					origin:  origin, 
-					point:   pRotatedCW
+					point:   pRotatedCW,
+					distance:intensity
 				});
 				let collision = this.getCollision({
 					objects: objectsInRange, 
 					origin:  origin, 
-					point:   point
+					point:   point,
+					distance:intensity
 				});
 				let collisionCCW = this.getCollision({
 					objects: objectsInRange, 
 					origin:  origin, 
-					point:   pRotatedCCW
+					point:   pRotatedCCW,
+					distance:intensity
 				});
 
 				//calculate "lost" intensity
@@ -405,29 +410,62 @@ module.exports = class lighting{
 			coneEnd:     endAngle
 		});
 
-		// lineOfSight.closePath();
-		// the fill gradient for cone
+
+		//setup flashlight temp canvas
+		let flashlightConeCanvas = document.createElement('canvas');
+		flashlightConeCanvas.width = this.width;
+		flashlightConeCanvas.height = this.height;
+		let flashlightConeRender = flashlightConeCanvas.getContext("2d");
+		//draw full line-of-Sight
+		flashlightConeRender.fillStyle = "white";
+		flashlightConeRender.fill(lineOfSight);
+		//cone gradient
 		let gradient = this.offscreenRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity);
-    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
     	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
     	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
     	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
-    	this.offscreenRender.fillStyle = gradient;
-		this.offscreenRender.fill(lineOfSight.cone);
-	
+    	//only keep what over-laps
+		flashlightConeRender.globalCompositeOperation = "source-in";
+		flashlightConeRender.beginPath();
+		flashlightConeRender.moveTo(viewPointEnd.x, viewPointEnd.y);
+		flashlightConeRender.lineTo(originPTrans.x, originPTrans.y);
+		flashlightConeRender.lineTo(viewPointStart.x, viewPointStart.y);
+		flashlightConeRender.arc(originPTrans.x, originPTrans.y, intensity, 
+			viewPointStart.angle, viewPointEnd.angle);
+		flashlightConeRender.fillStyle = gradient;
+		flashlightConeRender.fill();
+
+		//apply cone canvas to main lighting offscreen canvas
+        this.offscreenRender.drawImage(flashlightConeCanvas, 0, 0);
+
+
+        //setup flashlight glow temp canvas
+		let flashlightGlowCanvas = document.createElement('canvas');
+		flashlightGlowCanvas.width = this.width;
+		flashlightGlowCanvas.height = this.height;
+		let flashlightGlowRender = flashlightGlowCanvas.getContext("2d");
+		//draw full line-of-Sight
+		flashlightGlowRender.fillStyle = "white";
+		flashlightGlowRender.fill(lineOfSight);
+		//glow gradient
 		let restIntensity = intensity*0.5;
 		let gradientRest = this.offscreenRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
 			originPTrans.x, originPTrans.y, restIntensity);
-    	// gradient.addColorStop(0,"rgba(255, 255, 255, 0)");
     	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
     	gradientRest.addColorStop(0.5,"rgba(255, 255, 255, "+brightness+")");
     	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
-    	this.offscreenRender.fillStyle = gradientRest;
-		this.offscreenRender.fill(lineOfSight.antiCone);
-		this.offscreenRender.restore();
+    	//only keep what over-laps
+		flashlightGlowRender.globalCompositeOperation = "source-in";
+		flashlightGlowRender.arc(originPTrans.x, originPTrans.y, intensity, 
+			0, Math.PI*2);
+		flashlightGlowRender.fillStyle = gradientRest;
+		flashlightGlowRender.fill();
+
+		//apply glow canvas to main lighting offscreen canvas
+        this.offscreenRender.drawImage(flashlightGlowCanvas, 0, 0);
 
 	}//drawLightCone
 
@@ -455,92 +493,27 @@ module.exports = class lighting{
 		});
 
 		// create Path of line-of-sight
-		let lineOfSight = {
-			all:      new Path2D(),
-			cone:     new Path2D(),
-			antiCone: new Path2D()
-		};
+		let lineOfSight = new Path2D();
 		let index = 0; //debug
 		let lastPoint = listOfPoints[0];
-		let lastPointCone = null;
-		let lastPointAntiCone = null;
-		let coneStartPoint = null;
-		let coneEndPoint   = null;
-		let crossedEnd = false;
-		let crossedStart = false;
-
-		let coneCrossesZero = coneStart > coneEnd;
-		if(this.debug){
-			this.HUD.debugUpdate({
-		        coneCrossesZero: coneCrossesZero
-		    });
-		}
+		
 		//run through all points
 		listOfPoints.forEach((point)=>{
-			if(point.name === "Start"){
-				coneStartPoint = point;
-				crossedStart = true;
-			} 
-			if(point.name === "End"){
-				coneEndPoint   = point;
-				crossedEnd = true;
-			}   
-
-			let pointInCone = false;
-			if(coneCrossesZero){
-				pointInCone = ((coneStart < point.angle) || (point.angle < coneEnd));
-			} else {
-				pointInCone = ((coneStart < point.angle) && (point.angle < coneEnd));
-			}
-
+			
 			//main draw from point to point
 			if(lastPoint.edge && point.edge){
 				//curve instead of line
-				lineOfSight.all.arc(origin.x, origin.y, intensity, lastPoint.angle, point.angle);
+				lineOfSight.arc(origin.x, origin.y, intensity, lastPoint.angle, point.angle);
 			} else{
-				lineOfSight.all.lineTo(point.x, point.y);
-			}
-
-			//for cone and antiCone draw from point to point
-			if(pointInCone){
-				if(lastPointCone && lastPointCone.edge && point.edge){
-					//curve instead of line
-					lineOfSight.cone.arc(origin.x, origin.y, intensity, lastPointCone.angle, point.angle);
-				} else{
-					lineOfSight.cone.lineTo(point.x, point.y);
-				}
-			} else { //point not in Cone
-				// if(lastPointAntiCone && lastPointAntiCone.edge && point.edge){
-				// 	//curve instead of line
-				// 	lineOfSight.antiCone.arc(origin.x, origin.y, intensity, lastPointAntiCone.angle, point.angle);
-				// } else{
-				// 	lineOfSight.antiCone.lineTo(point.x, point.y);
-				// }
-			} //end point not in cone
-
-
-			//draw lines to origin and to start
-			if(crossedEnd && crossedStart){
-				//last bit of cone, inward towards origin
-				crossedEnd = false;
-				crossedStart = false;
-				if(coneCrossesZero){
-					lineOfSight.cone.moveTo(coneEndPoint.x, coneEndPoint.y);
-					lineOfSight.cone.lineTo(origin.x, origin.y);
-					lineOfSight.cone.lineTo(coneStartPoint.x, coneStartPoint.y);
-				} else {
-					lineOfSight.cone.moveTo(coneStartPoint.x, coneStartPoint.y);
-					lineOfSight.cone.lineTo(origin.x, origin.y);
-					lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
-				}
+				lineOfSight.lineTo(point.x, point.y);
 			}
 
 			//debug
 			if(this.debug){
 				this.render.save();
-				// this.render.fillStyle = point.color;
-				this.render.fillStyle = (pointInCone ? "blue" : "red");
-				if(point.name === "Start" || point.name === "End") this.render.fillStyle = "yellow";
+				this.render.fillStyle = point.color;
+				// this.render.fillStyle = (pointInCone ? "green" : "red");
+				// if(point.name === "Start" || point.name === "End") this.render.fillStyle = "yellow";
 				this.render.beginPath();
 				this.render.arc(point.x, point.y, 10, 0, 2*Math.PI);
 				this.render.closePath();
@@ -560,43 +533,22 @@ module.exports = class lighting{
 				this.render.restore();
 				index++;
 			}
-			lastPoint = point;
-			if(pointInCone) lastPointCone = point;
-			else lastPointAntiCone = point;
-		}); //for each point
 
-		if(lastPointCone === null) lastPointCone = coneEndPoint;
+			lastPoint = point;
+		}); //for each point
 
 		//complete path from first and last point
 		if(lastPoint.edge && listOfPoints[0].edge){
 			//curve instead of line
-			lineOfSight.all.arc(origin.x, origin.y, intensity, lastPoint.angle, listOfPoints[0].angle);
+			lineOfSight.arc(origin.x, origin.y, intensity, lastPoint.angle, listOfPoints[0].angle);
 		} else{
-			lineOfSight.all.moveTo(lastPoint.x, lastPoint.y);
-			lineOfSight.all.lineTo(listOfPoints[0].x, listOfPoints[0].y);
+			lineOfSight.moveTo(lastPoint.x, lastPoint.y);
+			lineOfSight.lineTo(listOfPoints[0].x, listOfPoints[0].y);
 		}
 
-		//complete paths cone and antiCone
-		if(coneCrossesZero){
-
-		} else { // doesnt cross zero
-			if(lastPointCone.edge && coneEndPoint.edge){
-				lineOfSight.cone.arc(origin.x, origin.y, intensity, lastPointCone.angle, coneEndPoint.angle);
-			} else {
-				lineOfSight.cone.moveTo(lastPointCone.x, lastPointCone.y);
-				lineOfSight.cone.lineTo(coneEndPoint.x, coneEndPoint.y);
-			}
-		}//end doesn't cross zero
-
-		// lineOfSight.antiCone.moveTo(coneEndPoint.x, coneEndPoint.y);
-		// lineOfSight.antiCone.lineTo(origin.x, origin.y);
-		// lineOfSight.antiCone.lineTo(coneStartPoint.x, coneStartPoint.y);
-
 		if(this.debug){
-			this.render.strokeStyle = "blue";
-			this.render.stroke(lineOfSight.cone);
-			// this.render.strokeStyle = "red";
-			// this.render.stroke(lineOfSight.antiCone);
+			this.render.strokeStyle = "white";
+			this.render.stroke(lineOfSight);
 		}
 		return lineOfSight;
 	}//getLineOfSightPath
@@ -664,7 +616,7 @@ module.exports = class lighting{
 		return {point: intersection, line: intersectingSegment};
 	}//get intersection
 
-	getCollision({objects, origin, point, mainStartPoint, width}){
+	getCollision({objects, origin, point, mainStartPoint, width, distance=Infinity}){
 		//check all objects in range for collision
 		let closestCollision = false;
 		let closestSegment = null;
@@ -686,7 +638,7 @@ module.exports = class lighting{
 			}
 		}//for objects in range
 
-		if(closestCollision){
+		if(closestCollision && closestDist < distance){
 			//make points at the corners of the box
 			let point1 = {x: closestSegment.x1, y: closestSegment.y1};
 			let point2 = {x: closestSegment.x2, y: closestSegment.y2};

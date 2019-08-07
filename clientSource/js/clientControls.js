@@ -39,6 +39,11 @@ export default class Controls{
 		      break;
 		  }
 		});
+		window.addEventListener("scroll", this.scollEvent);
+	}
+
+	scollEvent(event){
+		console.log(event);
 	}
 
 	keyPressed(keyCode, key) {
