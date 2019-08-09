@@ -41,7 +41,8 @@ module.exports = class lighting{
 		this.lightCalculationsLastFrame = 0;
 		this.lightPoints = 0;
 		this.orderPointsCreated = 0;
-		this.precision = 0.1;
+		// this.precision = 0.1;
+		this.objectsInRange = {};
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
@@ -63,7 +64,9 @@ module.exports = class lighting{
 		}
 	}//create light source
 
-	update(deltaTime){
+	update(deltaTime, objectsToDraw){
+		this.objectsInRange = objectsToDraw;
+
 		for(var id in this.objectsGlowing){
 			let object = this.objectsGlowing[id];
 			object.alreadyHit = false;
@@ -81,7 +84,7 @@ module.exports = class lighting{
 
 	draw(state){
 		// console.log("drawing lighting");
-
+		
 		this.render.globalCompositeOperation = "source-over";
 		this.offscreenRender.globalCompositeOperation = "source-over";
 		//clear the canvas
@@ -243,7 +246,10 @@ module.exports = class lighting{
 		let origin = {
 			x: Math.round(x),
 			y: Math.round(y)
-		} 
+		}
+
+		let lineOfSightDistance = (Math.max(this.width, this.height));
+
 		let originPTrans = this.CAMERA.translate(origin);
 
 		let widthOfCone    = Math.PI*0.7; //maybe scale on intensity somehow
@@ -271,51 +277,49 @@ module.exports = class lighting{
 		
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
-		let objectsInRange = State.getObjectsInRange({
-			state: state, 
-			x: origin.x, 
-			y: origin.y, 
-			distance: intensity
-		});
+		// let objectsInRange = State.getObjectsInRange({
+		// 	state: state, 
+		// 	x: origin.x, 
+		// 	y: origin.y, 
+		// 	distance: intensity
+		// });
 
 		let listOfPoints = [];
 		//need at least 1
-		let startCollision = this.getCollision({
-			objects: objectsInRange, 
-			origin:  origin, 
-			point:   startPoint,
-			distance:intensity
-		});
+		// let startCollision = this.getCollision({
+		// 	objects: objectsInRange, 
+		// 	origin:  origin, 
+		// 	point:   startPoint,
+		// 	distance:intensity
+		// });
 		let viewPointStart = this.getViewPoint({
-			point: startCollision.point,
-			edge:  !startCollision.collision,
-			color: (!startCollision.collision ? 'yellow' : 'red'),
+			point: startPoint,
+			color: "yellow",
 			name: "Start",
 			origin: origin
 		});
-		listOfPoints.push(viewPointStart);
+		// listOfPoints.push(viewPointStart);
 
-		let endCollision = this.getCollision({
-			objects: objectsInRange, 
-			origin:  origin, 
-			point:   endPoint,
-			distance:intensity
-		});
+		// let endCollision = this.getCollision({
+		// 	objects: objectsInRange, 
+		// 	origin:  origin, 
+		// 	point:   endPoint,
+		// 	distance:intensity
+		// });
 		let viewPointEnd = this.getViewPoint({
-			point: endCollision.point,
-			edge:  !endCollision.collision,
-			color: (!endCollision.collision ? 'yellow' : 'red'),
+			point: endPoint,
+			color: "yellow",
 			name: "End",
 			origin: origin
 		});
-		listOfPoints.push(viewPointEnd);
+		// listOfPoints.push(viewPointEnd);
 
 		
 		let lightCalculations = 0;
 		this.orderPointsCreated = 0;
-		for(var id in objectsInRange){
+		for(var id in this.objectsInRange){
 			lightCalculations++;
-			let object = objectsInRange[id];
+			let object = this.objectsInRange[id];
 			let points = object.hitbox.points;
 
 			points.forEach(function(point){
@@ -328,7 +332,7 @@ module.exports = class lighting{
 				pRotatedCW = Utilities.extendEndPoint({
 					startPoint: origin, 
 					endPoint: pRotatedCW, 
-					length: intensity
+					length: lineOfSightDistance
 				});
 				let pRotatedCCW = this.CAMERA.rotatePoint({
 					center: origin,
@@ -338,26 +342,23 @@ module.exports = class lighting{
 				pRotatedCCW = Utilities.extendEndPoint({
 					startPoint: origin, 
 					endPoint: pRotatedCCW, 
-					length: intensity
+					length: lineOfSightDistance
 				});
 
 				let collisionCW = this.getCollision({
-					objects: objectsInRange, 
+					objects: this.objectsInRange, 
 					origin:  origin, 
-					point:   pRotatedCW,
-					distance:intensity
+					point:   pRotatedCW
 				});
 				let collision = this.getCollision({
-					objects: objectsInRange, 
+					objects: this.objectsInRange, 
 					origin:  origin, 
-					point:   point,
-					distance:intensity
+					point:   point
 				});
 				let collisionCCW = this.getCollision({
-					objects: objectsInRange, 
+					objects: this.objectsInRange, 
 					origin:  origin, 
-					point:   pRotatedCCW,
-					distance:intensity
+					point:   pRotatedCCW
 				});
 
 				//calculate "lost" intensity
@@ -398,14 +399,14 @@ module.exports = class lighting{
 		if(this.debug){
 			this.HUD.debugUpdate({
 		        lightPoints: this.lightPoints,
-		        ObjectsInRangeLighting: Object.keys(objectsInRange).length
+		        ObjectsInRangeLighting: Object.keys(this.objectsInRange).length
 		    });
 		}
 
 		let lineOfSight = this.getLineOfSightPath({
 			listOfPoints:listOfPoints, 
 			origin:      originPTrans, 
-			intensity:   intensity,
+			distance:    lineOfSightDistance,
 			coneStart:   startAngle,
 			coneEnd:     endAngle
 		});
@@ -469,7 +470,7 @@ module.exports = class lighting{
 
 	}//drawLightCone
 
-	getViewPoint({point, edge, color, name, origin}){
+	getViewPoint({point, edge=false, color="yellow", name="No Name", origin}){
 		let pAngle = this.calculateAngle({
 										point1: point,
 									    centerPoint:origin});
@@ -487,7 +488,7 @@ module.exports = class lighting{
 	/*
 	Returns canvas path of the line of sight polygon, relative to canvas, not world
 	*/
-	getLineOfSightPath({listOfPoints, origin, intensity, coneStart, coneEnd}){
+	getLineOfSightPath({listOfPoints, origin, intensity, distance, coneStart, coneEnd}){
 		listOfPoints.sort((a,b)=>{
 			return a.angle-b.angle;
 		});
@@ -503,7 +504,7 @@ module.exports = class lighting{
 			//main draw from point to point
 			if(lastPoint.edge && point.edge){
 				//curve instead of line
-				lineOfSight.arc(origin.x, origin.y, intensity, lastPoint.angle, point.angle);
+				lineOfSight.arc(origin.x, origin.y, distance, lastPoint.angle, point.angle);
 			} else{
 				lineOfSight.lineTo(point.x, point.y);
 			}
@@ -537,14 +538,20 @@ module.exports = class lighting{
 			lastPoint = point;
 		}); //for each point
 
-		//complete path from first and last point
-		if(lastPoint.edge && listOfPoints[0].edge){
-			//curve instead of line
-			lineOfSight.arc(origin.x, origin.y, intensity, lastPoint.angle, listOfPoints[0].angle);
-		} else{
-			lineOfSight.moveTo(lastPoint.x, lastPoint.y);
-			lineOfSight.lineTo(listOfPoints[0].x, listOfPoints[0].y);
+		if(listOfPoints.length === 0){
+			lineOfSight.arc(origin.x, origin.y, distance, 0, Math.PI*2);
+		} else {
+			//complete path from first and last point
+			if(lastPoint.edge && listOfPoints[0].edge){
+				//curve instead of line
+				lineOfSight.arc(origin.x, origin.y, distance, lastPoint.angle, listOfPoints[0].angle);
+			} else{
+				lineOfSight.moveTo(lastPoint.x, lastPoint.y);
+				lineOfSight.lineTo(listOfPoints[0].x, listOfPoints[0].y);
+			}
 		}
+
+		
 
 		if(this.debug){
 			this.render.strokeStyle = "white";

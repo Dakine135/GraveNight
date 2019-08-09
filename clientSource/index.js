@@ -78,7 +78,7 @@ let sketch = (sk)=>{
       CONTROLS: CONTROLS
     });
     LIGHTING = new Lighting({
-      debug: false,
+      debug: true,
       width: sk.windowWidth, 
       height: sk.windowHeight,
       CONTROLS: CONTROLS,
@@ -170,7 +170,7 @@ let sketch = (sk)=>{
     }//if World has been received from Server
 
     //Lighting Stuff
-    LIGHTING.update(deltaTime);
+    LIGHTING.update(deltaTime, objectsToDraw);
     LIGHTING.draw(STATES.frameState);
     
 
