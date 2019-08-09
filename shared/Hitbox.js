@@ -56,6 +56,27 @@ function update(obj){
 	hitbox.points      = [hitbox.topLeft, hitbox.topRight, hitbox.bottomLeft, hitbox.bottomRight];
 }
 
+function getVisualPoints({obj, viewPoint, getPointsAfterEdge=false}){
+
+	obj.points.forEach()
+
+	let pRotatedCW = this.CAMERA.rotatePoint({
+		center: origin,
+		point: point,
+		angle: 0.01
+	});
+
+	let pRotatedCCW = this.CAMERA.rotatePoint({
+		center: origin,
+		point: point,
+		angle: -0.01
+	});
+
+	return obj.points;
+
+}
+exports.getVisualPoints = getVisualPoints;
+
 function colliding(obj1, obj2) {
 	//doesnt take angle into account yet.
 	let hitbox1 = obj1.hitbox;
@@ -77,38 +98,6 @@ function colliding(obj1, obj2) {
 	return roughColliding;
 } //colliding
 exports.colliding = colliding;
-
-// function translate({
-// 	x=0, 
-// 	y=0, 
-// 	hitbox=null, 
-// 	angle=0 //not yet implemented
-// }){
-// 	let translatedHitbox    = Utilities.cloneObject(hitbox);
-// 	translatedHitbox.top    = translatedHitbox.top + y;
-// 	translatedHitbox.bottom = translatedHitbox.bottom + y;
-// 	translatedHitbox.left   = translatedHitbox.left + x;
-// 	translatedHitbox.right  = translatedHitbox.right + x;
-// 	return translatedHitbox;
-// }; //translate
-// exports.translate = translate;
-
-// function getCorners(obj){
-// 	let hitbox = obj.hitbox;
-// 	// console.log("hitbox: ",hitbox);
-// 	let width  = hitbox.right  - hitbox.left;
-// 	let height = hitbox.bottom - hitbox.top;
-// 	return {
-// 		id:          obj.id,
-// 		x:           obj.x,
-// 		y: 			 obj.y,
-// 		topLeft:     {x: hitbox.left, y: hitbox.top},
-// 		topRight:    {x: hitbox.right, y: hitbox.top},
-// 		bottomLeft:  {x: hitbox.left, y: hitbox.bottom},
-// 		bottomRight: {x: hitbox.right, y: hitbox.bottom}
-// 	};
-// }
-// exports.getCorners = getCorners;
 
 function collideLineLine(line1, line2) {
 

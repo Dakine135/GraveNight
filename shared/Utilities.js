@@ -17,6 +17,31 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
+exports.rotatePoint = ({
+        center={x:0, y:0}, 
+        point={x:0, y:0}, 
+        angle=0
+    })=>{
+        let s = Math.sin(angle);
+        let c = Math.cos(angle);
+
+        //make copy
+        let newPoint = {x: point.x, y: point.y}; 
+
+        // translate point back to origin:
+        newPoint.x -= center.x;
+        newPoint.y -= center.y;
+
+        // rotate point
+        let xnew = newPoint.x * c - newPoint.y * s;
+        let ynew = newPoint.x * s + newPoint.y * c;
+
+        // translate point back:
+        newPoint.x = xnew + center.x;
+        newPoint.y = ynew + center.y;
+        return newPoint;
+    }
+
 exports.extendEndPoint = ({startPoint, endPoint, length})=>{
     let currentlength = Math.sqrt(
         Math.pow(startPoint.x - endPoint.x, 2.0) + 

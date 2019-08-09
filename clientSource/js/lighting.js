@@ -285,94 +285,75 @@ module.exports = class lighting{
 		// });
 
 		let listOfPoints = [];
-		//need at least 1
-		// let startCollision = this.getCollision({
-		// 	objects: objectsInRange, 
-		// 	origin:  origin, 
-		// 	point:   startPoint,
-		// 	distance:intensity
-		// });
-		let viewPointStart = this.getViewPoint({
-			point: startPoint,
-			color: "yellow",
-			name: "Start",
-			origin: origin
-		});
-		// listOfPoints.push(viewPointStart);
-
-		// let endCollision = this.getCollision({
-		// 	objects: objectsInRange, 
-		// 	origin:  origin, 
-		// 	point:   endPoint,
-		// 	distance:intensity
-		// });
-		let viewPointEnd = this.getViewPoint({
-			point: endPoint,
-			color: "yellow",
-			name: "End",
-			origin: origin
-		});
-		// listOfPoints.push(viewPointEnd);
-
 		
 		let lightCalculations = 0;
 		this.orderPointsCreated = 0;
 		for(var id in this.objectsInRange){
 			lightCalculations++;
 			let object = this.objectsInRange[id];
-			let points = object.hitbox.points;
+			let points = Hitbox.getVisualPoints({
+				obj:         object.hitbox,
+				pointOfView: origin,
+				getPointsAfterEdge: true
+			});
 
 			points.forEach(function(point){
 				// console.log(point);
-				let pRotatedCW = this.CAMERA.rotatePoint({
-					center: origin,
-					point: point,
-					angle: 0.01
-				});
-				pRotatedCW = Utilities.extendEndPoint({
-					startPoint: origin, 
-					endPoint: pRotatedCW, 
-					length: lineOfSightDistance
-				});
-				let pRotatedCCW = this.CAMERA.rotatePoint({
-					center: origin,
-					point: point,
-					angle: -0.01
-				});
-				pRotatedCCW = Utilities.extendEndPoint({
-					startPoint: origin, 
-					endPoint: pRotatedCCW, 
-					length: lineOfSightDistance
-				});
+				// let pRotatedCW = this.CAMERA.rotatePoint({
+				// 	center: origin,
+				// 	point: point,
+				// 	angle: 0.01
+				// });
+				// pRotatedCW = Utilities.extendEndPoint({
+				// 	startPoint: origin, 
+				// 	endPoint: pRotatedCW, 
+				// 	length: lineOfSightDistance
+				// });
+				// let pRotatedCCW = this.CAMERA.rotatePoint({
+				// 	center: origin,
+				// 	point: point,
+				// 	angle: -0.01
+				// });
+				// pRotatedCCW = Utilities.extendEndPoint({
+				// 	startPoint: origin, 
+				// 	endPoint: pRotatedCCW, 
+				// 	length: lineOfSightDistance
+				// });
 
-				let collisionCW = this.getCollision({
-					objects: this.objectsInRange, 
-					origin:  origin, 
-					point:   pRotatedCW
+				// let collisionCW = this.getCollision({
+				// 	objects: this.objectsInRange, 
+				// 	origin:  origin, 
+				// 	point:   pRotatedCW
+				// });
+
+				let extendedPoint = Utilities.extendEndPoint({
+					startPoint: origin, 
+					endPoint: point, 
+					length: lineOfSightDistance
 				});
 				let collision = this.getCollision({
 					objects: this.objectsInRange, 
 					origin:  origin, 
-					point:   point
+					point:   extendedPoint
 				});
-				let collisionCCW = this.getCollision({
-					objects: this.objectsInRange, 
-					origin:  origin, 
-					point:   pRotatedCCW
-				});
+				// let collisionCCW = this.getCollision({
+				// 	objects: this.objectsInRange, 
+				// 	origin:  origin, 
+				// 	point:   pRotatedCCW
+				// });
 
 				//calculate "lost" intensity
 				let lostIntensity = (intensity - collision.dist);
 				this.addGowingObject({obj: collision.object, intensity: lostIntensity});
 
-				let viewPointCW = this.getViewPoint({
-					point: collisionCW.point,
-					edge:  !collisionCW.collision,
-					color: (!collisionCW.collision ? 'yellow' : 'red'),
-					name: "CW",
-					origin: origin
-				});
-				listOfPoints.push(viewPointCW);
+				// let viewPointCW = this.getViewPoint({
+				// 	point: collisionCW.point,
+				// 	edge:  !collisionCW.collision,
+				// 	color: (!collisionCW.collision ? 'yellow' : 'red'),
+				// 	name: "CW",
+				// 	origin: origin
+				// });
+				// listOfPoints.push(viewPointCW);
 				let viewPoint = this.getViewPoint({
 					point: collision.point, 
 					edge:  !collision.collision,
@@ -381,14 +362,14 @@ module.exports = class lighting{
 					origin: origin
 				});
 				listOfPoints.push(viewPoint);
-				let viewPointCCW = this.getViewPoint({
-					point: collisionCCW.point, 
-					edge:  !collisionCCW.collision,
-					color: (!collisionCCW.collision ? 'yellow' : 'red'),
-					name: "CCW",
-					origin: origin
-				});
-				listOfPoints.push(viewPointCCW);
+				// let viewPointCCW = this.getViewPoint({
+				// 	point: collisionCCW.point, 
+				// 	edge:  !collisionCCW.collision,
+				// 	color: (!collisionCCW.collision ? 'yellow' : 'red'),
+				// 	name: "CCW",
+				// 	origin: origin
+				// });
+				// listOfPoints.push(viewPointCCW);
 			}.bind(this));
 		}
 
@@ -411,6 +392,19 @@ module.exports = class lighting{
 			coneEnd:     endAngle
 		});
 
+		let viewPointStart = this.getViewPoint({
+			point: startPoint,
+			color: "yellow",
+			name: "Start",
+			origin: origin
+		});
+
+		let viewPointEnd = this.getViewPoint({
+			point: endPoint,
+			color: "yellow",
+			name: "End",
+			origin: origin
+		});
 
 		//setup flashlight temp canvas
 		let flashlightConeCanvas = document.createElement('canvas');
