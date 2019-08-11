@@ -282,7 +282,7 @@ module.exports = class lighting{
 		// 	state: state, 
 		// 	x: origin.x, 
 		// 	y: origin.y, 
-		// 	distance: intensity
+		// 	distance: lineOfSightDistance
 		// });
 
 		let listOfPoints = [];
@@ -294,85 +294,51 @@ module.exports = class lighting{
 			let object = this.objectsInRange[id];
 			let points = Hitbox.getVisualPoints({
 				obj:         object.hitbox,
-				viewPoint: origin,
+				viewPoint:   origin,
 				getPointsAfterEdge: true
 			});
 
+			// if(this.debug){
+			// 	this.render.fillStyle = "white";
+			// 	this.render.textAlign = "center";
+			// 	let transLoc = this.CAMERA.translate(object);
+			// 	//points["relativeSector"]+
+			// 	this.render.fillText(points.length+"test"+points.relativeSector, transLoc.x, transLoc.y);
+			// 	// console.log(points);
+			// }
+
 			points.forEach(function(point){
-				// console.log(point);
-				// let pRotatedCW = this.CAMERA.rotatePoint({
-				// 	center: origin,
-				// 	point: point,
-				// 	angle: 0.01
-				// });
-				// pRotatedCW = Utilities.extendEndPoint({
-				// 	startPoint: origin, 
-				// 	endPoint: pRotatedCW, 
-				// 	length: lineOfSightDistance
-				// });
-				// let pRotatedCCW = this.CAMERA.rotatePoint({
-				// 	center: origin,
-				// 	point: point,
-				// 	angle: -0.01
-				// });
-				// pRotatedCCW = Utilities.extendEndPoint({
-				// 	startPoint: origin, 
-				// 	endPoint: pRotatedCCW, 
-				// 	length: lineOfSightDistance
-				// });
 
-				// let collisionCW = this.getCollision({
-				// 	objects: this.objectsInRange, 
-				// 	origin:  origin, 
-				// 	point:   pRotatedCW
-				// });
-
-				let extendedPoint = Utilities.extendEndPoint({
-					startPoint: origin, 
-					endPoint: point, 
-					length: lineOfSightDistance
-				});
+				let pointToCheck = point;
+				if(point.extend){
+					pointToCheck = Utilities.extendEndPoint({
+						startPoint: origin, 
+						endPoint: point, 
+						length: lineOfSightDistance
+					});
+				}
+				
 				let collision = this.getCollision({
 					objects: this.objectsInRange, 
 					origin:  origin, 
-					point:   extendedPoint
+					point:   pointToCheck
 				});
-				// let collisionCCW = this.getCollision({
-				// 	objects: this.objectsInRange, 
-				// 	origin:  origin, 
-				// 	point:   pRotatedCCW
-				// });
 
 				//calculate "lost" intensity
 				// let lostIntensity = (intensity - collision.dist);
 				// this.addGowingObject({obj: collision.object, intensity: lostIntensity});
 
-				// let viewPointCW = this.getViewPoint({
-				// 	point: collisionCW.point,
-				// 	edge:  !collisionCW.collision,
-				// 	color: (!collisionCW.collision ? 'yellow' : 'red'),
-				// 	name: "CW",
-				// 	origin: origin
-				// });
-				// listOfPoints.push(viewPointCW);
 				let viewPoint = this.getViewPoint({
 					point: collision.point, 
 					edge:  !collision.collision,
-					color: "green",
+					color: (collision.collision ? "green" : "yellow"),
 					name: "P",
 					origin: origin
 				});
 				listOfPoints.push(viewPoint);
-				// let viewPointCCW = this.getViewPoint({
-				// 	point: collisionCCW.point, 
-				// 	edge:  !collisionCCW.collision,
-				// 	color: (!collisionCCW.collision ? 'yellow' : 'red'),
-				// 	name: "CCW",
-				// 	origin: origin
-				// });
-				// listOfPoints.push(viewPointCCW);
+	
 			}.bind(this));
-		}
+		} //for objects in range
 
 
 		this.lightCalculationsLastFrame = lightCalculations;
