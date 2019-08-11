@@ -58,21 +58,116 @@ function update(obj){
 
 function getVisualPoints({obj, viewPoint, getPointsAfterEdge=false}){
 
-	obj.points.forEach()
+	let returnPoints = [];
+	if(viewPoint.y < obj.top){              //NW, N, NE
+		if(viewPoint.x < obj.left){         //NW
+			returnPoints = [obj.topLeft, obj.topRight, obj.bottomLeft];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomLeft,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topRight,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else if(viewPoint.x > obj.right){ //NE
+			returnPoints = [obj.topLeft, obj.topRight, obj.bottomRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topLeft,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomRight,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else {                            //N
+			returnPoints = [obj.topLeft, obj.topRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topLeft,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topRight,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		}
 
-	let pRotatedCW = this.CAMERA.rotatePoint({
-		center: origin,
-		point: point,
-		angle: 0.01
-	});
+	} else if(viewPoint.y > obj.bottom){    //SW, S, SE
+		if(viewPoint.x < obj.left){         //SW
+			returnPoints = [obj.topLeft, obj.bottomLeft, obj.bottomRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomRight,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topLeft,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else if(viewPoint.x > obj.right){ //SE
+			returnPoints = [obj.topRight, obj.bottomLeft, obj.bottomRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topRight,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomLeft,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else {                            //S
+			returnPoints = [obj.bottomLeft, obj.bottomRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomRight,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomLeft,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		}
 
-	let pRotatedCCW = this.CAMERA.rotatePoint({
-		center: origin,
-		point: point,
-		angle: -0.01
-	});
+	} else {                                //E or W
+		if(viewPoint.x < obj.left){         //W
+			returnPoints = [obj.topLeft, obj.bottomLeft];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomLeft,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topLeft,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else if(viewPoint.x > obj.right){ //E
+			returnPoints = [obj.topRight, obj.bottomRight];
+			let pRotatedCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.topRight,
+				angle: 0.01});
+			returnPoints.push(pRotatedCW);
+			let pRotatedCCW = Utilities.rotatePoint({
+				center: viewPoint,
+				point: obj.bottomRight,
+				angle: -0.01});
+			returnPoints.push(pRotatedCCW);
+		} else {
+			console.log("Catch in getVisualPoints, possibly viewPoint is inside the box");
+		}
+	}
 
-	return obj.points;
+	return returnPoints;
 
 }
 exports.getVisualPoints = getVisualPoints;

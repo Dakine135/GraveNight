@@ -17,11 +17,7 @@ exports.midPoint = (point1, point2)=>{
    return {x: middleX, y: middleY};
 }
 
-exports.rotatePoint = ({
-        center={x:0, y:0}, 
-        point={x:0, y:0}, 
-        angle=0
-    })=>{
+exports.rotatePoint = ({center={x:0, y:0}, point={x:0, y:0}, angle=0})=>{
         let s = Math.sin(angle);
         let c = Math.cos(angle);
 

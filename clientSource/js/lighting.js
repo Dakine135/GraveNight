@@ -248,7 +248,8 @@ module.exports = class lighting{
 			y: Math.round(y)
 		}
 
-		let lineOfSightDistance = (Math.max(this.width, this.height));
+		let lineOfSightDistance = (Math.max(this.width, this.height)*0.6);
+		// let lineOfSightDistance = intensity;
 
 		let originPTrans = this.CAMERA.translate(origin);
 
@@ -277,7 +278,7 @@ module.exports = class lighting{
 		
 		if(state == null || state.world == null) return;
 		//TODO optimization, get objects needs to take direction into account
-		// let objectsInRange = State.getObjectsInRange({
+		// this.objectsInRange = State.getObjectsInRange({
 		// 	state: state, 
 		// 	x: origin.x, 
 		// 	y: origin.y, 
@@ -293,7 +294,7 @@ module.exports = class lighting{
 			let object = this.objectsInRange[id];
 			let points = Hitbox.getVisualPoints({
 				obj:         object.hitbox,
-				pointOfView: origin,
+				viewPoint: origin,
 				getPointsAfterEdge: true
 			});
 
@@ -343,8 +344,8 @@ module.exports = class lighting{
 				// });
 
 				//calculate "lost" intensity
-				let lostIntensity = (intensity - collision.dist);
-				this.addGowingObject({obj: collision.object, intensity: lostIntensity});
+				// let lostIntensity = (intensity - collision.dist);
+				// this.addGowingObject({obj: collision.object, intensity: lostIntensity});
 
 				// let viewPointCW = this.getViewPoint({
 				// 	point: collisionCW.point,
@@ -517,7 +518,7 @@ module.exports = class lighting{
 				this.render.font = "12px Arial";
 				this.render.textAlign = "center"; 
 				this.render.fillText(index, point.x, point.y);
-				if(point.color == 'yellow'){
+				if(true){ //point.color == 'yellow'
 					this.render.fillStyle = "white";
 					this.render.textAlign = "left";
 					this.render.fillText(point.name+Math.round(point.angle*100)/100, point.x+12, point.y);
