@@ -10,6 +10,7 @@ module.exports = class lighting{
 		divId="lighting-layer",
 		width=0,
 		height=0,
+		renderDistance=null,
 		darkness=0.9,
 		brightness=0.9,
 		CAMERA=null,
@@ -18,6 +19,8 @@ module.exports = class lighting{
 	}){
 		this.width = width;
 		this.height = height;
+		this.renderDistance = renderDistance;
+		if(this.renderDistance === null) this.renderDistance = Math.max(this.width, this.height)*0.6;
 		this.darkness=darkness;
 		this.brightness=brightness;
 		if(debug){
@@ -248,7 +251,7 @@ module.exports = class lighting{
 			y: Math.round(y)
 		}
 
-		let lineOfSightDistance = (Math.max(this.width, this.height)*0.6);
+		// let lineOfSightDistance = (Math.max(this.width, this.height)*0.6);
 		// let lineOfSightDistance = intensity;
 
 		let originPTrans = this.CAMERA.translate(origin);
@@ -314,7 +317,7 @@ module.exports = class lighting{
 					pointToCheck = Utilities.extendEndPoint({
 						startPoint: origin, 
 						endPoint: point, 
-						length: lineOfSightDistance
+						length: this.renderDistance
 					});
 				}
 				
@@ -354,7 +357,7 @@ module.exports = class lighting{
 		let lineOfSight = this.getLineOfSightPath({
 			listOfPoints:listOfPoints, 
 			origin:      originPTrans, 
-			distance:    lineOfSightDistance,
+			distance:    this.renderDistance,
 			coneStart:   startAngle,
 			coneEnd:     endAngle
 		});

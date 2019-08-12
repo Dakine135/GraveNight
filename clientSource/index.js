@@ -21,6 +21,8 @@ import * as p5 from './js/p5.min.js';
 
 
 console.log("index.js loaded in bundle");
+var WIDTH = window.innerWidth;
+var HIEGHT = window.innerHeight;
 var STATES = {};
 var CONTROLS = {};
 var NETWORK = {};
@@ -38,6 +40,67 @@ var currentTime = new Date().getTime();
 var lastFrame = currentTime;
 var lastSecond = currentTime;
 var frames = 0;
+
+function setup(){
+    console.log("Start Setup");
+    console.log("Screen Size: ", WIDTH, HIEGHT);
+    p5Canvas = sk.createCanvas(WIDTH, HIEGHT); //full screen
+    RENDERDISTANCE = Math.max(WIDTH, HIEGHT)*0.6;
+    p5Canvas.parent('P5-Canvas-Container'); //attach p5 Canvas to div in index.html
+    CAMERA = new Camera({
+      x:0,y:0, 
+      width:WIDTH, 
+      height:HIEGHT,
+      speed:0.1
+    });
+    STATES = new StatesManager({
+      debug:false, 
+      debugState:false,
+      stateInterpolation: true,
+      clientSimulation: false, //not really working atm
+      sk:sk,
+      CAMERA: CAMERA
+    });
+    NETWORK = new Networking({
+      debug:false, 
+      STATES:STATES,
+      WORLD: WORLD
+    });
+    NETWORK.updateServerTimeDiffernce();
+    CONTROLS = new Controls({
+      debug:false, 
+      NETWORK:NETWORK, 
+      STATES:STATES, 
+      CAMERA: CAMERA
+    });
+    HUD = new Hud({
+      width: WIDTH, 
+      height: HIEGHT,
+      CONTROLS: CONTROLS
+    });
+    LIGHTING = new Lighting({
+      debug: false,
+      width: WIDTH, 
+      height: HIEGHT,
+      renderDistance: RENDERDISTANCE,
+      CONTROLS: CONTROLS,
+      CAMERA: CAMERA,
+      HUD: HUD,
+      darkness: DARKNESS, //darkness level 0-1
+      brightness: BRIGHTNESS
+    });
+    LIGHTING.createLightSource({}); //defaults to 0,0
+    // LIGHTING.createLightSource({x:500,y:500, size:300});
+    sk.angleMode(sk.RADIANS);
+    // sk.rectMode(sk.CENTER);
+    sk.frameRate(FRAMERATE); //default and max is 60
+    console.log("End Setup");
+}//SETUP
+// setup();
+
+
+
+
 let sketch = (sk)=>{
   //runs once at load
   sk.setup = ()=>{
@@ -78,9 +141,10 @@ let sketch = (sk)=>{
       CONTROLS: CONTROLS
     });
     LIGHTING = new Lighting({
-      debug: false,
+      debug: true,
       width: sk.windowWidth, 
       height: sk.windowHeight,
+      renderDistance: RENDERDISTANCE,
       CONTROLS: CONTROLS,
       CAMERA: CAMERA,
       HUD: HUD,

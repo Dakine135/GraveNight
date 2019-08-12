@@ -39,11 +39,26 @@ export default class Controls{
 		      break;
 		  }
 		});
-		window.addEventListener("scroll", this.scollEvent);
+		window.addEventListener('DOMMouseScroll', this.scollEvent);
+		// var wheelEvent
 	}
 
 	scollEvent(event){
-		console.log(event);
+		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
+		let data = {
+			type:'playerScroll',
+			time: eventTime
+		};
+		if(event.detail > 0){
+			console.log("scroll Down");
+			data.direction = 1;
+		} else {
+			console.log("scroll up");
+			data.direction = -1;
+		}
+		this.NETWORK.sendClientAction(data);
+		data.socketId = this.NETWORK.mySocketId;
+		this.STATES.addAction(data);
 	}
 
 	keyPressed(keyCode, key) {
