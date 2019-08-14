@@ -43,7 +43,7 @@ exports.addObject = (grid, obj)=>{
 	// 	minY+=bucketSize;
 	// }
 	let bucketIndex = getBucketIndex(obj.x, obj.y, bucketSize);
-	console.log("addObject to bucket:", bucketIndex.x, bucketIndex.y);
+	// console.log("addObject to bucket:", bucketIndex.x, bucketIndex.y);
 	if(grid[bucketIndex.x] == null) grid[bucketIndex.x] = {};
 	if(grid[bucketIndex.x][bucketIndex.y] == null) grid[bucketIndex.x][bucketIndex.y] = {};
 	grid[bucketIndex.x][bucketIndex.y][obj.id] = obj;

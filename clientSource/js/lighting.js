@@ -3,6 +3,8 @@ const Utilities = require('../../shared/Utilities.js');
 const Grid = require('../../shared/Grid.js');
 const World = require('../../shared/World.js');
 const State = require('../../shared/State.js');
+// import LineOfSightWorker from 'worker-loader!./lineOfSightWorker.js';
+const LineOfSightWorker = require('./lineOfSight.worker.js');
 
 module.exports = class lighting{
 	constructor({
@@ -42,10 +44,10 @@ module.exports = class lighting{
 		this.lightSources = {};
 		this.objectsGlowing = {};
 		this.lightCalculationsLastFrame = 0;
-		this.lightPoints = 0;
 		this.orderPointsCreated = 0;
 		// this.precision = 0.1;
 		this.objectsInRange = {};
+		this.lineOfSightWorker = new LineOfSightWorker();
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
@@ -288,71 +290,75 @@ module.exports = class lighting{
 		// 	distance: lineOfSightDistance
 		// });
 
+		this.orderPointsCreated = 0;
+
 		let listOfPoints = [];
 		
-		let lightCalculations = 0;
-		this.orderPointsCreated = 0;
-		for(var id in this.objectsInRange){
-			lightCalculations++;
-			let object = this.objectsInRange[id];
-			let points = Hitbox.getVisualPoints({
-				obj:         object.hitbox,
-				viewPoint:   origin,
-				getPointsAfterEdge: true
-			});
+		
+		// for(var id in this.objectsInRange){
+		// 	let object = this.objectsInRange[id];
+		// 	let points = Hitbox.getVisualPoints({
+		// 		obj:         object.hitbox,
+		// 		viewPoint:   origin,
+		// 		getPointsAfterEdge: true
+		// 	});
 
-			// if(this.debug){
-			// 	this.render.fillStyle = "white";
-			// 	this.render.textAlign = "center";
-			// 	let transLoc = this.CAMERA.translate(object);
-			// 	//points["relativeSector"]+
-			// 	this.render.fillText(points.length+"test"+points.relativeSector, transLoc.x, transLoc.y);
-			// 	// console.log(points);
-			// }
+		// 	points.forEach(function(point){
 
-			points.forEach(function(point){
-
-				let pointToCheck = point;
-				if(point.extend){
-					pointToCheck = Utilities.extendEndPoint({
-						startPoint: origin, 
-						endPoint: point, 
-						length: this.renderDistance
-					});
-				}
+		// 		let pointToCheck = point;
+		// 		if(point.extend){
+		// 			pointToCheck = Utilities.extendEndPoint({
+		// 				startPoint: origin, 
+		// 				endPoint: point, 
+		// 				length: this.renderDistance
+		// 			});
+		// 		}
 				
-				let collision = this.getCollision({
-					objects: this.objectsInRange, 
-					origin:  origin, 
-					point:   pointToCheck
-				});
+		// 		let collision = this.getCollision({
+		// 			objects: this.objectsInRange, 
+		// 			origin:  origin, 
+		// 			point:   pointToCheck
+		// 		});
 
-				//calculate "lost" intensity
-				// let lostIntensity = (intensity - collision.dist);
-				// this.addGowingObject({obj: collision.object, intensity: lostIntensity});
+		// 		//calculate "lost" intensity
+		// 		// let lostIntensity = (intensity - collision.dist);
+		// 		// this.addGowingObject({obj: collision.object, intensity: lostIntensity});
 
-				let viewPoint = this.getViewPoint({
-					point: collision.point, 
-					edge:  !collision.collision,
-					color: (collision.collision ? "green" : "yellow"),
-					name: "P",
-					origin: origin
-				});
-				listOfPoints.push(viewPoint);
+		// 		let viewPoint = this.getViewPoint({
+		// 			point: collision.point, 
+		// 			edge:  !collision.collision,
+		// 			color: (collision.collision ? "green" : "yellow"),
+		// 			name: "P",
+		// 			origin: origin
+		// 		});
+		// 		listOfPoints.push(viewPoint);
 	
-			}.bind(this));
-		} //for objects in range
+		// 	}.bind(this));
+		// } //for objects in range
 
-
-		this.lightCalculationsLastFrame = lightCalculations;
-
-		this.lightPoints = listOfPoints.length;
 		if(this.debug){
 			this.HUD.debugUpdate({
-		        lightPoints: this.lightPoints,
+		        lightPoints: listOfPoints.length,
 		        ObjectsInRangeLighting: Object.keys(this.objectsInRange).length
 		    });
 		}
+
+
+
+
+		this.lineOfSightWorker.postMessage({
+			objectsInRange: this.objectsInRange,
+			origin:         origin,
+			renderDistance: this.renderDistance
+		});
+
+		this.lineOfSightWorker.onmessage = function(event){
+			// console.log("return from worker:", event.data);
+		}
+
+
+
+
 
 		let lineOfSight = this.getLineOfSightPath({
 			listOfPoints:listOfPoints, 
