@@ -48,6 +48,13 @@ module.exports = class lighting{
 		// this.precision = 0.1;
 		this.objectsInRange = {};
 		this.lineOfSightWorker = new LineOfSightWorker();
+		this.listOfPoints = [];
+		this.workerCalculating == false;
+		this.lineOfSightWorker.onmessage = function(event){
+			// console.log("return from worker:", event.data);
+			this.listOfPoints = event.data;
+			this.workerCalculating = false;
+		}.bind(this);
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
@@ -146,33 +153,33 @@ module.exports = class lighting{
 
         //draw glowingObjects
 		// console.log(Object.keys(this.objectsGlowing).length);
-		for(var id in this.objectsGlowing){
-			let objOnScreen = this.CAMERA.translate({x:this.objectsGlowing[id].x,
-													 y:this.objectsGlowing[id].y});
-			let alpha = Utilities.mapNum({
-				input: this.objectsGlowing[id].intensity,
-				start1: 0,
-				end1: 1000,
-				start2: 0,
-				end2: 1
-			});
-			// if(this.objectsGlowing[id].intensity>50) console.log(this.objectsGlowing[id].intensity, "=>", alpha);
-			this.offscreenRender.save();
-			this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
-			this.offscreenRender.fillRect(
-				(objOnScreen.x - 25), 
-				(objOnScreen.y - 25), 
-				50,50);
-			if(this.debug){
-				this.render.fillStyle = "white";
-				this.render.font = "18px Arial";
-				this.render.textAlign = "center";
-				let text = Math.round(this.objectsGlowing[id].intensity);
-				this.render.fillText(text, objOnScreen.x, objOnScreen.y+50);
-			}
-			this.offscreenRender.restore();
-			// this.drawLightPoint(this.objectsGlowing[id]);
-		}// each glowing object
+		// for(var id in this.objectsGlowing){
+		// 	let objOnScreen = this.CAMERA.translate({x:this.objectsGlowing[id].x,
+		// 											 y:this.objectsGlowing[id].y});
+		// 	let alpha = Utilities.mapNum({
+		// 		input: this.objectsGlowing[id].intensity,
+		// 		start1: 0,
+		// 		end1: 1000,
+		// 		start2: 0,
+		// 		end2: 1
+		// 	});
+		// 	// if(this.objectsGlowing[id].intensity>50) console.log(this.objectsGlowing[id].intensity, "=>", alpha);
+		// 	this.offscreenRender.save();
+		// 	this.offscreenRender.fillStyle = "rgba(255, 255, 255, "+alpha+")";
+		// 	this.offscreenRender.fillRect(
+		// 		(objOnScreen.x - 25), 
+		// 		(objOnScreen.y - 25), 
+		// 		50,50);
+		// 	if(this.debug){
+		// 		this.render.fillStyle = "white";
+		// 		this.render.font = "18px Arial";
+		// 		this.render.textAlign = "center";
+		// 		let text = Math.round(this.objectsGlowing[id].intensity);
+		// 		this.render.fillText(text, objOnScreen.x, objOnScreen.y+50);
+		// 	}
+		// 	this.offscreenRender.restore();
+		// 	// this.drawLightPoint(this.objectsGlowing[id]);
+		// }// each glowing object
 
         this.render.globalCompositeOperation = "xor";
         this.render.drawImage(this.offscreenCanvas, 0, 0);
@@ -292,7 +299,7 @@ module.exports = class lighting{
 
 		this.orderPointsCreated = 0;
 
-		let listOfPoints = [];
+		// let listOfPoints = [];
 		
 		
 		// for(var id in this.objectsInRange){
@@ -335,33 +342,26 @@ module.exports = class lighting{
 	
 		// 	}.bind(this));
 		// } //for objects in range
+		if(!this.workerCalculating){
+			this.workerCalculating = true;
+			this.lineOfSightWorker.postMessage({
+				objectsInRange: this.objectsInRange,
+				origin:         origin,
+				renderDistance: this.renderDistance,
+				camera:         this.CAMERA
+			});
+		}
 
 		if(this.debug){
 			this.HUD.debugUpdate({
-		        lightPoints: listOfPoints.length,
+		        lightPoints: this.listOfPoints.length,
 		        ObjectsInRangeLighting: Object.keys(this.objectsInRange).length
 		    });
 		}
-
-
-
-
-		this.lineOfSightWorker.postMessage({
-			objectsInRange: this.objectsInRange,
-			origin:         origin,
-			renderDistance: this.renderDistance
-		});
-
-		this.lineOfSightWorker.onmessage = function(event){
-			// console.log("return from worker:", event.data);
-		}
-
-
-
-
+	
 
 		let lineOfSight = this.getLineOfSightPath({
-			listOfPoints:listOfPoints, 
+			listOfPoints:this.listOfPoints, 
 			origin:      originPTrans, 
 			distance:    this.renderDistance,
 			coneStart:   startAngle,
@@ -498,9 +498,9 @@ module.exports = class lighting{
 					this.render.textAlign = "left";
 					this.render.fillText(point.name+Math.round(point.angle*100)/100, point.x+12, point.y);
 				}
-				this.render.fillStyle = "white";
-				this.render.textAlign = "right";
-				this.render.fillText(point.count, point.x-12, point.y);
+				// this.render.fillStyle = "white";
+				// this.render.textAlign = "right";
+				// this.render.fillText(point.count, point.x-12, point.y);
 				this.render.restore();
 				index++;
 			}

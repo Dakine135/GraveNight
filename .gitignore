@@ -7,6 +7,7 @@ yarn-error.log*
 
 #webpack compiled
 clientBundle.js
+workers.js
 
 # Runtime data
 pids
