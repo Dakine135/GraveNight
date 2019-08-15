@@ -8,7 +8,7 @@ exports.create = ({
 	width = 50,
 	height = 50,
 	angle=0,
-	color = {r:0, g:0, b:0} //Utilities.randomColor()
+	color = Utilities.randomColor() //{r:0, g:0, b:0}
 })=>{
 	return {
 		id:id,

@@ -26,8 +26,8 @@ module.exports = class lighting{
 		this.darkness=darkness;
 		this.brightness=brightness;
 		if(debug){
-			this.darkness = darkness*0.7;
-			this.brightness = brightness*0.6;
+			this.darkness = darkness*0.8;
+			this.brightness = brightness*0.8;
 		}
 		this.CONTROLS = CONTROLS;
 		this.CAMERA = CAMERA;
@@ -50,9 +50,11 @@ module.exports = class lighting{
 		this.lineOfSightWorker = new LineOfSightWorker();
 		this.listOfPoints = [];
 		this.workerCalculating == false;
+		this.offset = this.CAMERA;
 		this.lineOfSightWorker.onmessage = function(event){
 			// console.log("return from worker:", event.data);
-			this.listOfPoints = event.data;
+			this.listOfPoints = event.data.points;
+			this.offset = event.data.offset;
 			this.workerCalculating = false;
 		}.bind(this);
 		console.log("Created lighting-layer",this.width, this.height);
@@ -289,59 +291,7 @@ module.exports = class lighting{
 		}
 		
 		if(state == null || state.world == null) return;
-		//TODO optimization, get objects needs to take direction into account
-		// this.objectsInRange = State.getObjectsInRange({
-		// 	state: state, 
-		// 	x: origin.x, 
-		// 	y: origin.y, 
-		// 	distance: lineOfSightDistance
-		// });
 
-		this.orderPointsCreated = 0;
-
-		// let listOfPoints = [];
-		
-		
-		// for(var id in this.objectsInRange){
-		// 	let object = this.objectsInRange[id];
-		// 	let points = Hitbox.getVisualPoints({
-		// 		obj:         object.hitbox,
-		// 		viewPoint:   origin,
-		// 		getPointsAfterEdge: true
-		// 	});
-
-		// 	points.forEach(function(point){
-
-		// 		let pointToCheck = point;
-		// 		if(point.extend){
-		// 			pointToCheck = Utilities.extendEndPoint({
-		// 				startPoint: origin, 
-		// 				endPoint: point, 
-		// 				length: this.renderDistance
-		// 			});
-		// 		}
-				
-		// 		let collision = this.getCollision({
-		// 			objects: this.objectsInRange, 
-		// 			origin:  origin, 
-		// 			point:   pointToCheck
-		// 		});
-
-		// 		//calculate "lost" intensity
-		// 		// let lostIntensity = (intensity - collision.dist);
-		// 		// this.addGowingObject({obj: collision.object, intensity: lostIntensity});
-
-		// 		let viewPoint = this.getViewPoint({
-		// 			point: collision.point, 
-		// 			edge:  !collision.collision,
-		// 			color: (collision.collision ? "green" : "yellow"),
-		// 			name: "P",
-		// 			origin: origin
-		// 		});
-		// 		listOfPoints.push(viewPoint);
-	
-		// 	}.bind(this));
-		// } //for objects in range
 		if(!this.workerCalculating){
 			this.workerCalculating = true;
 			this.lineOfSightWorker.postMessage({
@@ -382,14 +332,27 @@ module.exports = class lighting{
 			origin: origin
 		});
 
+		let offsetX = this.offset.x - this.CAMERA.x;
+		let offsetY = this.offset.y - this.CAMERA.y;
+		if(this.debug){
+			this.HUD.debugUpdate({
+		        offsetX: offsetX,
+		        offsetY: offsetY
+		    });
+		}
+
 		//setup flashlight temp canvas
 		let flashlightConeCanvas = document.createElement('canvas');
 		flashlightConeCanvas.width = this.width;
 		flashlightConeCanvas.height = this.height;
 		let flashlightConeRender = flashlightConeCanvas.getContext("2d");
 		//draw full line-of-Sight
+		flashlightConeRender.save();
 		flashlightConeRender.fillStyle = "white";
+		// let cameraTranslate = this.CAMERA.translate({});
+		flashlightConeRender.translate(offsetX, offsetY);
 		flashlightConeRender.fill(lineOfSight);
+		flashlightConeRender.restore();
 		//cone gradient
 		let gradient = this.offscreenRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
@@ -450,9 +413,21 @@ module.exports = class lighting{
 		viewPoint.color = color;
 		viewPoint.angle = pAngle;
 		viewPoint.name = name;
-		viewPoint.count = this.orderPointsCreated;
-		this.orderPointsCreated++;
 		return viewPoint;
+	}
+
+	calculateAngle({point1, point2=null, centerPoint}){
+		if(point2==null) point2 = {x: centerPoint.x+10, y:centerPoint.y};
+		let pAngle = Utilities.calculateAngle({
+										point1: point1, 
+										point2: point2,
+									    centerPoint:centerPoint});
+		// if(pAngle < 0) pAngle = pAngle + Math.PI*2;
+		if(pAngle < 0) pAngle = Math.abs(pAngle);
+		// if(pAngle > Math.PI) pAngle = Math.PI - pAngle;
+		// if(pAngle > width) pAngle = Math.PI*2 - pAngle;
+		//Could cause an issue when cone is wider than PI aka 180, maybe?
+		return pAngle;
 	}
 
 	/*
@@ -483,8 +458,6 @@ module.exports = class lighting{
 			if(this.debug){
 				this.render.save();
 				this.render.fillStyle = point.color;
-				// this.render.fillStyle = (pointInCone ? "green" : "red");
-				// if(point.name === "Start" || point.name === "End") this.render.fillStyle = "yellow";
 				this.render.beginPath();
 				this.render.arc(point.x, point.y, 10, 0, 2*Math.PI);
 				this.render.closePath();
@@ -498,9 +471,6 @@ module.exports = class lighting{
 					this.render.textAlign = "left";
 					this.render.fillText(point.name+Math.round(point.angle*100)/100, point.x+12, point.y);
 				}
-				// this.render.fillStyle = "white";
-				// this.render.textAlign = "right";
-				// this.render.fillText(point.count, point.x-12, point.y);
 				this.render.restore();
 				index++;
 			}
@@ -529,145 +499,5 @@ module.exports = class lighting{
 		}
 		return lineOfSight;
 	}//getLineOfSightPath
-
-	calculateAngle({point1, point2=null, centerPoint}){
-		if(point2==null) point2 = {x: centerPoint.x+10, y:centerPoint.y};
-		let pAngle = Utilities.calculateAngle({
-										point1: point1, 
-										point2: point2,
-									    centerPoint:centerPoint});
-		// if(pAngle < 0) pAngle = pAngle + Math.PI*2;
-		if(pAngle < 0) pAngle = Math.abs(pAngle);
-		// if(pAngle > Math.PI) pAngle = Math.PI - pAngle;
-		// if(pAngle > width) pAngle = Math.PI*2 - pAngle;
-		//Could cause an issue when cone is wider than PI aka 180, maybe?
-		return pAngle;
-	}
-
-	getIntersection(corners, line){
-		// console.log("corners:",corners);
-		let boxLineTop    = {x1:corners.topLeft.x,     y1:corners.topLeft.y, 
-						     x2:corners.topRight.x,    y2:corners.topRight.y};
-		let boxLineRight  = {x1:corners.topRight.x,    y1:corners.topRight.y, 
-						     x2:corners.bottomRight.x, y2:corners.bottomRight.y};
-		let boxLineBottom = {x1:corners.bottomRight.x, y1:corners.bottomRight.y, 
-						     x2:corners.bottomLeft.x,  y2:corners.bottomLeft.y};
-		let boxLineLeft   = {x1:corners.bottomLeft.x,  y1:corners.bottomLeft.y, 
-						     x2:corners.topLeft.x,     y2:corners.topLeft.y};
-		let intersection = false;
-		let intersectingSegment = null;
-		let closestDist = Infinity;
-		let top = Hitbox.collideLineLine(line, boxLineTop);
-		if(top){
-			intersection = top;
-			intersectingSegment = boxLineTop;
-			closestDist = Utilities.dist(top, {x:line.x1, y:line.y1});
-		}
-		let right = Hitbox.collideLineLine(line, boxLineRight);
-		if(right){
-			let dist = Utilities.dist(right, {x:line.x1, y:line.y1});
-			if(dist < closestDist){
-				intersection = right;
-				intersectingSegment = boxLineRight;
-				closestDist = dist;
-			}
-		}
-		let bottom = Hitbox.collideLineLine(line, boxLineBottom);
-		if(bottom){
-			let dist = Utilities.dist(bottom, {x:line.x1, y:line.y1});
-			if(dist < closestDist){
-				intersection = bottom;
-				intersectingSegment = boxLineBottom;
-				closestDist = dist;
-			}
-		}
-		let left = Hitbox.collideLineLine(line, boxLineLeft);
-		if(left){
-			let dist = Utilities.dist(left, {x:line.x1, y:line.y1});
-			if(dist < closestDist){
-				intersection = left;
-				intersectingSegment = boxLineLeft;
-				closestDist = dist;
-			}
-		}
-		return {point: intersection, line: intersectingSegment};
-	}//get intersection
-
-	getCollision({objects, origin, point, mainStartPoint, width, distance=Infinity}){
-		//check all objects in range for collision
-		let closestCollision = false;
-		let closestSegment = null;
-		let closestDist = Infinity;
-		//for object glow
-		let closestObj = null;
-		for(var id in objects){
-			let object = objects[id];
-			let collision = this.getIntersection(object.hitbox, {x1: origin.x,  y1: origin.y,
-														         x2: point.x,   y2: point.y});
-			if(collision){
-				let dist = Utilities.dist(collision.point, origin);
-				if(closestDist > dist){
-					closestObj = object;
-					closestDist = dist;
-					closestCollision = collision.point;
-					closestSegment = collision.line;
-				}
-			}
-		}//for objects in range
-
-		if(closestCollision && closestDist < distance){
-			//make points at the corners of the box
-			let point1 = {x: closestSegment.x1, y: closestSegment.y1};
-			let point2 = {x: closestSegment.x2, y: closestSegment.y2};
-			let angleCollisionToPoint1 = this.calculateAngle({
-											point1: point1,
-											centerPoint:origin});
-			let angleCollisionToPoint2 = this.calculateAngle({
-											point1: point2,
-										    centerPoint:origin});
-			let angleCollision = this.calculateAngle({
-											point1: closestCollision,
-										    centerPoint:origin});
-
-			let cwPoint;
-			let ccwPoint;
-			if(angleCollisionToPoint1 > angleCollisionToPoint2){
-				cwPoint  = point1;
-				cwPoint.angle = angleCollisionToPoint1;
-				ccwPoint = point2;
-				ccwPoint.angle = angleCollisionToPoint2;
-			} else {
-				cwPoint  = point2;
-				cwPoint.angle = angleCollisionToPoint2;
-				ccwPoint = point1;
-				ccwPoint.angle = angleCollisionToPoint1;
-			}
-
-			closestCollision.angle = angleCollision;
-
-			//make sure box edges are not out of range
-			// if(cwPoint.angle  >= endPointAngle || cwPoint.angle  <= startPointAngle){
-			// 	cwPoint = null;
-			// }
-			// if(ccwPoint.angle >= endPointAngle || ccwPoint.angle <= startPointAngle){
-			// 	ccwPoint = null;
-			// }
-
-			return {
-				collision: true,
-				point: closestCollision,
-				dist: closestDist,
-				cwPoint: cwPoint,
-				ccwPoint: ccwPoint,
-				object: closestObj
-			}
-		}//closest Collision
-		else {
-			return {
-				collision: false,
-				point: point
-			}
-		}
-	}//getCollision
 
 }//lighting class

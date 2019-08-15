@@ -14,7 +14,10 @@ onmessage = function(event){
 		renderDistance: data.renderDistance,
 		camera:         data.camera
 	});
-	postMessage(pointsToSend);
+	// setTimeout(()=>{
+		postMessage({points: pointsToSend, offset: data.camera});
+	// },1000);
+	
 }//on message
 
 
@@ -215,6 +218,7 @@ function getCollision({objects, origin, point, distance=Infinity}){
 									    centerPoint:origin});
 		//translate to point for display
 		let viewPoint = translateCamera({camera: camera, point: point});
+		// viewPoint = {x: point.x, y: point.y};
 		viewPoint.edge = edge;
 		viewPoint.color = color;
 		viewPoint.angle = pAngle;
