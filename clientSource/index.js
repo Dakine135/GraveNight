@@ -234,7 +234,7 @@ let sketch = (sk)=>{
     }//if World has been received from Server
 
     //Lighting Stuff
-    LIGHTING.update(deltaTime, objectsToDraw);
+    LIGHTING.update(deltaTime, objectsToDraw, myPlayer);
     LIGHTING.draw(STATES.frameState);
     
 

@@ -16,7 +16,7 @@ onmessage = function(event){
 	});
 	// setTimeout(()=>{
 		postMessage({points: pointsToSend, offset: data.camera});
-	// },1000);
+	// },500);
 	
 }//on message
 

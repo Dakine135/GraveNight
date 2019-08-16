@@ -179,11 +179,11 @@ function getVisualPoints({obj, viewPoint, getPointsAfterEdge=false}){
 			pRotatedCCW.extend = true;
 			returnPoints.push(pRotatedCCW);
 		} else {
-			console.log("Catch in getVisualPoints, possibly viewPoint is inside the box");
+			// console.log("Catch in getVisualPoints, possibly viewPoint is inside the box");
 		}
 	}
 
-	if(returnPoints.length < 4 || returnPoints.length > 5) console.log("Wrong amount of points:", returnPoints.length);
+	// if(returnPoints.length < 4 || returnPoints.length > 5) console.log("Wrong amount of points:", returnPoints.length);
 
 	return returnPoints;
 

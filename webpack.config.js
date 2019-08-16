@@ -5,7 +5,7 @@ module.exports = {
     entry: './clientSource/index.js',
     devtool: 'inline-source-map',
     optimization: {
-        minimize: true
+        // minimize: true
     },
     output: {
         filename: 'clientBundle.js',

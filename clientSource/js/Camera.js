@@ -64,5 +64,6 @@ module.exports = class Camera{
 		if(Math.abs(diffX) < 2) moveX = this.goalX;
 		if(Math.abs(diffY) < 2) moveY = this.goalY;
 		this.moveTo(moveX, moveY);
+		// this.moveTo(this.goalX, this.goalY);
 	}
 }//camera class
