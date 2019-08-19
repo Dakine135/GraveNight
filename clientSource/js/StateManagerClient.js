@@ -61,11 +61,9 @@ export default class StatesManager{
 
 		if(drawingState == null) return;
 		// console.log(drawingState.toString({verbose:true}));
+		//TODO only draw players in range of you
 		for(var id in drawingState.players){
 			Player.draw(drawingState.players[id], this.sk, this.CAMERA);
-		}
-		for(var id in drawingState.blocks){
-			Block.draw(drawingState.blocks[id], this.sk, this.CAMERA);
 		}
 		
 	}//draw

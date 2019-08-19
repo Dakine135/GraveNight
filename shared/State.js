@@ -149,7 +149,6 @@ function getObjectsInRange({
 		y=0,
 		distance=50
 	}){
-	// console.log(state);
 	//get objects in World
 	let objectsInRange = World.getObjects({
 		world: state.world, 
@@ -157,16 +156,31 @@ function getObjectsInRange({
 		y: y, 
 		distance: distance
 	});
-	//get other players in Range
-	// for(var id in state.players){
-	// 	let player = state.players[id];
-	// 	//skip over if yourself
-	// 	if(player.x == x && player.y == y) continue;
-	// 	//check distance and add if in range.
-	// }
 	return objectsInRange;
 }
 exports.getObjectsInRange = getObjectsInRange;
+
+function getPlayersInRange({
+		state=null, 
+		x=0,
+		y=0,
+		distance=50
+	}){
+	let playersInRange = {};
+	//get other players in Range
+	for(var id in state.players){
+		let player = state.players[id];
+		//skip over if yourself
+		// if(player.x == x && player.y == y) continue;
+		//check distance and add if in range.
+		let dist = Utilities.dist({x: x, y: y}, {x: player.x, y: player.y});
+		if(dist <= distance){
+			playersInRange[player.socketId] = player;
+		}
+	}
+	return playersInRange;
+}
+exports.getPlayersInRange = getPlayersInRange;
 
 /*
  	Return what you are colliding with or null
