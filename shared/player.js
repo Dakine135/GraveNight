@@ -16,7 +16,7 @@ exports.create = ({
 		width = 50,
 		height = 50,
 		color = Utilities.randomColor(),
-		energy = 200
+		energy = 400
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent

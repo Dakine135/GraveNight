@@ -32,8 +32,8 @@ var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
-var DARKNESS = 0.99; //1 full dark, 0 full light
-var BRIGHTNESS = 0.95;  //1 full white, 0 no light
+var DARKNESS = 0.95; //1 full dark, 0 full light
+var BRIGHTNESS = 0.97;  //1 full white, 0 no light
 var p5Canvas;
 
 var currentTime = new Date().getTime();
@@ -233,8 +233,17 @@ let sketch = (sk)=>{
       }
     }//if World has been received from Server
 
+    let playersInRange = {};
+    if(myPlayer != null){
+      playersInRange = STATES.getPlayersInRange({
+        x: myPlayer.x,
+        y: myPlayer.y,
+        distance: RENDERDISTANCE
+      });
+    }
+
     //Lighting Stuff
-    LIGHTING.update(deltaTime, objectsToDraw, myPlayer);
+    LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
     LIGHTING.draw(STATES.frameState);
     
 

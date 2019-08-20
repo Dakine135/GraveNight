@@ -87,8 +87,17 @@ export default class StatesManager{
 			this.frameState = State.InterpolateCreateNew(this.state, this.nextState, percent);
 			return this.frameState;
 		}
-		
-	}
+	}// getIntermediateState
+
+	getPlayersInRange({ 
+		x=0,
+		y=0,
+		distance=50
+	}){
+		return State.getPlayersInRange({
+						state: this.frameState, x:x, y:y, distance: distance
+					});
+	}//getPlyaersInRange
 
 	removePlayer(info){
 		if(this.debug) console.log(`Removing Player ${info}`);

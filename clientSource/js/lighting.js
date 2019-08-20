@@ -44,23 +44,11 @@ module.exports = class lighting{
 		this.lightSources = {};
 		this.objectsInRange = {};
 		this.myPlayer == null;
-		this.lineOfSightOrigin = {x:0, y:0};
-		this.lineOfSightFlashlightOrigin = {x:0, y:0};
-		this.lineOfSightWorker = new LineOfSightWorker();
-		this.listOfPoints = [];
-		this.workerCalculating == false;
-		this.offset = this.CAMERA;
-		this.lineOfSightWorker.onmessage = function(event){
-			// console.log("return from worker:", event.data);
-			this.listOfPoints = event.data.points;
-			this.offset = event.data.offset;
-			this.workerCalculating = false;
-			if(this.debug){
-				this.HUD.debugUpdate({
-	        lightPoints: this.listOfPoints.length
-		    });
-			}
-		}.bind(this);
+
+		//contains cached info about how to draw each players light
+		this.playersToDraw = {};
+
+
 		console.log("Created lighting-layer",this.width, this.height);
 	}//constructor
 
@@ -86,49 +74,79 @@ module.exports = class lighting{
 		}
 	}//create light source
 
-	update(deltaTime, objectsToDraw, myPlayer){
+	update(deltaTime, objectsToDraw, myPlayer, playersInRange){
 		this.objectsInRange = objectsToDraw;
 		if(this.debug){
 			this.HUD.debugUpdate({
 		        ObjectsInRangeLighting: Object.keys(this.objectsInRange).length
 		    });
 		}
-
 		if(myPlayer != null){
 			this.myPlayer = myPlayer;
-			this.lineOfSightOrigin = {x: myPlayer.x, y: myPlayer.y};
-			let x = (myPlayer.x + myPlayer.width *0.5 + 5);
-    	let y = (myPlayer.y + myPlayer.height*0.5);
-    	this.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
-    		center:this.lineOfSightOrigin,
-    		point:{x:x, y:y},
-    		angle: myPlayer.angle
-    	});
 		}
 
-		if(!this.workerCalculating){
-			this.workerCalculating = true;
-			this.lineOfSightWorker.postMessage({
-				objectsInRange: this.objectsInRange,
-				origin:         this.lineOfSightFlashlightOrigin,
-				renderDistance: this.renderDistance,
-				camera:         this.CAMERA
-			});
-		}
 
-		//get players flightlight lineOfSight
-    // for(var id in state.players){
-    // 	if(id != this.myPlayer.socketId){
-    //   	let player = state.players[id];
-    //   	let x = (player.x + player.width *0.5 + 5);
-    //   	let y = (player.y + player.height*0.5);
-    //   	let flashlightOrigin = this.CAMERA.rotatePoint({
-    //   		center:{x: player.x, y: player.y},
-    //   		point:{x:x, y:y},
-    //   		angle: player.angle
-    //   	});
-    // 	}//if not myPlayer
-    // }//for each player
+
+		for(var id in playersInRange){
+			let player = playersInRange[id];
+			if(this.playersToDraw[id] == null){
+				//create entry
+				let newPlayerInRange = {};
+				newPlayerInRange.lineOfSightOrigin = {x: player.x, y: player.y};
+				let x = (player.x + player.width *0.5 + 5);
+	    	let y = (player.y + player.height*0.5);
+	    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+	    		center:newPlayerInRange.lineOfSightOrigin,
+	    		point:{x: x, y: y},
+	    		angle: player.angle
+	    	});
+				newPlayerInRange.lineOfSightWorker = new LineOfSightWorker();
+				newPlayerInRange.listOfPoints = [];
+				newPlayerInRange.workerCalculating == false;
+				newPlayerInRange.offset = this.CAMERA;
+				let that = this;
+				newPlayerInRange.lineOfSightWorker.onmessage = function(event){
+					// console.log("return from worker:", event.data);
+					newPlayerInRange.listOfPoints = event.data.points;
+					newPlayerInRange.offset = event.data.offset;
+					let originPTrans = that.CAMERA.translate(newPlayerInRange.lineOfSightFlashlightOrigin);
+					let lineOfSight = that.getLineOfSightPath({
+						listOfPoints:newPlayerInRange.listOfPoints, 
+						origin:      originPTrans, 
+						distance:    that.renderDistance
+					});
+					newPlayerInRange.lineOfSightPath = lineOfSight;
+					newPlayerInRange.workerCalculating = false;
+				}.bind(newPlayerInRange);
+				this.playersToDraw[id] = newPlayerInRange;
+			}//create new player in range entry for lighting
+			else{
+				//update entry
+				let playerLightEntry = this.playersToDraw[id];
+				playerLightEntry.lineOfSightOrigin = {x: player.x, y: player.y};
+				let x = (player.x + player.width *0.5 + 5);
+	    	let y = (player.y + player.height*0.5);
+	    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+	    		center:playerLightEntry.lineOfSightOrigin,
+	    		point:{x: x, y: y},
+	    		angle: player.angle
+	    	});
+			}//update existing
+
+			let playerLightEntry = this.playersToDraw[id];
+
+			//TODO each line of sight needs its own objects in range
+			//update the lineOfSight
+			if(!playerLightEntry.workerCalculating){
+				playerLightEntry.workerCalculating = true;
+				playerLightEntry.lineOfSightWorker.postMessage({
+					objectsInRange: this.objectsInRange,
+					origin:         playerLightEntry.lineOfSightFlashlightOrigin,
+					renderDistance: this.renderDistance,
+					camera:         this.CAMERA
+				});
+			}//if worker is not still busy with the last calculation
+		}//for each player in range
 
 	}//update
 
@@ -164,57 +182,21 @@ module.exports = class lighting{
         	
         }
 
-        //draw myPlayer
-        if(this.myPlayer){
-        	let originPTrans = this.CAMERA.translate(this.lineOfSightFlashlightOrigin);
-        	let lineOfSight = this.getLineOfSightPath({
-						listOfPoints:this.listOfPoints, 
-						origin:      originPTrans, 
-						distance:    this.renderDistance
-					});
+        for(var id in this.playersToDraw){
+        	let playerToDraw = this.playersToDraw[id];
+        	
 
         	this.drawLightCone({
-        		x: this.lineOfSightFlashlightOrigin.x, 
-        		y: this.lineOfSightFlashlightOrigin.y,
-        		angle: this.myPlayer.angle, //player.angle
-        		intensity:(this.myPlayer.energy*2),
+        		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
+        		y: playerToDraw.lineOfSightFlashlightOrigin.y,
+        		angle: state.players[id].angle, //player.angle
+        		intensity:(state.players[id].energy*2),
         		brightness: this.brightness,
-        		lineOfSight: lineOfSight
+        		lineOfSight: playerToDraw.lineOfSightPath,
+        		offset:    playerToDraw.offset
         	});
         }
-
-        //draw Player lights
-        for(var id in state.players){
-        	if(id != this.myPlayer.socketId){
-	        	let player = state.players[id];
-	        	let x = (player.x + player.width *0.5 + 5);
-	        	let y = (player.y + player.height*0.5);
-	        	let rotatedPoint = this.CAMERA.rotatePoint({
-	        		center:{x: player.x, y: player.y},
-	        		point:{x:x, y:y},
-	        		angle: player.angle
-	        	});
-	        	let originPTrans = this.CAMERA.translate(rotatedPoint);
-	        	let lineOfSight = this.getLineOfSightPath({
-							listOfPoints:this.listOfPoints, 
-							origin:      originPTrans, 
-							distance:    this.renderDistance
-						});
-	        	// this.drawLightPoint({
-	        	// 	x: player.x, 
-	        	// 	y: player.y, 
-	        	// 	intensity:(player.energy/2)
-	        	// });
-	        	this.drawLightCone({
-	        		x: rotatedPoint.x, 
-	        		y: rotatedPoint.y,
-	        		angle: player.angle, //player.angle
-	        		intensity:(player.energy*2),
-	        		brightness: this.brightness,
-	        		lineOfSight: lineOfSight
-	        	});
-        	}//if not myPlayer
-        }//for each player
+        
 
         this.render.globalCompositeOperation = "xor";
         this.render.drawImage(this.offscreenCanvas, 0, 0);
@@ -285,7 +267,8 @@ module.exports = class lighting{
 		intensity,
 		brightness = this.brightness,
 		darkness   = this.darkness,
-		lineOfSight
+		lineOfSight,
+		offset
 	}){
 		if(intensity<=0){
 			return;
@@ -327,8 +310,8 @@ module.exports = class lighting{
 			origin: origin
 		});
 
-		let offsetX = Math.round(this.offset.x - this.CAMERA.x);
-		let offsetY = Math.round(this.offset.y - this.CAMERA.y);
+		let offsetX = Math.round(offset.x - this.CAMERA.x);
+		let offsetY = Math.round(offset.y - this.CAMERA.y);
 		if(this.debug){
 			this.HUD.debugUpdate({
 		        offsetX: offsetX,
