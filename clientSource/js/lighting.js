@@ -178,7 +178,11 @@ module.exports = class lighting{
         //draw light sources
         for(var id in this.lightSources){
         	let light = this.lightSources[id];
-        	this.drawLightPoint({x:light.x, y:light.y, intensity:light.intensity});
+        	this.drawLightPoint({
+        		x:light.x, 
+        		y:light.y, 
+        		intensity:light.intensity
+        	});
         	
         }
 
@@ -191,7 +195,14 @@ module.exports = class lighting{
 	        		y: playerToDraw.lineOfSightFlashlightOrigin.y,
 	        		angle: state.players[id].angle, //player.angle
 	        		intensity:(state.players[id].energy*2),
-	        		brightness: this.brightness,
+	        		lineOfSight: playerToDraw.lineOfSightPath,
+	        		offset:    playerToDraw.offset
+	        	});
+
+	        	this.drawLightPoint({
+	        		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
+	        		y: playerToDraw.lineOfSightFlashlightOrigin.y,
+	        		intensity:(state.players[id].energy*2),
 	        		lineOfSight: playerToDraw.lineOfSightPath,
 	        		offset:    playerToDraw.offset
 	        	});
@@ -231,33 +242,57 @@ module.exports = class lighting{
 	drawLightPoint({
 		x, 
 		y, 
-		intensity
+		intensity,
+		brightness = this.brightness,
+		darkness   = this.darkness,
+		lineOfSight = null,
+		offset = {x:0, y:0}
 	}){
 		// console.log("lightdraw:",intensity);
 		if(intensity<=0){
 			return;
 		}
-		let originP = {
+		let origin = {
 			x: Math.round(x),
 			y: Math.round(y)
 		}
-		intensity = Math.floor(intensity);
-		let originPTrans = this.CAMERA.translate(originP);
+		let originPTrans = this.CAMERA.translate(origin);
 
-		this.offscreenRender.save();
-		this.offscreenRender.beginPath();
-    	let gradient = this.offscreenRender.createRadialGradient(
-    		originPTrans.x, originPTrans.y, 0, 
-    		originPTrans.x, originPTrans.y, intensity);
-    	gradient.addColorStop(0,  "rgba(255, 255, 255, 1)");
-    	gradient.addColorStop(0.4,"rgba(255, 255, 255, 0.9)");
-    	// gradient.addColorStop(0.7,"rgba(255, 255, 255, 0.5)");
-    	gradient.addColorStop(1,  "rgba(255, 255, 255, 0)");
-    	this.offscreenRender.fillStyle = gradient;
-    	this.offscreenRender.arc(originPTrans.x, originPTrans.y, intensity, 0, Math.PI*2);
-    	this.offscreenRender.closePath();
-    	this.offscreenRender.fill();
-    	this.offscreenRender.restore();
+		let offsetX = Math.round(offset.x - this.CAMERA.x);
+		let offsetY = Math.round(offset.y - this.CAMERA.y);
+
+		//setup flashlight glow temp canvas
+		let flashlightGlowCanvas = document.createElement('canvas');
+		flashlightGlowCanvas.width = this.width;
+		flashlightGlowCanvas.height = this.height;
+		let flashlightGlowRender = flashlightGlowCanvas.getContext("2d");
+		//draw full line-of-Sight
+		if(lineOfSight){
+			flashlightGlowRender.save();
+			flashlightGlowRender.fillStyle = "white";
+			flashlightGlowRender.translate(offsetX, offsetY);
+			flashlightGlowRender.fill(lineOfSight);
+			flashlightGlowRender.restore();
+		}
+		//glow gradient
+		let restIntensity = intensity*0.5;
+		let gradientRest = this.offscreenRender.createRadialGradient(
+			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
+			originPTrans.x, originPTrans.y, restIntensity
+		);
+	  	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+	  	gradientRest.addColorStop(0.9,"rgba(255, 255, 255, "+(brightness*0.3)+")");
+	  	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
+	  	//only keep what over-laps
+		if(lineOfSight) flashlightGlowRender.globalCompositeOperation = "source-in";
+		flashlightGlowRender.arc(originPTrans.x, originPTrans.y, intensity, 
+			0, Math.PI*2);
+		flashlightGlowRender.fillStyle = gradientRest;
+		flashlightGlowRender.fill();
+
+		//apply glow canvas to main lighting offscreen canvas
+        this.offscreenRender.drawImage(flashlightGlowCanvas, 0, 0);
+
 	}//draw light point
 
 	/*
@@ -314,12 +349,6 @@ module.exports = class lighting{
 
 		let offsetX = Math.round(offset.x - this.CAMERA.x);
 		let offsetY = Math.round(offset.y - this.CAMERA.y);
-		if(this.debug){
-			this.HUD.debugUpdate({
-		        offsetX: offsetX,
-		        offsetY: offsetY
-		    });
-		}
 
 		//setup flashlight temp canvas
 		let flashlightConeCanvas = document.createElement('canvas');
@@ -345,10 +374,10 @@ module.exports = class lighting{
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity
 		);
-  	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-  	gradient.addColorStop(0.8,"rgba(255, 255, 255, "+(brightness*0.5)+")");
-  	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
-  	//only keep what over-laps
+	  	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
+	  	gradient.addColorStop(0.9,"rgba(255, 255, 255, "+(brightness*0.3)+")");
+	  	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
+	  	//only keep what over-laps
 		flashlightConeRender.globalCompositeOperation = "source-in";
 		flashlightConeRender.beginPath();
 		flashlightConeRender.moveTo(viewPointEnd.x, viewPointEnd.y);
@@ -360,38 +389,7 @@ module.exports = class lighting{
 		flashlightConeRender.fill();
 
 		//apply cone canvas to main lighting offscreen canvas
-    this.offscreenRender.drawImage(flashlightConeCanvas, 0, 0);
-
-
-    //setup flashlight glow temp canvas
-		let flashlightGlowCanvas = document.createElement('canvas');
-		flashlightGlowCanvas.width = this.width;
-		flashlightGlowCanvas.height = this.height;
-		let flashlightGlowRender = flashlightGlowCanvas.getContext("2d");
-		//draw full line-of-Sight
-		flashlightGlowRender.save();
-		flashlightGlowRender.fillStyle = "white";
-		flashlightGlowRender.translate(offsetX, offsetY);
-		flashlightGlowRender.fill(lineOfSight);
-		flashlightGlowRender.restore();
-		//glow gradient
-		let restIntensity = intensity*0.5;
-		let gradientRest = this.offscreenRender.createRadialGradient(
-			originPTrans.x, originPTrans.y, (restIntensity*0.2), 
-			originPTrans.x, originPTrans.y, restIntensity
-		);
-  	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-  	gradientRest.addColorStop(0.8,"rgba(255, 255, 255, "+(brightness*0.5)+")");
-  	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
-  	//only keep what over-laps
-		flashlightGlowRender.globalCompositeOperation = "source-in";
-		flashlightGlowRender.arc(originPTrans.x, originPTrans.y, intensity, 
-			0, Math.PI*2);
-		flashlightGlowRender.fillStyle = gradientRest;
-		flashlightGlowRender.fill();
-
-		//apply glow canvas to main lighting offscreen canvas
-        this.offscreenRender.drawImage(flashlightGlowCanvas, 0, 0);
+	    this.offscreenRender.drawImage(flashlightConeCanvas, 0, 0);
 
 	}//drawLightCone
 

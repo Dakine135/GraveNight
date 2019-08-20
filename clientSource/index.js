@@ -33,7 +33,7 @@ var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
 var DARKNESS = 0.95; //1 full dark, 0 full light
-var BRIGHTNESS = 0.97;  //1 full white, 0 no light
+var BRIGHTNESS = 1;  //1 full white, 0 no light
 var p5Canvas;
 
 var currentTime = new Date().getTime();
