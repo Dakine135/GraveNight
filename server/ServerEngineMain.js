@@ -39,7 +39,7 @@ module.exports = class Engine {
     this.world = World.create({
       width:10000,
       height:10000,
-      gridsize:50
+      gridsize:32
     });
     World.createBounderies(this.world);
     World.randomWorld(this.world);

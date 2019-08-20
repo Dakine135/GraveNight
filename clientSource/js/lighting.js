@@ -125,12 +125,12 @@ module.exports = class lighting{
 				let playerLightEntry = this.playersToDraw[id];
 				playerLightEntry.lineOfSightOrigin = {x: player.x, y: player.y};
 				let x = (player.x + player.width *0.5 + 5);
-	    	let y = (player.y + player.height*0.5);
-	    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
-	    		center:playerLightEntry.lineOfSightOrigin,
-	    		point:{x: x, y: y},
-	    		angle: player.angle
-	    	});
+		    	let y = (player.y + player.height*0.5);
+		    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+		    		center:playerLightEntry.lineOfSightOrigin,
+		    		point:{x: x, y: y},
+		    		angle: player.angle
+		    	});
 			}//update existing
 
 			let playerLightEntry = this.playersToDraw[id];
@@ -185,16 +185,18 @@ module.exports = class lighting{
         for(var id in this.playersToDraw){
         	let playerToDraw = this.playersToDraw[id];
         	
-
-        	this.drawLightCone({
-        		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
-        		y: playerToDraw.lineOfSightFlashlightOrigin.y,
-        		angle: state.players[id].angle, //player.angle
-        		intensity:(state.players[id].energy*2),
-        		brightness: this.brightness,
-        		lineOfSight: playerToDraw.lineOfSightPath,
-        		offset:    playerToDraw.offset
-        	});
+        	if (playerToDraw.lineOfSightPath) {
+        		this.drawLightCone({
+	        		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
+	        		y: playerToDraw.lineOfSightFlashlightOrigin.y,
+	        		angle: state.players[id].angle, //player.angle
+	        		intensity:(state.players[id].energy*2),
+	        		brightness: this.brightness,
+	        		lineOfSight: playerToDraw.lineOfSightPath,
+	        		offset:    playerToDraw.offset
+	        	});
+        	}
+        	
         }
         
 
@@ -344,7 +346,7 @@ module.exports = class lighting{
 			originPTrans.x, originPTrans.y, intensity
 		);
   	gradient.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-  	gradient.addColorStop(0.6,"rgba(255, 255, 255, "+brightness+")");
+  	gradient.addColorStop(0.8,"rgba(255, 255, 255, "+(brightness*0.5)+")");
   	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
   	//only keep what over-laps
 		flashlightConeRender.globalCompositeOperation = "source-in";
@@ -379,7 +381,7 @@ module.exports = class lighting{
 			originPTrans.x, originPTrans.y, restIntensity
 		);
   	gradientRest.addColorStop(0,"rgba(255, 255, 255, "+brightness+")");
-  	gradientRest.addColorStop(0.5,"rgba(255, 255, 255, "+brightness+")");
+  	gradientRest.addColorStop(0.8,"rgba(255, 255, 255, "+(brightness*0.5)+")");
   	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
   	//only keep what over-laps
 		flashlightGlowRender.globalCompositeOperation = "source-in";
