@@ -88,8 +88,8 @@ exports.updateMutate = (obj, currentTime)=>{
 	// console.log("updateMutate");
 	//check for proper parameters
 	if(obj == null || obj == undefined) Utilities.error('Player object null or undefined');
-	if(obj.type != "Player") Utilities.error('Object not of type Player');
-	if(obj.x == null || obj.y == null) Utilities.error('Player object missing location');
+	if(obj.type != "Player")            Utilities.error('Object not of type Player');
+	if(obj.x == null || obj.y == null)  Utilities.error('Player object missing location');
 	
 	//actually do update on new object
 	//do final calculations on movement to account for buttons held for the duration of the tick

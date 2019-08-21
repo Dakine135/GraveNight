@@ -52,6 +52,7 @@ function processActions(state, previousState){
 	let actions = previousState.actions;
 	//move threw actions backwards (first in first out)
 	var startTime = previousState.time;
+	// if(actions.length > 0) console.log(actions.length);
 	for(var i=0; i<actions.length; i++){
 		//process action on state
 		let action = actions[i];

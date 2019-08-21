@@ -12,6 +12,14 @@ module.exports = class Camera{
 		this.goalY = y;
 		this.speed = speed; //1 would be instant camera, percent to move each update toward player of remaining distance
 	}
+
+	resize({
+		width,
+		height
+	}){
+		this.width = width;
+		this.height = height;
+	}
 	
 	moveTo(x, y){
 		this.x = x;

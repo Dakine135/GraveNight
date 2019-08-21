@@ -9,6 +9,7 @@ export default class Controls{
 		this.CAMERA = CAMERA;
 
 		this.mouse = {x:0, y:0};
+		this.keysBringPressed = {};
 
 		this.leftClickPressed=false;
 		this.middleClickPressed=false;
@@ -29,25 +30,23 @@ export default class Controls{
 		    case 2: this.rightClickPressed  = false; break;
 		  }
 		});
-		window.addEventListener('wheel', this.scollEvent.bind(this));
+		window.addEventListener('wheel',          this.scrollEvent.bind(this));
 		window.addEventListener('keydown',        this.keyPressed.bind(this));
 		window.addEventListener('keyup',          this.keyReleased.bind(this));
 		window.addEventListener('mousemove',      this.mouseMoved.bind(this));
-		// var wheelEvent
-
 	}//constructor
 
-	scollEvent(event){
+	scrollEvent(event){
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerScroll',
 			time: eventTime
 		};
 		if(event.deltaY > 0){
-			console.log("scroll Down");
+			if(this.debug) console.log("scroll Down");
 			data.direction = 1;
 		} else {
-			console.log("scroll up");
+			if(this.debug) console.log("scroll up");
 			data.direction = -1;
 		}
 		this.NETWORK.sendClientAction(data);
@@ -59,6 +58,11 @@ export default class Controls{
 		let keyCode = event.keyCode;
 		let key     = event.key;
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
+		if(!this.keysBringPressed[keyCode]) this.keysBringPressed[keyCode] = true;
+		else{ 
+			//console.log("key already pressed:", keyCode); 
+			return;
+		};
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
@@ -102,6 +106,11 @@ export default class Controls{
 		let keyCode = event.keyCode;
 		let key     = event.key;
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
+		if(this.keysBringPressed[keyCode]) this.keysBringPressed[keyCode] = false;
+		else{ 
+			//console.log("key never pressed but Released:", keyCode); 
+			return;
+		};
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 

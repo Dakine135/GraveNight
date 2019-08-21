@@ -54,10 +54,16 @@ module.exports = class lighting{
 
 	resize({
 		width,
-		height
+		height,
+		renderDistance
 	}){
 		this.width = width;
 		this.height = height;
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
+		this.offscreenCanvas.width = this.width;
+		this.offscreenCanvas.height = this.height;
+		this.renderDistance = renderDistance;
 	}
 
 	createLightSource({

@@ -9,7 +9,7 @@ import Block from '../shared/Block.js';
 
 console.log("index.js loaded in bundle");
 var WIDTH = window.innerWidth;
-var HIEGHT = window.innerHeight;
+var HEIGHT = window.innerHeight;
 var STATES = {};
 var CONTROLS = {};
 var NETWORK = {};
@@ -19,7 +19,7 @@ var HUD = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
-var DARKNESS = 0.95; //1 full dark, 0 full light
+var DARKNESS = 0.98; //1 full dark, 0 full light
 var BRIGHTNESS = 1;  //1 full white, 0 no light
 
 let divId = "main-layer";
@@ -33,14 +33,14 @@ var frames = 0;
 
 function setup(){
     console.log("Start Setup");
-    console.log("Screen Size: ", WIDTH, HIEGHT);
+    console.log("Screen Size: ", WIDTH, HEIGHT);
     canvas.width  = WIDTH;
-    canvas.height = HIEGHT;
-    RENDERDISTANCE = Math.max(WIDTH, HIEGHT)*0.6;
+    canvas.height = HEIGHT;
+    RENDERDISTANCE = Math.max(WIDTH, HEIGHT)*0.6;
     CAMERA = new Camera({
       x:0,y:0, 
       width:WIDTH, 
-      height:HIEGHT,
+      height:HEIGHT,
       speed:0.1
     });
     STATES = new StatesManager({
@@ -58,20 +58,20 @@ function setup(){
     });
     NETWORK.updateServerTimeDiffernce();
     CONTROLS = new Controls({
-      debug:   true, 
+      debug:   false, 
       NETWORK: NETWORK, 
       STATES:  STATES, 
       CAMERA:  CAMERA
     });
     HUD = new Hud({
       width:    WIDTH, 
-      height:   HIEGHT,
+      height:   HEIGHT,
       CONTROLS: CONTROLS
     });
     LIGHTING = new Lighting({
-      debug: true,
+      debug: false,
       width: WIDTH, 
-      height: HIEGHT,
+      height: HEIGHT,
       renderDistance: RENDERDISTANCE,
       CONTROLS:   CONTROLS,
       CAMERA:     CAMERA,
@@ -83,20 +83,25 @@ function setup(){
     console.log("End Setup");
 }//SETUP
 
-  // sk.windowResized = ()=>{
-   //    //https://p5js.org/reference/#/p5/resizeCanvas
-   //    //TODO make lighting and camera and GUI, and such resize with window as well
-   //    sk.resizeCanvas(sk.windowWidth, sk.windowHeight);
-   //    console.log("Resize: ",sk.windowWidth, sk.windowHeight);
-   //    RENDERDISTANCE = Math.max(sk.windowWidth, sk.windowHeight);
-   //  } //window Resized
+window.addEventListener('resize', windowResized);
+function windowResized(){
+  WIDTH = window.innerWidth;
+  HEIGHT = window.innerHeight;
+  console.log("Resize: ", WIDTH, HEIGHT);
+  canvas.width  = WIDTH;
+  canvas.height = HEIGHT;
+  RENDERDISTANCE = Math.max(WIDTH, HEIGHT);
+  LIGHTING.resize({width: WIDTH, height: HEIGHT, renderDistance: RENDERDISTANCE});
+  HUD.resize({width: WIDTH, height: HEIGHT});
+  CAMERA.resize({width: WIDTH, height: HEIGHT});
+} //window Resized
 
 function draw(){
   //background "wipes" the screen every frame
   //clear the canvas
   render.save();
   render.setTransform(1, 0, 0, 1, 0, 0);
-  render.clearRect(0, 0, WIDTH, HIEGHT);
+  render.clearRect(0, 0, WIDTH, HEIGHT);
   render.beginPath();
   render.restore();
   currentTime = new Date().getTime();
@@ -114,16 +119,18 @@ function draw(){
   //draw line between player and cursor
   if(myPlayer != null){
     let playerLocOnScreen = CAMERA.translate({x: myPlayer.x, y: myPlayer.y});
-    // sk.line(
-    //   playerLocOnScreen.x, playerLocOnScreen.y, 
-    //   mouse.x, mouse.y
-    //);
   }
 
   //square at 0,0
   let origin = CAMERA.translate({x:0, y:0});
-  // sk.rect(origin.x-10,origin.y-10,20,20);
-  // sk.text(0+","+0,origin.x, origin.y);
+  render.save();
+  render.strokeStyle = "black";
+  render.strokeRect(origin.x-10, origin.y-10, 20, 20);
+  // render.font = "px Arial";
+  render.textAlign = "center";
+  render.fillText(0+","+0, origin.x, origin.y);
+  render.restore();
+  
 
   //Main state, players
   STATES.draw(deltaTime);
@@ -172,7 +179,7 @@ function draw(){
     NETWORK.updateServerTimeDiffernce();
     HUD.debugUpdate({
       FrameRate: frames,
-      ScreenSize: WIDTH+", "+HIEGHT,
+      ScreenSize: WIDTH+", "+HEIGHT,
       Ping: NETWORK.ping,
       ServerUPS: STATES.serverUpdatesPerSecond,
       timeDiffernce: NETWORK.timeDiffernce,

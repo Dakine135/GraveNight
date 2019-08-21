@@ -23,6 +23,16 @@ module.exports = class HUD{
 		console.log("Created hud-layer", this.width, this.height);
 	}//constructor
 
+	resize({
+		width,
+		height
+	}){
+		this.width = width;
+		this.height = height;
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
+	}
+
 	update(obj){
 		for(var id in obj){
 			this[id] = obj[id];
@@ -82,8 +92,8 @@ module.exports = class HUD{
     this.render.lineTo(this.CONTROLS.mouse.x, this.CONTROLS.mouse.y+size);
     this.render.stroke();
     this.render.font = size+"px Arial";
-		this.render.strokeStyle = "white";
-		this.render.textAlign = "center";
+	this.render.strokeStyle = "white";
+	this.render.textAlign = "center";
     //location on screen
     this.render.fillText(this.CONTROLS.mouse.x+","+this.CONTROLS.mouse.y, 
     	this.CONTROLS.mouse.x, this.CONTROLS.mouse.y-size
