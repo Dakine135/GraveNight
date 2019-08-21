@@ -8,40 +8,34 @@ export default class Controls{
 		this.STATES = STATES;
 		this.CAMERA = CAMERA;
 
+		this.mouse = {x:0, y:0};
+
 		this.leftClickPressed=false;
 		this.middleClickPressed=false;
 		this.rightClickPressed=false;
 		window.addEventListener('mousedown', event => {
-		  // console.log(event.button);
+		  if(this.debug) console.log("mousePressed:", event.button);
 		  switch(event.button){
-		    case 0:
-		      this.leftClickPressed = true;
-		      break;
-		    case 1:
-		      this.middleClickPressed=true;
-		      break;
-		    case 2:
-		      this.rightClickPressed = true;
-		      break;
+		    case 0: this.leftClickPressed   = true; break;
+		    case 1: this.middleClickPressed = true; break;
+		    case 2: this.rightClickPressed  = true; break;
 		  }
 		});
 		window.addEventListener('mouseup', event => {
-		  // console.log(event.button);
+		  if(this.debug) console.log("mouseReleased:", event.button);
 		  switch(event.button){
-		    case 0:
-		      this.leftClickPressed = false;
-		      break;
-		    case 1:
-		      this.middleClickPressed=false;
-		      break;
-		    case 2:
-		      this.rightClickPressed = false;
-		      break;
+		    case 0: this.leftClickPressed   = false; break;
+		    case 1: this.middleClickPressed = false; break;
+		    case 2: this.rightClickPressed  = false; break;
 		  }
 		});
-		window.addEventListener('DOMMouseScroll', this.scollEvent);
+		window.addEventListener('wheel', this.scollEvent.bind(this));
+		window.addEventListener('keydown',        this.keyPressed.bind(this));
+		window.addEventListener('keyup',          this.keyReleased.bind(this));
+		window.addEventListener('mousemove',      this.mouseMoved.bind(this));
 		// var wheelEvent
-	}
+
+	}//constructor
 
 	scollEvent(event){
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
@@ -49,7 +43,7 @@ export default class Controls{
 			type:'playerScroll',
 			time: eventTime
 		};
-		if(event.detail > 0){
+		if(event.deltaY > 0){
 			console.log("scroll Down");
 			data.direction = 1;
 		} else {
@@ -61,7 +55,9 @@ export default class Controls{
 		this.STATES.addAction(data);
 	}
 
-	keyPressed(keyCode, key) {
+	keyPressed(event) {
+		let keyCode = event.keyCode;
+		let key     = event.key;
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
@@ -102,7 +98,9 @@ export default class Controls{
 		}
 	} //keyPressed
 
-	keyReleased(keyCode, key) {
+	keyReleased(event) {
+		let keyCode = event.keyCode;
+		let key     = event.key;
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
@@ -151,11 +149,11 @@ export default class Controls{
 		return {x:worldX, y:worldY};
 	}
 
-	mouseMoved(mouseX, mouseY) {
-		if(this.debug) console.log(`Mouse: ${mouseX}, ${mouseY}`);
+	mouseMoved(event) {
+		let mouseX = event.pageX;
+		let mouseY = event.pageY;
+		this.mouse = {x: mouseX, y: mouseY};
 		let locInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
-		if(this.debug) console.log(`locInWorld: ${locInWorld.x}, ${locInWorld.y}`);
-		// if(this.debug) console.log("player Angle:", angle);
 		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerCursor',

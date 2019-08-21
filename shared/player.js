@@ -16,7 +16,8 @@ exports.create = ({
 		width = 50,
 		height = 50,
 		color = Utilities.randomColor(),
-		energy = 300
+		energy = 500,
+		flashlightFocus = 0.5
 	}) => {
 	return {
 		id: socketId, //might change later to something else more persistent
@@ -43,6 +44,7 @@ exports.create = ({
 		angle: angle,
 		color: color,
 		energy:energy,
+		flashlightFocus:flashlightFocus,
 		//just server stuff
 		ping: 0,
 		timeDiffernce: 0,
@@ -148,6 +150,13 @@ exports.setMovementDirectionMutate = (obj, action)=>{
 	}
 } //set setMovementMutate
 
+exports.focusFlashLightMutate = (obj, action)=>{
+	let step = 0.1;
+	obj.flashlightFocus = obj.flashlightFocus + (step*action.direction);
+	if(obj.flashlightFocus < 0) obj.flashlightFocus = 0;
+	else if(obj.flashlightFocus > 1) obj.flashlightFocus = 1;
+} // focusFlashLightMutate
+
 /*
 Input:
 	obj = Player object
@@ -193,36 +202,38 @@ function getRandomName(){
 exports.getRandomName = getRandomName;
 
 exports.draw = (obj, render, CAMERA)=>{
-	// console.log("drawing");
-	// console.log("drawing player:", CAMERA);
-	render.push(); // Start a new drawing state
-	render.noStroke();
-	// render.translate(obj.x, obj.y);
+
+	// Start a new drawing state
+	render.save();
+	render.beginPath();
 	let translatedLocation = CAMERA.translate({x: obj.x, y: obj.y});
 	render.translate(translatedLocation.x, translatedLocation.y);
 	//player Name
-	render.textSize(18);
-	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.textAlign(render.CENTER);
-	render.text(obj.name, 0, -obj.height);
+	render.font = "18px Arial";
+	render.fillStyle = `rgba(${obj.color.r}, ${obj.color.g}, ${obj.color.b}, 1)`;
+	render.textAlign = "center";
+	render.fillText(obj.name, 0, -obj.height);
 	//player location for debugging
-	render.fill(0);
-	render.text(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.height);
+	render.fillStyle = "black";
+	render.fillText(Math.round(obj.x)+","+Math.round(obj.y), 0, obj.height);
 	let angleText = Math.round(obj.angle*100)/100+"";
 	if(obj.angle < 0) angleText += " ("+(Math.round((obj.angle + Math.PI*2)*100)/100)+")";
-	render.text(angleText, 0, obj.height*1.5);
+	render.fillText(angleText, 0, obj.height*1.5);
 
 	//rotate for player direction facing
 	render.rotate(obj.angle);
 	//draw main body
-	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.rect (-obj.width/2, -obj.height/2, obj.width, obj.height);
+	render.fillStyle = `rgba(${obj.color.r}, ${obj.color.g}, ${obj.color.b}, 1)`;
+	render.fillRect(-obj.width/2, -obj.width/2, obj.width, obj.height);
 	//draw eyes
-	render.fill(0, 0, 255);
-	render.circle(15, 10, 10);
-	render.circle(15, -10, 10);
+	render.fillStyle = "blue";
+	render.arc(15, 10,  5, 0, 2*Math.PI);
+	render.fill();
+	render.arc(15, -10, 5, 0, 2*Math.PI);
+	render.fill();
 	//draw flashlight
-	render.fill(0);
-	render.rect(15, 20, 20, 10);
-	render.pop(); // Restore original state
+	render.fillStyle = "black";
+	render.fillRect(15, 20, 20, 10);
+	render.closePath();
+	render.restore(); // Restore original state
 }

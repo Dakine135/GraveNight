@@ -30,12 +30,11 @@ exports.create = ({
 } //create
 
 exports.draw = (obj, render, CAMERA)=>{
-	render.push(); // Start a new drawing state
-	render.noStroke();
+	render.save(); // Start a new drawing state
 	let translatedLocation = CAMERA.translate({x: obj.x, y: obj.y});
 	render.translate(translatedLocation.x, translatedLocation.y);
-	//draw block
-	render.fill(obj.color.r, obj.color.g, obj.color.b);
-	render.rect (-obj.width/2, -obj.height/2, obj.width, obj.height);
-	render.pop();
+	// //draw block
+	render.fillStyle = `rgba(${obj.color.r}, ${obj.color.g}, ${obj.color.b}, 1)`;
+	render.fillRect(-obj.width/2, -obj.width/2, obj.width, obj.height);
+	render.restore();
 }//draw

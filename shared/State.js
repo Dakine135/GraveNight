@@ -63,18 +63,19 @@ function processActions(state, previousState){
 		//compensate for ping and time difference
 		//TODO should roll back to previous state and re-simulate the ticks to full incorporate the change at the time the client did the action from their perspective.
 	
-		// console.log("process action:",action.time);
+		// console.log("process action:",action.type);
 		switch(action.type){
 			case "playerMove":
 				Player.setMovementDirectionMutate(player, action);
 				break;
 			case "playerCursor":
-				// console.log("BEFORE player.cursor:",player.cursorX, player.cursorY);
 				Player.setCursorMutate(player, action);
-				// console.log("AFTER player.cursor:",player.cursorX, player.cursorY);
+				break;
+			case "playerScroll":
+				Player.focusFlashLightMutate(player, action);
 				break;
 			default:
-				console.log("Unknown action");
+				console.log("Unknown action", action.type);
 		}
 	}//for each action
 } //processActions
