@@ -5,21 +5,21 @@ const Block = require('./Block.js');
 exports.create = ({
 	width=1000,
 	height=1000,
-	gridsize=32,
+	gridSize=32,
 	blockCount=0,
 	saveTo=null
 })=>{
 	if(saveTo){
 		saveTo.width = width,
 		saveTo.height = height,
-		saveTo.gridsize = gridsize,
+		saveTo.gridSize = gridSize,
 		saveTo.blockCount = blockCount,
 		saveTo.grid={}
 	}
 	return {
 		width: width,
 		height: height,
-		gridsize: gridsize,
+		gridSize: gridSize,
 		blockCount:0,
 		grid:{}
 	}
@@ -49,10 +49,10 @@ function addBlock(world, info){
 exports.addBlock = addBlock;
 
 function createBounderies(world){
-	let topWorld = {x:0, y:-(world.height/2), width:world.width, height:world.gridsize};
-    let bottomWorld = {x:0, y:(world.height/2), width:world.width, height:world.gridsize};
-    let leftWorld = {x:-(world.width/2), y:0, width:world.gridsize, height:world.height};
-    let rightWorld = {x:(world.width/2), y:0, width:world.gridsize, height:world.height};
+	let topWorld = {x:0, y:-(world.height/2), width:world.width, height:world.gridSize};
+    let bottomWorld = {x:0, y:(world.height/2), width:world.width, height:world.gridSize};
+    let leftWorld = {x:-(world.width/2), y:0, width:world.gridSize, height:world.height};
+    let rightWorld = {x:(world.width/2), y:0, width:world.gridSize, height:world.height};
     addBlock(world, topWorld);
     addBlock(world, bottomWorld);
     addBlock(world, leftWorld);
@@ -67,18 +67,18 @@ function randomWorld(world){
 	let spawnAreaEndX = 500;
 	let spawnAreaEndY = 500;
     //add random blocks
-    let startPointX = -((world.width/2)-(world.gridsize/2));
-    let endPointX = (world.width/2)-(world.gridsize/2);
-    let startPointY = -((world.height/2)-(world.gridsize/2));
-    let endPointY = (world.height/2)-(world.gridsize/2);
-    for(var x=startPointX; x<endPointX; x+=world.gridsize){
-      for(var y=startPointY; y<endPointY; y+=world.gridsize){
-        //for every gridsize px block
+    let startPointX = -((world.width/2)-(world.gridSize/2));
+    let endPointX = (world.width/2)-(world.gridSize/2);
+    let startPointY = -((world.height/2)-(world.gridSize/2));
+    let endPointY = (world.height/2)-(world.gridSize/2);
+    for(var x=startPointX; x<endPointX; x+=world.gridSize){
+      for(var y=startPointY; y<endPointY; y+=world.gridSize){
+        //for every gridSize px block
         if(spawnAreaStartY < y && y < spawnAreaEndY &&
            spawnAreaStartX < x && x < spawnAreaEndX) continue;
         let chance = Math.random();
         if(chance < 0.05){
-          addBlock(world, {x:x, y:y, width:world.gridsize, height:world.gridsize});
+          addBlock(world, {x:x, y:y, width:world.gridSize, height:world.gridSize});
         }
       }//loop through rows
     }//loop through columns

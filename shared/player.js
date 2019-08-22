@@ -16,7 +16,7 @@ exports.create = ({
 		width = 50,
 		height = 50,
 		color = Utilities.randomColor(),
-		energy = 500,
+		energy = 600,
 		flashlightFocus = 0.5
 	}) => {
 	return {
@@ -77,7 +77,7 @@ exports.updateCreateNew = (obj, currentTime)=>{
 	newObj.moveByX = 0;
 	newObj.moveByY = 0;
 	if(newObj.energy>0){
-	newObj.energy = newObj.energy-.1;
+	newObj.energy = newObj.energy-0.05;
 	}
 	//update Angle of player based on cursor location relative to player
 	calculateAndSetAngleMutate(newObj);

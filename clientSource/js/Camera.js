@@ -1,13 +1,16 @@
 module.exports = class Camera{
 	constructor({
 		x=0, y=0, 
-		width=500, height=500, 
-		speed=0.3
+		width=500, 
+		height=500, 
+		speed=0.3,
+		debug=false
 	}){
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		this.debug = debug;
 		this.goalX = x;
 		this.goalY = y;
 		this.speed = speed; //1 would be instant camera, percent to move each update toward player of remaining distance
@@ -22,8 +25,8 @@ module.exports = class Camera{
 	}
 	
 	moveTo(x, y){
-		this.x = x;
-		this.y = y;
+		this.x = Math.round(x);
+		this.y = Math.round(y);
 	}
 
 	setGoal(x,y){
@@ -65,13 +68,15 @@ module.exports = class Camera{
 	}
 
 	update(){
-		let diffX = this.x - this.goalX;
-		let diffY = this.y - this.goalY;
-		let moveX = this.x - (diffX*this.speed);
-		let moveY = this.y - (diffY*this.speed);
-		if(Math.abs(diffX) < 2) moveX = this.goalX;
-		if(Math.abs(diffY) < 2) moveY = this.goalY;
-		this.moveTo(moveX, moveY);
-		// this.moveTo(this.goalX, this.goalY);
+		if(this.debug) this.moveTo(this.goalX, this.goalY);
+		else {
+			let diffX = this.x - this.goalX;
+			let diffY = this.y - this.goalY;
+			let moveX = this.x - (diffX*this.speed);
+			let moveY = this.y - (diffY*this.speed);
+			if(Math.abs(diffX) < 2) moveX = this.goalX;
+			if(Math.abs(diffY) < 2) moveY = this.goalY;
+			this.moveTo(moveX, moveY);
+		}
 	}
 }//camera class

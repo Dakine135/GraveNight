@@ -4,6 +4,7 @@ import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
 import Lighting from './js/lighting.js';
 import Hud from './js/hud.js';
+import Background from './js/background.js';
 import World from '../shared/World.js';
 import Block from '../shared/Block.js';
 
@@ -16,12 +17,15 @@ var NETWORK = {};
 var CAMERA = {};
 var LIGHTING = {};
 var HUD = {};
+var BACKGROUND = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
 var DARKNESS = 0.98; //1 full dark, 0 full light
 var BRIGHTNESS = 1;  //1 full white, 0 no light
+var WORLDGRIDSIZE = 32;
 
+//main layer with players and walls
 let divId = "main-layer";
 var canvas = document.getElementById(divId);
 var render = canvas.getContext("2d");
@@ -38,6 +42,7 @@ function setup(){
     canvas.height = HEIGHT;
     RENDERDISTANCE = Math.max(WIDTH, HEIGHT)*0.6;
     CAMERA = new Camera({
+      debug: false,
       x:0,y:0, 
       width:WIDTH, 
       height:HEIGHT,
@@ -80,6 +85,12 @@ function setup(){
       brightness: BRIGHTNESS
     });
     LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
+    BACKGROUND = new Background({
+      debug: false,
+      width: WIDTH, 
+      height: HEIGHT,
+      CAMERA: CAMERA
+    });
     console.log("End Setup");
 }//SETUP
 
@@ -94,6 +105,7 @@ function windowResized(){
   LIGHTING.resize({width: WIDTH, height: HEIGHT, renderDistance: RENDERDISTANCE});
   HUD.resize({width: WIDTH, height: HEIGHT});
   CAMERA.resize({width: WIDTH, height: HEIGHT});
+  BACKGROUND.resize({width: WIDTH, height: HEIGHT});
 } //window Resized
 
 function draw(){
@@ -104,6 +116,7 @@ function draw(){
   render.clearRect(0, 0, WIDTH, HEIGHT);
   render.beginPath();
   render.restore();
+
   currentTime = new Date().getTime();
   let deltaTime = currentTime - lastFrame;
   lastFrame = currentTime;
@@ -113,8 +126,7 @@ function draw(){
   if(myPlayer != null) CAMERA.setGoal(myPlayer.x, myPlayer.y);
   CAMERA.update();
 
-  //testing draw grass "sprite"
-
+  // BACKGROUND.draw();
 
   //draw line between player and cursor
   if(myPlayer != null){
@@ -157,6 +169,8 @@ function draw(){
           console.log("Object not recognized to Draw");
       }
     }
+    BACKGROUND.updateWithWorldData(WORLD);
+
   }//if World has been received from Server
 
   let playersInRange = {};
@@ -184,7 +198,8 @@ function draw(){
       ServerUPS: STATES.serverUpdatesPerSecond,
       timeDiffernce: NETWORK.timeDiffernce,
       objectsToDraw: Object.keys(objectsToDraw).length,
-      RENDERDISTANCE: RENDERDISTANCE
+      RENDERDISTANCE: RENDERDISTANCE,
+      CAMERA: CAMERA.x+", "+CAMERA.y
     });
     lastSecond = currentTime;
     frames = 0;

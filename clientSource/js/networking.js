@@ -37,7 +37,7 @@ module.exports = class Networking{
         World.create({
               width:data.width,
               height:data.height,
-              gridsize:data.gridsize,
+              gridSize:data.gridSize,
               saveTo: this.WORLD
         });
         this.WORLD.grid = data.grid;
