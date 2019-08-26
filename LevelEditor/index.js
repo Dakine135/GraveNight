@@ -81,7 +81,12 @@ function scrollEvent(event){
 
 function colorCell(x, y){
 	let location = getCellAtLocation(x,y);
-	grid[location.x][location.y] = "blue";
+	if(grid[location.x][location.y] == "blue"){
+		grid[location.x][location.y] = "white";
+	}
+	else{
+		grid[location.x][location.y] = "blue";
+	}
 	updateScreen();
 }
 function getCellAtLocation(x,y){
@@ -157,8 +162,13 @@ function updateMiniMap(){
     	}
     };
 }
-
-
+function goToColor(x,y){
+	let currCell = getCellAtLocation(x,y);
+	if(prevCellLoc.x != currCell.x || prevCellLoc.y != currCell.y){
+		prevCellLoc = getCellAtLocation(x,y);
+		colorCell(x,y);
+	}
+}
 function click(event)
 {
 	mouseHeld=true;
@@ -166,10 +176,15 @@ function click(event)
 	let canvasY = event.y - canvas.offsetTop;
 	let x = canvasX+(camera.x-width/2);
 	let y = canvasY+(camera.y-height/2);
+	prevCellLoc = getCellAtLocation(x,y);
 	colorCell(x, y);
 }
 function release(event){
 	mouseHeld = false;
+}
+let prevCellLoc = {
+	x: 0,
+	y: 0
 }
 function drag(event){
 	let canvasX = event.x - canvas.offsetLeft;
@@ -177,7 +192,7 @@ function drag(event){
 	let x = canvasX+(camera.x-width/2);
     let y = canvasY+(camera.y-height/2);
 	if(mouseHeld){
-		colorCell(x, y);
+		goToColor(x, y);
 	}
 	else{
 		//console.log("x:" + x + " y:" + y);
