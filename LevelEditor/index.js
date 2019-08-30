@@ -4,12 +4,13 @@ let width = window.screen.width;
 let height = window.screen.height;
 canvas.width = width;
 canvas.height = height;
-let gridSize = 200;
-let cellSize = 20;
+let gridSize = 100;
+let cellSize = 50;
 //WORLD GRID SIZE
 let worldGridSize = 32;
-let maxCellSize = 200;
+let maxCellSize = 150;
 let buffer = 0;
+let selectedColor = "blue"
 
 //setup offscreen canvas
 let offscreenCanvas = document.createElement('canvas');
@@ -39,6 +40,7 @@ for(var i=0; i<gridSize; i++){
 	for(var j=0; j<gridSize; j++){
 		if(i == 0 || i == (gridSize-1) ||
 		   j == 0 || j == (gridSize-1)){
+		   	//console.log("im working");
 			grid[i][j] = "black";
 		} 
 		let currentX = i*worldGridSize;
@@ -49,7 +51,7 @@ for(var i=0; i<gridSize; i++){
 		}
 		else grid[i][j] = "white";
 	}
-};
+}
 
 let mouseHeld = false;
 window.addEventListener("mousedown", click);
@@ -78,15 +80,31 @@ function scrollEvent(event){
 	updateScreen();
 }
 
+function goToColor(x,y){
+	let currCell = getCellAtLocation(x,y);
+	if(prevCellLoc.x != currCell.x || prevCellLoc.y != currCell.y){
+		prevCellLoc = getCellAtLocation(x,y);
+		// switch(selectedColor){
+		// 	case "blue":
+		// 		colorCell(x, y);
+		// 		break;
+		// 	case "red":
+		// 		colorCell(x,y);
+		// 		break;
+		//}
+		colorCell(x,y);
+	}
+}
 
 function colorCell(x, y){
 	let location = getCellAtLocation(x,y);
-	if(grid[location.x][location.y] == "blue"){
+	if(grid[location.x][location.y] == selectedColor){
 		grid[location.x][location.y] = "white";
 	}
 	else{
-		grid[location.x][location.y] = "blue";
+		grid[location.x][location.y] = selectedColor;
 	}
+	// grid[location.x][location.y] = selectedColor;	
 	updateScreen();
 }
 function getCellAtLocation(x,y){
@@ -129,13 +147,13 @@ function keyPressed(event){
 			downloadPNG();
 			break;
 	}
-	// if(camera.x-width/2 < 0 || 
-	// 	camera.y-height/2 < 0 || 
-	// 	camera.x+width/2 > gridSize*cellSize || 
-	// 	camera.y+height/2 > gridSize*cellSize){
-	// 	camera.x = currCamX;
-	// 	camera.y = currCamY;
-	// }
+	if(camera.x-width/2 < 0 || 
+		camera.y-height/2 < 0 || 
+		camera.x+width/2 > gridSize*cellSize || 
+		camera.y+height/2 > gridSize*cellSize){
+		camera.x = currCamX;
+		camera.y = currCamY;
+	}
 	updateScreen();
 }
 function downloadPNG(){
@@ -162,13 +180,7 @@ function updateMiniMap(){
     	}
     };
 }
-function goToColor(x,y){
-	let currCell = getCellAtLocation(x,y);
-	if(prevCellLoc.x != currCell.x || prevCellLoc.y != currCell.y){
-		prevCellLoc = getCellAtLocation(x,y);
-		colorCell(x,y);
-	}
-}
+
 function click(event)
 {
 	mouseHeld=true;
@@ -177,6 +189,12 @@ function click(event)
 	let x = canvasX+(camera.x-width/2);
 	let y = canvasY+(camera.y-height/2);
 	prevCellLoc = getCellAtLocation(x,y);
+	if(prevCellLoc.x == 0 && prevCellLoc.y == 0){
+		selectedColor = "blue";
+	}
+	else if(prevCellLoc.x == 1 && prevCellLoc.y == 0){
+		selectedColor = "red";
+	}
 	colorCell(x, y);
 }
 function release(event){
@@ -222,6 +240,7 @@ function updateScreen(){
     // console.log(viewStart.x, viewStart.y);
     for(var i=viewStart.x; i<viewEnd.x+1; i++){
     	for(var j=viewStart.y; j<viewEnd.y+1; j++){
+    		//console.log(grid[i][j]);
     		offscreenRender.fillStyle = grid[i][j];
     		offscreenRender.fillRect(i, j, 1, 1);
     		render.fillStyle = grid[i][j];
