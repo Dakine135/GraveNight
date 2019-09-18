@@ -180,7 +180,7 @@ module.exports = class lighting{
 
 	}//update
 
-	draw(players){
+	draw(state){
 		// console.log("drawing lighting");
 		
 		this.render.globalCompositeOperation = "source-over";
@@ -234,7 +234,7 @@ module.exports = class lighting{
 
     for(var id in this.playersToDraw){
     	let playerToDraw = this.playersToDraw[id];
-    	let playerInState = players[id];
+    	let playerInState = state.players[id];
     	
     	if (playerToDraw.lineOfSightPath) {
     		// let width = Math.PI/2;

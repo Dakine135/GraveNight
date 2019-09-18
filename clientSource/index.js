@@ -188,7 +188,7 @@ function draw(){
 
   //Lighting Stuff
   LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LIGHTING.draw(STATES.frameState.players);
+  LIGHTING.draw(STATES.frameState);
   
 
   //once a second
