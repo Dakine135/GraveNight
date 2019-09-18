@@ -1,5 +1,6 @@
 var StateManager = require('./StateManager.js');
 var World = require('../shared/World.js');
+var PNG = require('png-js');
 
 module.exports = class Engine {
   constructor({
@@ -42,7 +43,14 @@ module.exports = class Engine {
       gridSize:32
     });
     World.createBounderies(this.world);
-    World.randomWorld(this.world);
+    let imageLocation = ".\\LevelEditor\\levels\\levelTest.png"; //..\LevelEditor\
+    // let imageBuffer = PNG.load(imageLocation);
+    PNG.decode(imageLocation, function(pixels) {
+      World.createWorldFromImage(this.world, pixels);
+      // pixels is a 1d array (in rgba order) of decoded pixel data
+    }.bind(this));
+    
+    // World.randomWorld(this.world);
 
     this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds, world:this.world});
   }//constructor
@@ -96,6 +104,7 @@ module.exports = class Engine {
 
   update(deltaTime){
     // console.log("deltaTime update:", deltaTime);
+    if(deltaTime > this.ticRate) console.log("DetlaTimeBehind", deltaTime, "should be", this.ticRate);
     this.stateManager.createNextState(this.tickCount, deltaTime);
     this.sendGameStateToClients(this.tickCount);
   }

@@ -55,15 +55,20 @@ function getPoints({
 				point:   pointToCheck
 			});
 
-			let viewPoint = getViewPoint({
-				point: collision.point, 
-				edge:  !collision.collision,
-				color: (collision.collision ? "green" : "yellow"),
-				name: "P",
-				origin: origin,
-				camera: camera
-			});
-			listOfPoints.push(viewPoint);
+			//only add point if you collided with the object we are checking, and not if another
+			if(!collision.collision || collision.object.id == id){
+				let viewPoint = getViewPoint({
+					point: collision.point, 
+					edge:  !collision.collision,
+					color: (collision.collision ? "green" : "yellow"),
+					name: "P",
+					origin: origin,
+					camera: camera
+				});
+				listOfPoints.push(viewPoint);
+			}
+
+			
 
 		});//for each point in object
 	}//for objects in range

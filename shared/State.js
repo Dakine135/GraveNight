@@ -87,7 +87,7 @@ exports.simulateForClient = (state, currentTime)=>{
 	processActions(state, state);
 	state.actions = [];
 	updatePlayersMutate(state, currentTime);
-	updateObjectsMutate(state, currentTime);
+	state.time = currentTime;
 }
 
 
@@ -292,6 +292,42 @@ exports.InterpolateCreateNew = (startState, endState, percent)=>{
 		}
 		
 		newStateObj.players[id] = intermediatePlayer;
+	}
+	// newStateObj.objects = {};
+	// for(var id in startState.objects){
+	// 	newStateObj.objects[id] = Utilities.cloneObject(startState.objects[id]);
+	// 	//TODO intermediate objects
+	// }
+	return newStateObj;
+}
+
+exports.InterpolateMutate = (startState, endState, percent)=>{
+	// let differnceInTick = endState.tick - startState.tick;
+	// startState.tick = startState.tick + (differnceInTick*percent);
+	let differnceInTime = endState.time - startState.time;
+	startState.time = startState.time + (differnceInTime*percent);
+	startState.debug = startState.debug;
+	startState.actions = [];
+	startState.players = {};
+	startState.world = startState.world; //intentionally a reference
+	for(var id in startState.players){
+		let intermediatePlayer = Utilities.cloneObject(startState.players[id]);
+		if(endState.players[id] != null){
+			//calculate the difference in location between the states
+			let playerEnd = endState.players[id];
+			let diffX = intermediatePlayer.x - playerEnd.x;
+			intermediatePlayer.x = intermediatePlayer.x - (diffX * percent);
+			let diffY = intermediatePlayer.y - playerEnd.y;
+			intermediatePlayer.y = intermediatePlayer.y - (diffY * percent);
+
+			//TODO check for but when rotated through Math.PI
+			// let diffAngle = intermediatePlayer.angle - playerEnd.angle;
+			// if(diffAngle < Math.PI){
+			// 	intermediatePlayer.angle = intermediatePlayer.angle - (diffAngle * percent);
+			// }
+		}
+		
+		startState.players[id] = intermediatePlayer;
 	}
 	// newStateObj.objects = {};
 	// for(var id in startState.objects){

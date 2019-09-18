@@ -32,14 +32,31 @@ module.exports = class lighting{
 		this.CONTROLS = CONTROLS;
 		this.CAMERA = CAMERA;
 		this.HUD = HUD;
+		//main canvas that exists in dom
 		this.canvas = document.getElementById(divId);
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 		this.render = this.canvas.getContext("2d");
+		//main offscreen that compiles the lighting
 		this.offscreenCanvas = document.createElement('canvas');
 		this.offscreenCanvas.width = this.width;
 		this.offscreenCanvas.height = this.height;
 		this.offscreenRender = this.offscreenCanvas.getContext("2d");
-		this.canvas.width = this.width;
-		this.canvas.height = this.height;
+		//canvas for light point calculations
+		this.flashlightGlowCanvas = document.createElement('canvas');
+		this.flashlightGlowCanvas.width = this.width;
+		this.flashlightGlowCanvas.height = this.height;
+		this.flashlightGlowRender = this.flashlightGlowCanvas.getContext("2d");
+		//canvas for light point calculations
+		this.flashlightGlowCanvas = document.createElement('canvas');
+		this.flashlightGlowCanvas.width = this.width;
+		this.flashlightGlowCanvas.height = this.height;
+		this.flashlightGlowRender = this.flashlightGlowCanvas.getContext("2d");
+		//canvas for light cone calculations
+		this.flashlightConeCanvas = document.createElement('canvas');
+		this.flashlightConeCanvas.width = this.width;
+		this.flashlightConeCanvas.height = this.height;
+		this.flashlightConeRender = this.flashlightConeCanvas.getContext("2d");
 		this.debug = debug;
 		this.lightSources = {};
 		this.objectsInRange = {};
@@ -63,6 +80,10 @@ module.exports = class lighting{
 		this.canvas.height = this.height;
 		this.offscreenCanvas.width = this.width;
 		this.offscreenCanvas.height = this.height;
+		this.flashlightGlowCanvas.width = this.width;
+		this.flashlightGlowCanvas.height = this.height;
+		this.flashlightConeCanvas.width = this.width;
+		this.flashlightConeCanvas.height = this.height;
 		this.renderDistance = renderDistance;
 	}
 
@@ -109,6 +130,7 @@ module.exports = class lighting{
 				newPlayerInRange.lineOfSightWorker = new LineOfSightWorker();
 				newPlayerInRange.listOfPoints = [];
 				newPlayerInRange.workerCalculating == false;
+				newPlayerInRange.timeSinceLastUpdate = 0;
 				newPlayerInRange.offset = this.CAMERA;
 				let that = this;
 				newPlayerInRange.lineOfSightWorker.onmessage = function(event){
@@ -143,7 +165,9 @@ module.exports = class lighting{
 
 			//TODO each line of sight needs its own objects in range
 			//update the lineOfSight
-			if(!playerLightEntry.workerCalculating){
+			playerLightEntry.timeSinceLastUpdate += deltaTime;
+			if(!playerLightEntry.workerCalculating && playerLightEntry.timeSinceLastUpdate > 16){
+				playerLightEntry.timeSinceLastUpdate = 0;
 				playerLightEntry.workerCalculating = true;
 				playerLightEntry.lineOfSightWorker.postMessage({
 					objectsInRange: this.objectsInRange,
@@ -156,11 +180,14 @@ module.exports = class lighting{
 
 	}//update
 
-	draw(state){
+	draw(players){
 		// console.log("drawing lighting");
 		
 		this.render.globalCompositeOperation = "source-over";
 		this.offscreenRender.globalCompositeOperation = "source-over";
+		this.flashlightGlowRender.globalCompositeOperation = "source-over";
+		this.flashlightConeRender.globalCompositeOperation = "source-over";
+		
 		//clear the canvas
    	this.render.save();
     this.render.setTransform(1, 0, 0, 1, 0, 0);
@@ -181,6 +208,20 @@ module.exports = class lighting{
     this.offscreenRender.beginPath();
     this.offscreenRender.restore();
 
+    //clear the canvas
+   	this.flashlightGlowRender.save();
+    this.flashlightGlowRender.setTransform(1, 0, 0, 1, 0, 0);
+    this.flashlightGlowRender.clearRect(0, 0, this.width, this.height);
+    this.flashlightGlowRender.beginPath();
+    this.flashlightGlowRender.restore();
+
+    //clear the canvas
+   	this.flashlightConeRender.save();
+    this.flashlightConeRender.setTransform(1, 0, 0, 1, 0, 0);
+    this.flashlightConeRender.clearRect(0, 0, this.width, this.height);
+    this.flashlightConeRender.beginPath();
+    this.flashlightConeRender.restore();
+
     //draw light sources
     for(var id in this.lightSources){
     	let light = this.lightSources[id];
@@ -189,38 +230,41 @@ module.exports = class lighting{
     		y:light.y, 
     		intensity:light.intensity
     	});
-    	
-    }
+    }// for every light source
 
     for(var id in this.playersToDraw){
     	let playerToDraw = this.playersToDraw[id];
+    	let playerInState = players[id];
     	
     	if (playerToDraw.lineOfSightPath) {
+    		// let width = Math.PI/2;
+    		// let intensityFlashLight = 300;
+    		// let intensityGlow = 300;
     		let width = Utilities.mapNum({
-    			input: state.players[id].flashlightFocus,
+    			input: playerInState.flashlightFocus,
     			start1: 0, 
     			end1: 1,
     			start2: Math.PI*0.1,
     			end2: Math.PI
     		});
     		let intensityFlashLight = Utilities.mapNum({
-    			input: (1 - state.players[id].flashlightFocus),
+    			input: (1 - playerInState.flashlightFocus),
     			start1: 0, 
     			end1: 1,
-    			start2: state.players[id].energy,
-    			end2:  state.players[id].energy*2
+    			start2: playerInState.energy,
+    			end2:  playerInState.energy*2
     		});
     		let intensityGlow = Utilities.mapNum({
-    			input: (1 - state.players[id].flashlightFocus),
+    			input: (1 - playerInState.flashlightFocus),
     			start1: 0, 
     			end1: 1,
-    			start2: state.players[id].energy,
-    			end2:  state.players[id].energy*0.1
+    			start2: playerInState.energy,
+    			end2:  playerInState.energy*0.1
     		});
     		this.drawLightCone({
       		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
       		y: playerToDraw.lineOfSightFlashlightOrigin.y,
-      		angle: state.players[id].angle, //player.angle
+      		angle: playerInState.angle, //player.angle
       		intensity:intensityFlashLight,
       		width: width,
       		lineOfSight: playerToDraw.lineOfSightPath,
@@ -234,9 +278,10 @@ module.exports = class lighting{
       		lineOfSight: playerToDraw.lineOfSightPath,
       		offset:    playerToDraw.offset
       	});
-    	}
-    	
-    }
+
+    	}//only if line of sight path is ready
+  
+    }// every player in playersToDraw Lighting
     
 
     this.render.globalCompositeOperation = "xor";
@@ -288,22 +333,17 @@ module.exports = class lighting{
 
 		let offsetX = Math.round(offset.x - this.CAMERA.x);
 		let offsetY = Math.round(offset.y - this.CAMERA.y);
-
-		//setup flashlight glow temp canvas
-		let flashlightGlowCanvas = document.createElement('canvas');
-		flashlightGlowCanvas.width = this.width;
-		flashlightGlowCanvas.height = this.height;
-		let flashlightGlowRender = flashlightGlowCanvas.getContext("2d");
+		
 		//draw full line-of-Sight
 		if(lineOfSight){
-			flashlightGlowRender.save();
-			flashlightGlowRender.fillStyle = "white";
-			flashlightGlowRender.translate(offsetX, offsetY);
-			flashlightGlowRender.fill(lineOfSight);
-			flashlightGlowRender.restore();
+			this.flashlightGlowRender.save();
+			this.flashlightGlowRender.fillStyle = "white";
+			this.flashlightGlowRender.translate(offsetX, offsetY);
+			this.flashlightGlowRender.fill(lineOfSight);
+			this.flashlightGlowRender.restore();
 		}
 		//glow gradient
-		let gradientRest = this.offscreenRender.createRadialGradient(
+		let gradientRest = this.flashlightGlowRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity
 		);
@@ -311,14 +351,14 @@ module.exports = class lighting{
 	  	gradientRest.addColorStop(0.9,"rgba(255, 255, 255, "+(brightness*0.3)+")");
 	  	gradientRest.addColorStop(1,"rgba(255, 255, 255, 0)");
 	  	//only keep what over-laps
-		if(lineOfSight) flashlightGlowRender.globalCompositeOperation = "source-in";
-		flashlightGlowRender.arc(originPTrans.x, originPTrans.y, intensity, 
+		if(lineOfSight) this.flashlightGlowRender.globalCompositeOperation = "source-in";
+		this.flashlightGlowRender.arc(originPTrans.x, originPTrans.y, intensity, 
 			0, Math.PI*2);
-		flashlightGlowRender.fillStyle = gradientRest;
-		flashlightGlowRender.fill();
+		this.flashlightGlowRender.fillStyle = gradientRest;
+		this.flashlightGlowRender.fill();
 
 		//apply glow canvas to main lighting offscreen canvas
-        this.offscreenRender.drawImage(flashlightGlowCanvas, 0, 0);
+    this.offscreenRender.drawImage(this.flashlightGlowCanvas, 0, 0);
 
 	}//draw light point
 
@@ -377,16 +417,11 @@ module.exports = class lighting{
 		let offsetX = Math.round(offset.x - this.CAMERA.x);
 		let offsetY = Math.round(offset.y - this.CAMERA.y);
 
-		//setup flashlight temp canvas
-		let flashlightConeCanvas = document.createElement('canvas');
-		flashlightConeCanvas.width = this.width;
-		flashlightConeCanvas.height = this.height;
-		let flashlightConeRender = flashlightConeCanvas.getContext("2d");
 		//draw full line-of-Sight
-		flashlightConeRender.save();
-		flashlightConeRender.fillStyle = "white";
+		this.flashlightConeRender.save();
+		this.flashlightConeRender.fillStyle = "white";
 		// let cameraTranslate = this.CAMERA.translate({});
-		flashlightConeRender.translate(offsetX, offsetY);
+		this.flashlightConeRender.translate(offsetX, offsetY);
 		if(this.debug){
 			this.render.save();
 			this.render.translate(offsetX, offsetY);
@@ -394,10 +429,10 @@ module.exports = class lighting{
 			this.render.stroke(lineOfSight);
 			this.render.restore();
 		}
-		flashlightConeRender.fill(lineOfSight);
-		flashlightConeRender.restore();
+		this.flashlightConeRender.fill(lineOfSight);
+		this.flashlightConeRender.restore();
 		//cone gradient
-		let gradient = this.offscreenRender.createRadialGradient(
+		let gradient = this.flashlightConeRender.createRadialGradient(
 			originPTrans.x, originPTrans.y, (intensity*0.2), 
 			originPTrans.x, originPTrans.y, intensity
 		);
@@ -405,18 +440,18 @@ module.exports = class lighting{
 	  	gradient.addColorStop(0.9,"rgba(255, 255, 255, "+(brightness*0.3)+")");
 	  	gradient.addColorStop(1,"rgba(255, 255, 255, 0)");
 	  	//only keep what over-laps
-		flashlightConeRender.globalCompositeOperation = "source-in";
-		flashlightConeRender.beginPath();
-		flashlightConeRender.moveTo(viewPointEnd.x, viewPointEnd.y);
-		flashlightConeRender.lineTo(originPTrans.x, originPTrans.y);
-		flashlightConeRender.lineTo(viewPointStart.x, viewPointStart.y);
-		flashlightConeRender.arc(originPTrans.x, originPTrans.y, intensity, 
+		this.flashlightConeRender.globalCompositeOperation = "source-in";
+		this.flashlightConeRender.beginPath();
+		this.flashlightConeRender.moveTo(viewPointEnd.x, viewPointEnd.y);
+		this.flashlightConeRender.lineTo(originPTrans.x, originPTrans.y);
+		this.flashlightConeRender.lineTo(viewPointStart.x, viewPointStart.y);
+		this.flashlightConeRender.arc(originPTrans.x, originPTrans.y, intensity, 
 				viewPointStart.angle, viewPointEnd.angle);
-		flashlightConeRender.fillStyle = gradient;
-		flashlightConeRender.fill();
+		this.flashlightConeRender.fillStyle = gradient;
+		this.flashlightConeRender.fill();
 
 		//apply cone canvas to main lighting offscreen canvas
-	    this.offscreenRender.drawImage(flashlightConeCanvas, 0, 0);
+	    this.offscreenRender.drawImage(this.flashlightConeCanvas, 0, 0);
 
 	}//drawLightCone
 
@@ -454,6 +489,14 @@ module.exports = class lighting{
 		listOfPoints.sort((a,b)=>{
 			return a.angle-b.angle;
 		});
+
+		// console.log(listOfPoints.length);
+		if(this.debug){
+			this.HUD.debugUpdate({
+	      numberOfPoints: listOfPoints.length,
+	    });
+		}
+		
 
 		// create Path of line-of-sight
 		let lineOfSight = new Path2D();

@@ -25,6 +25,9 @@ export default class StatesManager{
 		this.render = render;
 		this.CAMERA = CAMERA;
 
+		//debugging client and server simulations differences
+		this.serverUpdateCount = 0;
+
 		//stats
 		this.timeSinceLastServerUpdate = 0;
 		this.serverUpdatesPerSecond = 10;
@@ -42,7 +45,10 @@ export default class StatesManager{
 		// if(this.debug) console.log("CurrentState:",this.state);
 		// if(this.debug) console.log("NextState:",this.nextState);
 		// if(this.debug) console.log("================================");
+
 		if(this.nextState != null) this.state = State.clone(this.nextState);
+		// if(this.nextState != null && this.serverUpdateCount < 2) this.state = State.clone(this.nextState);
+		this.serverUpdateCount++;
 		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
 		State.updateWithNewData(this.nextState, data);
@@ -54,9 +60,12 @@ export default class StatesManager{
 		}
 	}//reciveServerState
 
-	draw(deltaTime){
-		let currentTimeInSimulation = this.state.time + this.currentDeltaTime;
+	update(deltaTime){
+		let currentTimeInSimulation = this.state.time + deltaTime;
 		if(this.clientSimulation) State.simulateForClient(this.state, currentTimeInSimulation);
+	}
+
+	draw(deltaTime){
 		let drawingState = this.getIntermediateState(deltaTime);
 
 		if(drawingState == null) return;
@@ -65,6 +74,12 @@ export default class StatesManager{
 		for(var id in drawingState.players){
 			Player.draw(drawingState.players[id], this.render, this.CAMERA);
 		}
+
+		//for debug when comparing server and client states
+		// if(this.nextState == null) return;
+		// for(var id in this.nextState.players){
+		// 	Player.draw(this.nextState.players[id], this.render, this.CAMERA);
+		// }
 		
 	}//draw
 
@@ -104,14 +119,14 @@ export default class StatesManager{
 		State.removePlayer(this.state, info);
     }
 
-    //apply player actions immediately for smoothness
-    //difficulty is in making the actions results line up with the server's result
-    //otherwise it'll snap around.
-    //TODO
-    addAction(action){
-    	if(this.debug) console.log("Adding action to tick", this.state.tick, action);
-    	State.addAction(this.state, action);
-    }
+  //apply player actions immediately for smoothness
+  //difficulty is in making the actions results line up with the server's result
+  //otherwise it'll snap around.
+  //TODO
+  addAction(action){
+  	if(this.debug) console.log("Adding action to tick", this.state.tick, action);
+  	State.addAction(this.state, action);
+  }
 
 	getPlayer(Id){
 		return this.state.players[Id];

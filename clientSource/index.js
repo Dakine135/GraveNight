@@ -33,6 +33,7 @@ var render = canvas.getContext("2d");
 var currentTime = new Date().getTime();
 var lastFrame = currentTime;
 var lastSecond = currentTime;
+var lastFrames = 0;
 var frames = 0;
 
 function setup(){
@@ -49,17 +50,18 @@ function setup(){
       speed:0.1
     });
     STATES = new StatesManager({
-      debug: false, 
-      debugState: false,
+      debug:              false, 
+      debugState:         false,
       stateInterpolation: true,
-      clientSimulation: false, //not really working atm
-      render: render,
-      CAMERA: CAMERA
+      clientSimulation:   false, //not really working atm
+      render:             render,
+      CAMERA:             CAMERA
     });
     NETWORK = new Networking({
       debug:  false, 
       STATES: STATES,
-      WORLD:  WORLD
+      WORLD:  WORLD,
+      HUD:    HUD
     });
     NETWORK.updateServerTimeDiffernce();
     CONTROLS = new Controls({
@@ -73,9 +75,10 @@ function setup(){
       height:   HEIGHT,
       CONTROLS: CONTROLS
     });
+    NETWORK.HUD = HUD;
     LIGHTING = new Lighting({
-      debug: false,
-      width: WIDTH, 
+      debug:  false,
+      width:  WIDTH, 
       height: HEIGHT,
       renderDistance: RENDERDISTANCE,
       CONTROLS:   CONTROLS,
@@ -145,6 +148,7 @@ function draw(){
   
 
   //Main state, players
+  STATES.update(deltaTime);
   STATES.draw(deltaTime);
 
   //World drawing
@@ -155,7 +159,7 @@ function draw(){
       x:CAMERA.x,
       y:CAMERA.y,
       distance: RENDERDISTANCE,
-      angle: myPlayer.angle,
+      //angle: myPlayer.angle,
       fieldOfView: Math.PI/2 //90 degrees
     });
     // console.log("objectsToDraw:",objectsToDraw);
@@ -184,7 +188,7 @@ function draw(){
 
   //Lighting Stuff
   LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LIGHTING.draw(STATES.frameState);
+  LIGHTING.draw(STATES.frameState.players);
   
 
   //once a second
@@ -192,7 +196,7 @@ function draw(){
     // console.log(STATES.state);
     NETWORK.updateServerTimeDiffernce();
     HUD.debugUpdate({
-      FrameRate: frames,
+      FrameRate: Math.round((lastFrames*0.8) + (frames*0.2)),
       ScreenSize: WIDTH+", "+HEIGHT,
       Ping: NETWORK.ping,
       ServerUPS: STATES.serverUpdatesPerSecond,
@@ -202,6 +206,7 @@ function draw(){
       CAMERA: CAMERA.x+", "+CAMERA.y
     });
     lastSecond = currentTime;
+    lastFrames = frames;
     frames = 0;
   }
 

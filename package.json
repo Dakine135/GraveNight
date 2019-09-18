@@ -30,6 +30,8 @@
   "homepage": "https://github.com/Dakine135/GraveNight#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "png-js": "^0.1.1",
     "reload": "^3.0.1",
     "socket.io": "^2.2.0",
     "webpack": "^4.35.0",
