@@ -33,7 +33,7 @@ var render = canvas.getContext("2d");
 var currentTime = new Date().getTime();
 var lastFrame = currentTime;
 var lastSecond = currentTime;
-var lastFrames = 0;
+var lastFrames = 60;
 var frames = 0;
 
 function setup(){

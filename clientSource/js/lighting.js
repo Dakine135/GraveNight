@@ -47,11 +47,6 @@ module.exports = class lighting{
 		this.flashlightGlowCanvas.width = this.width;
 		this.flashlightGlowCanvas.height = this.height;
 		this.flashlightGlowRender = this.flashlightGlowCanvas.getContext("2d");
-		//canvas for light point calculations
-		this.flashlightGlowCanvas = document.createElement('canvas');
-		this.flashlightGlowCanvas.width = this.width;
-		this.flashlightGlowCanvas.height = this.height;
-		this.flashlightGlowRender = this.flashlightGlowCanvas.getContext("2d");
 		//canvas for light cone calculations
 		this.flashlightConeCanvas = document.createElement('canvas');
 		this.flashlightConeCanvas.width = this.width;
@@ -80,10 +75,10 @@ module.exports = class lighting{
 		this.canvas.height = this.height;
 		this.offscreenCanvas.width = this.width;
 		this.offscreenCanvas.height = this.height;
-		this.flashlightGlowCanvas.width = this.width;
-		this.flashlightGlowCanvas.height = this.height;
-		this.flashlightConeCanvas.width = this.width;
-		this.flashlightConeCanvas.height = this.height;
+		// this.flashlightGlowCanvas.width = this.width;
+		// this.flashlightGlowCanvas.height = this.height;
+		// this.flashlightConeCanvas.width = this.width;
+		// this.flashlightConeCanvas.height = this.height;
 		this.renderDistance = renderDistance;
 	}
 
@@ -112,8 +107,6 @@ module.exports = class lighting{
 			this.myPlayer = myPlayer;
 		}
 
-
-
 		for(var id in playersInRange){
 			let player = playersInRange[id];
 			if(this.playersToDraw[id] == null){
@@ -121,17 +114,27 @@ module.exports = class lighting{
 				let newPlayerInRange = {};
 				newPlayerInRange.lineOfSightOrigin = {x: player.x, y: player.y};
 				let x = (player.x + player.width *0.5 + 5);
-	    	let y = (player.y + player.height*0.5);
-	    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
-	    		center:newPlayerInRange.lineOfSightOrigin,
-	    		point:{x: x, y: y},
-	    		angle: player.angle
-	    	});
+	    		let y = (player.y + player.height*0.5);
+		    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+		    		center:newPlayerInRange.lineOfSightOrigin,
+		    		point:{x: x, y: y},
+		    		angle: player.angle
+		    	});
 				newPlayerInRange.lineOfSightWorker = new LineOfSightWorker();
 				newPlayerInRange.listOfPoints = [];
 				newPlayerInRange.workerCalculating == false;
 				newPlayerInRange.timeSinceLastUpdate = 0;
 				newPlayerInRange.offset = this.CAMERA;
+				//canvas for light point calculations
+				newPlayerInRange.flashlightGlowCanvas = document.createElement('canvas');
+				newPlayerInRange.flashlightGlowCanvas.width = this.width;
+				newPlayerInRange.flashlightGlowCanvas.height = this.height;
+				newPlayerInRange.flashlightGlowRender = newPlayerInRange.flashlightGlowCanvas.getContext("2d");
+				//canvas for light cone calculations
+				newPlayerInRange.flashlightConeCanvas = document.createElement('canvas');
+				newPlayerInRange.flashlightConeCanvas.width = this.width;
+				newPlayerInRange.flashlightConeCanvas.height = this.height;
+				newPlayerInRange.flashlightConeRender = newPlayerInRange.flashlightConeCanvas.getContext("2d");
 				let that = this;
 				newPlayerInRange.lineOfSightWorker.onmessage = function(event){
 					// console.log("return from worker:", event.data);
@@ -189,103 +192,103 @@ module.exports = class lighting{
 		this.flashlightConeRender.globalCompositeOperation = "source-over";
 		
 		//clear the canvas
-   	this.render.save();
-    this.render.setTransform(1, 0, 0, 1, 0, 0);
-    this.render.clearRect(0, 0, this.width, this.height);
-    this.render.beginPath();
-    this.render.restore();
+	   	this.render.save();
+	    this.render.setTransform(1, 0, 0, 1, 0, 0);
+	    this.render.clearRect(0, 0, this.width, this.height);
+	    this.render.beginPath();
+	    this.render.restore();
 
-    //fill black
-    this.render.save();
-    this.render.fillStyle = "rgba(0, 0, 0,"+ this.darkness +")";
-    this.render.fillRect(0,0,this.width,this.height);
-    this.render.restore();
+	    //fill black
+	    this.render.save();
+	    this.render.fillStyle = "rgba(0, 0, 0,"+ this.darkness +")";
+	    this.render.fillRect(0,0,this.width,this.height);
+	    this.render.restore();
 
-    //clear the canvas
-   	this.offscreenRender.save();
-    this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
-    this.offscreenRender.clearRect(0, 0, this.width, this.height);
-    this.offscreenRender.beginPath();
-    this.offscreenRender.restore();
+	    //clear the canvas
+	   	this.offscreenRender.save();
+	    this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
+	    this.offscreenRender.clearRect(0, 0, this.width, this.height);
+	    this.offscreenRender.beginPath();
+	    this.offscreenRender.restore();
 
-    //clear the canvas
-   	this.flashlightGlowRender.save();
-    this.flashlightGlowRender.setTransform(1, 0, 0, 1, 0, 0);
-    this.flashlightGlowRender.clearRect(0, 0, this.width, this.height);
-    this.flashlightGlowRender.beginPath();
-    this.flashlightGlowRender.restore();
+	    //clear the canvas
+	   	this.flashlightGlowRender.save();
+	    this.flashlightGlowRender.setTransform(1, 0, 0, 1, 0, 0);
+	    this.flashlightGlowRender.clearRect(0, 0, this.width, this.height);
+	    this.flashlightGlowRender.beginPath();
+	    this.flashlightGlowRender.restore();
 
-    //clear the canvas
-   	this.flashlightConeRender.save();
-    this.flashlightConeRender.setTransform(1, 0, 0, 1, 0, 0);
-    this.flashlightConeRender.clearRect(0, 0, this.width, this.height);
-    this.flashlightConeRender.beginPath();
-    this.flashlightConeRender.restore();
+	    //clear the canvas
+	   	this.flashlightConeRender.save();
+	    this.flashlightConeRender.setTransform(1, 0, 0, 1, 0, 0);
+	    this.flashlightConeRender.clearRect(0, 0, this.width, this.height);
+	    this.flashlightConeRender.beginPath();
+	    this.flashlightConeRender.restore();
 
-    //draw light sources
-    for(var id in this.lightSources){
-    	let light = this.lightSources[id];
-    	this.drawLightPoint({
-    		x:light.x, 
-    		y:light.y, 
-    		intensity:light.intensity
-    	});
-    }// for every light source
+	    //draw light sources
+	    for(var id in this.lightSources){
+	    	let light = this.lightSources[id];
+	    	this.drawLightPoint({
+	    		x:light.x, 
+	    		y:light.y, 
+	    		intensity:light.intensity
+	    	});
+	    }// for every light source
 
-    for(var id in this.playersToDraw){
-    	let playerToDraw = this.playersToDraw[id];
-    	let playerInState = state.players[id];
-    	
-    	if (playerToDraw.lineOfSightPath) {
-    		// let width = Math.PI/2;
-    		// let intensityFlashLight = 300;
-    		// let intensityGlow = 300;
-    		let width = Utilities.mapNum({
-    			input: playerInState.flashlightFocus,
-    			start1: 0, 
-    			end1: 1,
-    			start2: Math.PI*0.1,
-    			end2: Math.PI
-    		});
-    		let intensityFlashLight = Utilities.mapNum({
-    			input: (1 - playerInState.flashlightFocus),
-    			start1: 0, 
-    			end1: 1,
-    			start2: playerInState.energy,
-    			end2:  playerInState.energy*2
-    		});
-    		let intensityGlow = Utilities.mapNum({
-    			input: (1 - playerInState.flashlightFocus),
-    			start1: 0, 
-    			end1: 1,
-    			start2: playerInState.energy,
-    			end2:  playerInState.energy*0.1
-    		});
-    		this.drawLightCone({
-      		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
-      		y: playerToDraw.lineOfSightFlashlightOrigin.y,
-      		angle: playerInState.angle, //player.angle
-      		intensity:intensityFlashLight,
-      		width: width,
-      		lineOfSight: playerToDraw.lineOfSightPath,
-      		offset:    playerToDraw.offset
-      	});
+	    for(var id in this.playersToDraw){
+	    	let playerToDraw = this.playersToDraw[id];
+	    	let playerInState = state.players[id];
+	    	
+	    	if (playerToDraw.lineOfSightPath) {
+	    		// let width = Math.PI/2;
+	    		// let intensityFlashLight = 300;
+	    		// let intensityGlow = 300;
+	    		let width = Utilities.mapNum({
+	    			input: playerInState.flashlightFocus,
+	    			start1: 0, 
+	    			end1: 1,
+	    			start2: Math.PI*0.1,
+	    			end2: Math.PI
+	    		});
+	    		let intensityFlashLight = Utilities.mapNum({
+	    			input: (1 - playerInState.flashlightFocus),
+	    			start1: 0, 
+	    			end1: 1,
+	    			start2: playerInState.energy,
+	    			end2:  playerInState.energy*2
+	    		});
+	    		let intensityGlow = Utilities.mapNum({
+	    			input: (1 - playerInState.flashlightFocus),
+	    			start1: 0, 
+	    			end1: 1,
+	    			start2: playerInState.energy,
+	    			end2:  playerInState.energy*0.1
+	    		});
+	    		this.drawLightCone({
+	      		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
+	      		y: playerToDraw.lineOfSightFlashlightOrigin.y,
+	      		angle: playerInState.angle, //player.angle
+	      		intensity:intensityFlashLight,
+	      		width: width,
+	      		lineOfSight: playerToDraw.lineOfSightPath,
+	      		offset:    playerToDraw.offset
+	      	});
 
-      	this.drawLightPoint({
-      		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
-      		y: playerToDraw.lineOfSightFlashlightOrigin.y,
-      		intensity:intensityGlow,
-      		lineOfSight: playerToDraw.lineOfSightPath,
-      		offset:    playerToDraw.offset
-      	});
+	      	this.drawLightPoint({
+	      		x: playerToDraw.lineOfSightFlashlightOrigin.x, 
+	      		y: playerToDraw.lineOfSightFlashlightOrigin.y,
+	      		intensity:intensityGlow,
+	      		lineOfSight: playerToDraw.lineOfSightPath,
+	      		offset:    playerToDraw.offset
+	      	});
 
-    	}//only if line of sight path is ready
-  
-    }// every player in playersToDraw Lighting
-    
+	    	}//only if line of sight path is ready
+	  
+	    }// every player in playersToDraw Lighting
+	    
 
-    this.render.globalCompositeOperation = "xor";
-    this.render.drawImage(this.offscreenCanvas, 0, 0);
+	    this.render.globalCompositeOperation = "xor";
+	    this.render.drawImage(this.offscreenCanvas, 0, 0);
 	}//draw
 
 	addGowingObject({
