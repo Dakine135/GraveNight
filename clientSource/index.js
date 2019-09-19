@@ -3,6 +3,7 @@ import Controls from './js/clientControls.js';
 import Networking from './js/networking.js';
 import Camera from './js/Camera.js';
 import Lighting from './js/lighting.js';
+import LineOfSight from './js/lineOfSight.js';
 import Hud from './js/hud.js';
 import Background from './js/background.js';
 import World from '../shared/World.js';
@@ -16,6 +17,7 @@ var CONTROLS = {};
 var NETWORK = {};
 var CAMERA = {};
 var LIGHTING = {};
+var LINEOFSIGHT = {};
 var HUD = {};
 var BACKGROUND = {};
 var WORLD = {};
@@ -52,7 +54,7 @@ function setup(){
     STATES = new StatesManager({
       debug:              false, 
       debugState:         false,
-      stateInterpolation: true,
+      stateInterpolation: false,
       clientSimulation:   false, //not really working atm
       render:             render,
       CAMERA:             CAMERA
@@ -88,6 +90,14 @@ function setup(){
       brightness: BRIGHTNESS
     });
     LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
+    LINEOFSIGHT = new LineOfSight({
+      debug:  false,
+      width:  WIDTH, 
+      height: HEIGHT,
+      renderDistance: RENDERDISTANCE,
+      CAMERA:     CAMERA,
+      HUD:        HUD,
+    });
     BACKGROUND = new Background({
       debug: false,
       width: WIDTH, 
@@ -185,6 +195,10 @@ function draw(){
       distance: RENDERDISTANCE
     });
   }
+
+  //Line of sight Stuff
+  LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  LINEOFSIGHT.draw(STATES.frameState);
 
   //Lighting Stuff
   LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);

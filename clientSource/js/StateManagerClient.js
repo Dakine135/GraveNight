@@ -46,12 +46,14 @@ export default class StatesManager{
 		// if(this.debug) console.log("NextState:",this.nextState);
 		// if(this.debug) console.log("================================");
 
-		if(this.nextState != null) this.state = State.clone(this.nextState);
+		// if(this.nextState != null) this.state = State.clone(this.nextState);
+		// if(this.nextState != null) State.copyProperties(this.state, this.nextState);
 		// if(this.nextState != null && this.serverUpdateCount < 2) this.state = State.clone(this.nextState);
 		this.serverUpdateCount++;
 		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
-		State.updateWithNewData(this.nextState, data);
+		// State.updateWithNewData(this.nextState, data);
+		State.updateWithNewData(this.state, data);
 		if(this.timeSinceLastServerUpdate > 0){
 			this.serverUpdatesPerSecond = Math.round(
 				((1000/this.timeSinceLastServerUpdate)*0.7) + 
@@ -86,9 +88,12 @@ export default class StatesManager{
 	getIntermediateState(deltaTime){
 		this.currentDeltaTime += deltaTime;
 		if(!this.stateInterpolation){
-			let tempState = State.clone(this.state);
-			this.frameState = tempState;
-			return tempState;
+			//trying to fix Cycle collector issues
+			// let tempState = State.clone(this.state);
+			// this.frameState = tempState;
+			// return this.frameState;
+			this.frameState = this.state;
+			return this.frameState;
 		}
 		//interpolate between this.state and this.nextState
 		let totalTimeBetweenStates = this.nextState.time - this.state.time;

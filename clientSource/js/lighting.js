@@ -104,12 +104,12 @@ module.exports = class lighting{
 				let newPlayerInRange = {};
 				newPlayerInRange.lineOfSightOrigin = {x: player.x, y: player.y};
 				let x = (player.x + player.width *0.5 + 5);
-	    		let y = (player.y + player.height*0.5);
-		    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
-		    		center:newPlayerInRange.lineOfSightOrigin,
-		    		point:{x: x, y: y},
-		    		angle: player.angle
-		    	});
+    		let y = (player.y + player.height*0.5);
+	    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+	    		center:newPlayerInRange.lineOfSightOrigin,
+	    		point:{x: x, y: y},
+	    		angle: player.angle
+	    	});
 				newPlayerInRange.lineOfSightWorker = new LineOfSightWorker();
 				newPlayerInRange.listOfPoints = [];
 				newPlayerInRange.workerCalculating == false;
@@ -146,12 +146,12 @@ module.exports = class lighting{
 				let playerLightEntry = this.playersToDraw[id];
 				playerLightEntry.lineOfSightOrigin = {x: player.x, y: player.y};
 				let x = (player.x + player.width *0.5 + 5);
-		    	let y = (player.y + player.height*0.5);
-		    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
-		    		center:playerLightEntry.lineOfSightOrigin,
-		    		point:{x: x, y: y},
-		    		angle: player.angle
-		    	});
+	    	let y = (player.y + player.height*0.5);
+	    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
+	    		center:playerLightEntry.lineOfSightOrigin,
+	    		point:{x: x, y: y},
+	    		angle: player.angle
+	    	});
 			}//update existing
 
 			let playerLightEntry = this.playersToDraw[id];

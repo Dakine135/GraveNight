@@ -264,6 +264,31 @@ function clone(state){
 }
 exports.clone = clone;
 
+function copyProperties(state, copyFromState){
+	state.tick = copyFromState.tick;
+	state.time = copyFromState.time;
+	state.debug = copyFromState.debug;
+	state.actions = [];
+	state.world = copyFromState.world //intentionally a reference
+	// state.actions.forEach((action)=>{
+	// 	state.actions.push(Utilities.cloneObject(action));
+	// });
+	state.players = {};
+	for(var id in copyFromState.players){
+		state.players[id] = Utilities.cloneObject(copyFromState.players[id]);
+	}
+	// state.blocks = {};
+	// for(var id in state.blocks){
+	// 	state.blocks[id] = Utilities.cloneObject(copyFromState.blocks[id]);
+	// }
+	// newStateObj.objects = {};
+	// for(var id in state.objects){
+	// 	newStateObj.objects[id] = Utilities.cloneObject(state.objects[id]);
+	// }
+	// return newStateObj;
+}
+exports.copyProperties = copyProperties;
+
 exports.InterpolateCreateNew = (startState, endState, percent)=>{
 	let newStateObj = {};
 	let differnceInTick = endState.tick - startState.tick;
