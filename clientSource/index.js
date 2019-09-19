@@ -21,7 +21,7 @@ var BACKGROUND = {};
 var WORLD = {};
 var RENDERDISTANCE = 1000; //latter set by window size
 var FRAMERATE = 60;
-var DARKNESS = 0.98; //1 full dark, 0 full light
+var DARKNESS = 1; //1 full dark, 0 full light
 var BRIGHTNESS = 1;  //1 full white, 0 no light
 var WORLDGRIDSIZE = 32;
 
