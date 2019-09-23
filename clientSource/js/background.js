@@ -88,14 +88,18 @@ module.exports = class lighting{
 
   draw(){
     if(!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated) return;
+    // let cameraOffset = {
+    //   x: Math.floor(this.CAMERA.x % this.WORLD.gridSize),
+    //   y: Math.floor(this.CAMERA.y % this.WORLD.gridSize)
+    // }
     let cameraOffset = {
-      x: Math.floor(this.CAMERA.x % this.WORLD.gridSize),
-      y: Math.floor(this.CAMERA.y % this.WORLD.gridSize)
+      x: this.CAMERA.x,
+      y: this.CAMERA.y
     }
     let spriteSheetSize = 64;
     let x = 0;
     let y = 0;
-    for(  let offsetX=-cameraOffset.x; offsetX<this.width;  offsetX+=this.WORLD.gridSize){
+    for(let offsetX=-cameraOffset.x; offsetX<this.width;  offsetX+=this.WORLD.gridSize){
       y = 0;
       for(let offsetY=-cameraOffset.y; offsetY<this.height; offsetY+=this.WORLD.gridSize){
         let imageOffset = this.spriteGrid[x][y];

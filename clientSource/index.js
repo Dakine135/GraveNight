@@ -139,7 +139,7 @@ function draw(){
   if(myPlayer != null) CAMERA.setGoal(myPlayer.x, myPlayer.y);
   CAMERA.update();
 
-  // BACKGROUND.draw();
+  BACKGROUND.draw();
 
   //draw line between player and cursor
   if(myPlayer != null){
