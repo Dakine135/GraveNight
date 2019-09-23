@@ -43,7 +43,7 @@ function setup(){
     console.log("Screen Size: ", WIDTH, HEIGHT);
     canvas.width  = WIDTH;
     canvas.height = HEIGHT;
-    RENDERDISTANCE = Math.max(WIDTH, HEIGHT)*0.6;
+    RENDERDISTANCE = Math.ceil(Math.max(WIDTH, HEIGHT)*0.6);
     CAMERA = new Camera({
       debug: false,
       x:0,y:0, 
@@ -99,10 +99,11 @@ function setup(){
       HUD:        HUD,
     });
     BACKGROUND = new Background({
-      debug: false,
-      width: WIDTH, 
+      debug:  false,
+      width:  WIDTH, 
       height: HEIGHT,
-      CAMERA: CAMERA
+      CAMERA: CAMERA,
+      HUD:    HUD
     });
     console.log("End Setup");
 }//SETUP
@@ -197,12 +198,12 @@ function draw(){
   }
 
   //Line of sight Stuff
-  LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LINEOFSIGHT.draw(STATES.frameState);
+  // LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  // LINEOFSIGHT.draw(STATES.frameState);
 
   //Lighting Stuff
-  LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LIGHTING.draw(STATES.frameState);
+  // LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  // LIGHTING.draw(STATES.frameState);
   
 
   //once a second
