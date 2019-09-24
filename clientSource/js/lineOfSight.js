@@ -55,6 +55,11 @@ module.exports = class lighting{
       this.workerCalculating = false;
     }.bind(this);
 
+    this.offscreenCanvas = document.createElement('canvas');
+    this.offscreenCanvas.width = this.width;
+    this.offscreenCanvas.height = this.height;
+    this.offscreenRender = this.offscreenCanvas.getContext("2d");
+
     console.log("Created lineOfSight-layer", this.width, this.height);
   }//constructor
 
@@ -67,8 +72,8 @@ module.exports = class lighting{
     this.height = height;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
-    // this.offscreenCanvas.width = this.width;
-    // this.offscreenCanvas.height = this.height;
+    this.offscreenCanvas.width = this.width;
+    this.offscreenCanvas.height = this.height;
     this.renderDistance = renderDistance;
   }
 
@@ -101,7 +106,7 @@ module.exports = class lighting{
     // console.log("drawing lighting");
     
     this.render.globalCompositeOperation = "source-over";
-    // this.offscreenRender.globalCompositeOperation = "source-over";
+    this.offscreenRender.globalCompositeOperation = "source-over";
     
     //clear the canvas
     this.render.save();
@@ -110,12 +115,24 @@ module.exports = class lighting{
     this.render.beginPath();
     this.render.restore();
 
-    //fill black
+    // //fill black
     this.render.save();
     this.render.fillStyle = "black";
     this.render.fillRect(0,0,this.width,this.height);
 
-    this.render.globalCompositeOperation = "xor";
+    //fill black
+    this.offscreenRender.save();
+    this.offscreenRender.fillStyle = "black";
+    this.offscreenRender.fillRect(0,0,this.width,this.height);
+
+     //clear the canvas
+    this.offscreenRender.save();
+    this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
+    this.offscreenRender.clearRect(0, 0, this.width, this.height);
+    this.offscreenRender.beginPath();
+    this.offscreenRender.restore();
+
+    this.render.globalCompositeOperation = "destination-out";
 
     if(this.myPlayer != null){
       this.drawLineOfSightMask({
@@ -126,11 +143,10 @@ module.exports = class lighting{
       });
     }
     
-
    
-    //white square for testing
-    // this.render.fillStyle = "rgba(255, 255, 255)";
-    // this.render.fillRect(this.width/4,this.height/4,this.width/2,this.height/2);
+    // this.render.shadowBlur = 100;
+    // this.render.shadowColor = "white";
+    this.render.drawImage(this.offscreenCanvas, 0, 0);
     this.render.restore();
   }//draw
 
@@ -152,11 +168,14 @@ module.exports = class lighting{
     
     //draw full line-of-Sight
     if(lineOfSight){
-      this.render.save();
-      this.render.fillStyle = "white";
-      this.render.translate(offsetX, offsetY);
-      this.render.fill(lineOfSight);
-      this.render.restore();
+      this.offscreenRender.save();
+      this.offscreenRender.fillStyle = "white";
+      this.offscreenRender.strokeStyle = "white";
+      this.offscreenRender.lineWidth = 32;
+      this.offscreenRender.translate(offsetX, offsetY);
+      this.offscreenRender.fill(lineOfSight);
+      this.offscreenRender.stroke(lineOfSight);
+      this.offscreenRender.restore();
     } else return
 
     if(this.debug){

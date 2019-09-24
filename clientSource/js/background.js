@@ -71,15 +71,24 @@ module.exports = class lighting{
         let tileTypeRan = Math.random()*1000;
         if(tileTypeRan >= 900){
           //full grass with leaf
-          this.spriteGrid[column][row].x = 5;
-          this.spriteGrid[column][row].y = 0;
-          this.spriteGrid[column][row].lock = false;
+          let leafRotation = Math.random();
+          if(leafRotation < 0.25)
+          this.setSprite({column:  column, row: row,
+                        spriteX: 5,      spriteY: 0, rotate: Math.PI});
+          else if(leafRotation < 0.5)
+          this.setSprite({column:  column, row: row,
+                        spriteX: 5,      spriteY: 0, rotate: Math.PI/2});
+          else if(leafRotation < 0.75)
+          this.setSprite({column:  column, row: row,
+                        spriteX: 5,      spriteY: 0, rotate: -Math.PI/2});
+          else
+          this.setSprite({column:  column, row: row,
+                          spriteX: 5,      spriteY: 0});
         }
         else{
            //full grass
-           this.spriteGrid[column][row].x = 0;
-           this.spriteGrid[column][row].y = 0;
-           this.spriteGrid[column][row].lock = false;
+           this.setSprite({column:  column, row: row,
+                          spriteX: 0,      spriteY: 0});
         }
       }//for rows
     }//for columns
@@ -90,11 +99,58 @@ module.exports = class lighting{
       for(let row   =0; row   <(numOfRows    - chunkSize); row    += chunkSize){
         if(this.checkGridGroupLock(column, row, chunkSize)) continue;
         let tileTypeRan = Math.random()*1000;
-        if(tileTypeRan >= 900){
-          //full grass with leaf
+        if(tileTypeRan >= 900){ //grass circle patch
+          //top row
+          if(Math.random() <= 0.5)
+          this.setSprite({column:  column,   row: row, lock: true,
+                          spriteX: 3,        spriteY: 2});
+          this.setSprite({column:  column+1, row: row, lock: true,
+                          spriteX: 4,        spriteY: 2, rotate: Math.PI/2});
+          if(Math.random() <= 0.5)
+          this.setSprite({column:  column+2, row: row, lock: true,
+                          spriteX: 2,        spriteY: 2});
+          //middle row
+          this.setSprite({column:  column,   row: row+1, lock: true,
+                          spriteX: 4,        spriteY: 2});
+          let middleType = Math.random();
+          if(middleType < 0.25)
+          this.setSprite({column:  column+1, row: row+1, lock: true,
+                          spriteX: 3,        spriteY: 0});
+          else if(middleType < 0.40)
+          this.setSprite({column:  column+1, row: row+1, lock: true,
+                          spriteX: 4,        spriteY: 0});
+          else
+          this.setSprite({column:  column+1, row: row+1, lock: true,
+                          spriteX: 2,        spriteY: 0});
+          this.setSprite({column:  column+2, row: row+1, lock: true,
+                          spriteX: 4,        spriteY: 2, rotate: Math.PI});
+          //bottom row
+          if(Math.random() <= 0.5)
+          this.setSprite({column:  column,   row: row+2, lock: true,
+                          spriteX: 2,        spriteY: 2, rotate: Math.PI});
+          this.setSprite({column:  column+1, row: row+2, lock: true,
+                          spriteX: 4,        spriteY: 2, rotate: -Math.PI/2});
+          if(Math.random() <= 0.5)
+          this.setSprite({column:  column+2, row: row+2, lock: true,
+                          spriteX: 3,        spriteY: 2, rotate: Math.PI});
+        }
+        else if(tileTypeRan >= 800){
+          //top
+          this.setSprite({column:  column+1, row: row, lock: true,
+                          spriteX: 3,        spriteY: 1, rotate: Math.PI/2});
+          //middle row
+          this.setSprite({column:  column,   row: row+1, lock: true,
+                          spriteX: 3,        spriteY: 1});
+          this.setSprite({column:  column+1, row: row+1, lock: true,
+                        spriteX: 4,        spriteY: 1});
+          this.setSprite({column:  column+2, row: row+1, lock: true,
+                          spriteX: 3,        spriteY: 1, rotate: Math.PI});
+          //bottom row
+          this.setSprite({column:  column+1, row: row+2, lock: true,
+                          spriteX: 3,        spriteY: 1, rotate: -Math.PI/2});
         }
         else{
-           //full grass
+          //don't do anything for chunk
         }
       }//for rows
     }//for columns
@@ -112,6 +168,13 @@ module.exports = class lighting{
     }
     return false;
   }//checkGridGroupLock
+
+  setSprite({column, row, spriteX=0, spriteY=0, rotate=0, lock=false}){
+    this.spriteGrid[column][row].x = spriteX;
+    this.spriteGrid[column][row].y = spriteY;
+    this.spriteGrid[column][row].rotate = rotate;
+    this.spriteGrid[column][row].lock = lock;
+  }//setSprite
 
   resize({
     width,
@@ -177,14 +240,19 @@ module.exports = class lighting{
         let worldLocX = this.CAMERA.x + (offsetX);
         let worldLocY = this.CAMERA.y + (offsetY);
         let imageOffset = this.getImageOffset(worldLocX, worldLocY);
+        this.render.save();
+        this.render.translate(offsetX+(this.WORLD.gridSize/2), offsetY+(this.WORLD.gridSize/2));
+        this.render.rotate(imageOffset.rotate);
+        this.render.translate(-(this.WORLD.gridSize/2), -(this.WORLD.gridSize/2));
         this.render.drawImage(
           this.grassSpriteSheet,            //image source
           (imageOffset.x * spriteSheetSize),//cord x to clip source
           (imageOffset.y * spriteSheetSize),//cord y to clip source
           spriteSheetSize, spriteSheetSize, //width and height of source
-          offsetX, offsetY,                 //cord x and y to paste on canvas
+          0, 0,                 //cord x and y to paste on canvas
           this.gridSize, this.gridSize      //size of paste (can stretch or reduce image)
         );
+        this.render.restore();
         y++;
       }//height
       x++;

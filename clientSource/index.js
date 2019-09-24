@@ -198,12 +198,12 @@ function draw(){
   }
 
   //Line of sight Stuff
-  // LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  // LINEOFSIGHT.draw(STATES.frameState);
+  LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  LINEOFSIGHT.draw(STATES.frameState);
 
   //Lighting Stuff
-  // LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  // LIGHTING.draw(STATES.frameState);
+  LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  LIGHTING.draw(STATES.frameState);
   
 
   //once a second
@@ -214,7 +214,7 @@ function draw(){
       FrameRate: Math.round((lastFrames*0.8) + (frames*0.2)),
       ScreenSize: WIDTH+", "+HEIGHT,
       Ping: NETWORK.ping,
-      ServerUPS: STATES.serverUpdatesPerSecond,
+      // ServerUPS: STATES.serverUpdatesPerSecond,
       timeDiffernce: NETWORK.timeDiffernce,
       objectsToDraw: Object.keys(objectsToDraw).length,
       RENDERDISTANCE: RENDERDISTANCE,

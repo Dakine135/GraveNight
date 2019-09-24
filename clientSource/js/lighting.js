@@ -357,6 +357,8 @@ module.exports = class lighting{
 		render.fill();
 
 		//apply glow canvas to main lighting offscreen canvas
+    this.offscreenRender.shadowBlur = 32;
+    this.offscreenRender.shadowColor = "rgba(255, 255, 255, 1)";
     this.offscreenRender.drawImage(canvas, 0, 0);
     //clear the canvas
     render.globalCompositeOperation = "source-over";
@@ -459,6 +461,8 @@ module.exports = class lighting{
 		render.fill();
 
 		//apply cone canvas to main lighting offscreen canvas
+    this.offscreenRender.shadowBlur = 32;
+    this.offscreenRender.shadowColor = "rgba(255, 255, 255, 1)";
     this.offscreenRender.drawImage(canvas, 0, 0);
     //clear the canvas
     render.globalCompositeOperation = "source-over";

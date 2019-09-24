@@ -77,7 +77,7 @@ exports.updateCreateNew = (obj, currentTime)=>{
 	newObj.moveByX = 0;
 	newObj.moveByY = 0;
 	if(newObj.energy>0){
-	newObj.energy = newObj.energy-0.05;
+	// newObj.energy = newObj.energy-0.05;
 	}
 	//update Angle of player based on cursor location relative to player
 	calculateAndSetAngleMutate(newObj);
@@ -115,6 +115,9 @@ exports.updateMutate = (obj, currentTime)=>{
 	//reset accumulated movement
 	obj.moveByX = 0;
 	obj.moveByY = 0;
+	if(newObj.energy>0){
+	// newObj.energy = newObj.energy-0.05;
+	}
 	//update Angle of player based on cursor location relative to player
 	calculateAndSetAngleMutate(obj);
 
