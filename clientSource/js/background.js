@@ -62,33 +62,56 @@ module.exports = class lighting{
     this.backgroundGenerated = true;
     let numOfColumns = this.WORLD.width/this.WORLD.gridSize;
     let numOfRows = this.WORLD.height/this.WORLD.gridSize;
+    //go through and set inital grass
     for(  let column=0; column<numOfColumns;  column++){
       for(let row   =0; row   <numOfRows;     row++){
         if(this.spriteGrid[column] === undefined) this.spriteGrid[column] = [];
         if(this.spriteGrid[column][row] === undefined) this.spriteGrid[column][row] = {};
         if(this.spriteGrid[column][row].lock === true) continue;
         let tileTypeRan = Math.random()*1000;
-        if(tileTypeRan >= 800){
+        if(tileTypeRan >= 900){
           //full grass with leaf
           this.spriteGrid[column][row].x = 5;
           this.spriteGrid[column][row].y = 0;
           this.spriteGrid[column][row].lock = false;
         }
-        else if(tileTypeRan >= 600){
-          //full grass with leaf
-          this.spriteGrid[column][row].x = 1;
-          this.spriteGrid[column][row].y = 2;
-          this.spriteGrid[column][row].lock = false;
-        } 
         else{
            //full grass
            this.spriteGrid[column][row].x = 0;
            this.spriteGrid[column][row].y = 0;
            this.spriteGrid[column][row].lock = false;
         }
+      }//for rows
+    }//for columns
+
+    //go through in 3x3 chuncks and replace sections with sprites that go together
+    let chunkSize = 3; //square
+    for(  let column=0; column<(numOfColumns - chunkSize); column += chunkSize){
+      for(let row   =0; row   <(numOfRows    - chunkSize); row    += chunkSize){
+        if(this.checkGridGroupLock(column, row, chunkSize)) continue;
+        let tileTypeRan = Math.random()*1000;
+        if(tileTypeRan >= 900){
+          //full grass with leaf
+        }
+        else{
+           //full grass
+        }
+      }//for rows
+    }//for columns
+  }//generateBackGroundImage
+
+  //returns true if any cell in group is locked, otherwise false
+  checkGridGroupLock(column, row, size){
+    // console.log(column, row, size);
+    let maxX = column + size;
+    let maxY = row    + size;
+    for(  let x=column; x<maxX;  x++){
+      for(let y=row;    y<maxY;  y++){
+        if(this.spriteGrid[x][y].lock) return true;
       }
     }
-  }//generateBackGroundImage
+    return false;
+  }//checkGridGroupLock
 
   resize({
     width,
