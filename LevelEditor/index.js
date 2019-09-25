@@ -18,8 +18,43 @@ offscreenCanvas.width = gridSize;
 offscreenCanvas.height = gridSize;
 let offscreenRender = offscreenCanvas.getContext("2d");
 
+let buttons = [
+	{	//blue
+		x: 50,
+		y: 50,
+		width: 40,
+		height: 40,
+		color: "blue",
+		callback: () => {
+			selectedColor = "blue"
+		}
+	},
+	{	//red
+		x: 100,
+		y: 50,
+		width: 40,
+		height: 40,
+		color: "red",
+		callback: () => {
+			selectedColor = "red"
+		}
+	},
+	{	//white
+		x: 150,
+		y: 50,
+		width: 40,
+		height: 40,
+		color: "white",
+		callback: () => {
+			selectedColor = "white"
+		}
+	}
+];
 
-
+let prevCellLoc = {
+	x: 0,
+	y: 0
+}
 let currentCellLoc = {
 	x: 0,
 	y: 0
@@ -38,14 +73,14 @@ let centerEndY = (gridSize*worldGridSize)/2 + 500;
 for(var i=0; i<gridSize; i++){
 	grid[i] = [];
 	for(var j=0; j<gridSize; j++){
+		let currentX = i*worldGridSize;
+		let currentY = j*worldGridSize;
 		if(i == 0 || i == (gridSize-1) ||
 		   j == 0 || j == (gridSize-1)){
 		   	//console.log("im working");
 			grid[i][j] = "black";
 		} 
-		let currentX = i*worldGridSize;
-		let currentY = j*worldGridSize;
-		if(centerStartX < currentX && currentX < centerEndX &&
+		else if(centerStartX < currentX && currentX < centerEndX &&
 		   centerStartY < currentY && currentY < centerEndY){
 			grid[i][j] = "yellow";
 		}
@@ -195,14 +230,13 @@ function click(event)
 	else if(prevCellLoc.x == 1 && prevCellLoc.y == 0){
 		selectedColor = "red";
 	}
+	else if(prevCellLoc.x == 2 && prevCellLoc.y == 0){
+		selectedColor = "black";
+	}
 	colorCell(x, y);
 }
 function release(event){
 	mouseHeld = false;
-}
-let prevCellLoc = {
-	x: 0,
-	y: 0
 }
 function drag(event){
 	let canvasX = event.x - canvas.offsetLeft;
@@ -256,12 +290,23 @@ function updateScreen(){
     render.fillRect(buffer+currentCellLoc.x, buffer+currentCellLoc.y, cellSize, cellSize);
     render.restore();
 
+    //draw buttons
+    buttons.forEach((button)=>{
+    	//console.log("i am working", button);
+    	render.fillStyle = button.color;
+    	render.fillRect(button.x, button.y, button.width, button.height);
+    	render.lineWidth = 1;
+    	render.strokeStyle = "black";
+    	render.strokeRect(button.x, button.y, button.width, button.height);
+    });
+
     //minimap
     render.lineWidth = 10;
 	render.strokeStyle = "green";
 	render.strokeRect(width-gridSize-10, 0, gridSize+10, gridSize
 		+10);
     render.drawImage(offscreenCanvas, width-gridSize-5, 5);
+
 }
 
 updateMiniMap();
