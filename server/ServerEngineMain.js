@@ -79,6 +79,7 @@ module.exports = class Engine {
         this.acumulatedTime = this.acumulatedTime - this.ticRate;
         if((this.tickCount % 1) == 0){
           if(this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${(deltaTime * this.nanosecondsIntoMiliseconds)}`);
+          if(deltaTime > this.ticRate*2) console.log("DetlaTimeBehind", deltaTime, "should be", this.ticRate);
         }
         this.update(this.tickRateMS);
 
@@ -104,7 +105,6 @@ module.exports = class Engine {
 
   update(deltaTime){
     // console.log("deltaTime update:", deltaTime);
-    if(deltaTime > this.ticRate) console.log("DetlaTimeBehind", deltaTime, "should be", this.ticRate);
     this.stateManager.createNextState(this.tickCount, deltaTime);
     this.sendGameStateToClients(this.tickCount);
   }

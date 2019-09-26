@@ -237,6 +237,9 @@ exports.draw = (obj, render, CAMERA)=>{
 	//draw flashlight
 	render.fillStyle = "black";
 	render.fillRect(15, 20, 20, 10);
+	//second light
+	// render.fillStyle = "black";
+	// render.fillRect(15, -30, 20, 10);
 	render.closePath();
 	render.restore(); // Restore original state
 }

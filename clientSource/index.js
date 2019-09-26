@@ -10,8 +10,6 @@ import World from '../shared/World.js';
 import Block from '../shared/Block.js';
 
 console.log("index.js loaded in bundle");
-var WIDTH = window.innerWidth;
-var HEIGHT = window.innerHeight;
 var STATES = {};
 var CONTROLS = {};
 var NETWORK = {};
@@ -38,9 +36,25 @@ var lastSecond = currentTime;
 var lastFrames = 60;
 var frames = 0;
 
+let scale = 80;
+var WIDTH = 16*scale;
+var HEIGHT = 9*scale;
+var screenWidth = window.innerWidth;
+var screenHeight = window.innerHeight;
+var scaleX = screenWidth / WIDTH;
+var scaleY = screenHeight / HEIGHT;
+// var scaleToFit = Math.min(scaleX, scaleY);
+// var scaleToCover = Math.max(scaleX, scaleY);
+stage.style.transformOrigin = '0 0'; //scale from top left
+// stage.style.transform = 'scale(' + scaleToFit + ')';
+stage.style.transform = 'scale('+scaleX+','+scaleY+')';
+
+
+
 function setup(){
     console.log("Start Setup");
     console.log("Screen Size: ", WIDTH, HEIGHT);
+    console.log("Game Size: ", WIDTH, HEIGHT);
     canvas.width  = WIDTH;
     canvas.height = HEIGHT;
     RENDERDISTANCE = Math.ceil(Math.max(WIDTH, HEIGHT)*0.6);
@@ -55,7 +69,7 @@ function setup(){
       debug:              false, 
       debugState:         false,
       stateInterpolation: false,
-      clientSimulation:   false, //not really working atm
+      clientSimulation:   true, //not really working atm
       render:             render,
       CAMERA:             CAMERA
     });
@@ -110,16 +124,27 @@ function setup(){
 
 window.addEventListener('resize', windowResized);
 function windowResized(){
-  WIDTH = window.innerWidth;
-  HEIGHT = window.innerHeight;
-  console.log("Resize: ", WIDTH, HEIGHT);
-  canvas.width  = WIDTH;
-  canvas.height = HEIGHT;
-  RENDERDISTANCE = Math.max(WIDTH, HEIGHT);
-  LIGHTING.resize({width: WIDTH, height: HEIGHT, renderDistance: RENDERDISTANCE});
-  HUD.resize({width: WIDTH, height: HEIGHT});
-  CAMERA.resize({width: WIDTH, height: HEIGHT});
-  BACKGROUND.resize({width: WIDTH, height: HEIGHT});
+  screenWidth = window.innerWidth;
+  screenHeight = window.innerHeight;
+  scaleX = screenWidth / WIDTH;
+  scaleY = screenHeight / HEIGHT;
+  // scaleToFit = Math.min(scaleX, scaleY);
+  // scaleToCover = Math.max(scaleX, scaleY);
+  stage.style.transformOrigin = '0 0'; //scale from top left
+  // stage.style.transform = 'scale(' + scaleToFit + ')';
+  stage.style.transform = 'scale('+scaleX+','+scaleY+')';
+
+
+  // WIDTH = window.innerWidth;
+  // HEIGHT = window.innerHeight;
+  // console.log("Resize: ", WIDTH, HEIGHT);
+  // canvas.width  = WIDTH;
+  // canvas.height = HEIGHT;
+  // RENDERDISTANCE = Math.max(WIDTH, HEIGHT);
+  // LIGHTING.resize({width: WIDTH, height: HEIGHT, renderDistance: RENDERDISTANCE});
+  // HUD.resize({width: WIDTH, height: HEIGHT});
+  // CAMERA.resize({width: WIDTH, height: HEIGHT});
+  // BACKGROUND.resize({width: WIDTH, height: HEIGHT});
 } //window Resized
 
 function draw(){
@@ -139,13 +164,12 @@ function draw(){
   let myPlayer = NETWORK.getMyPlayer();
   if(myPlayer != null) CAMERA.setGoal(myPlayer.x, myPlayer.y);
   CAMERA.update();
+  let timeAfterCamera = new Date().getTime();
+  let deltaCamera = timeAfterCamera - currentTime;
 
   BACKGROUND.draw();
-
-  //draw line between player and cursor
-  if(myPlayer != null){
-    let playerLocOnScreen = CAMERA.translate({x: myPlayer.x, y: myPlayer.y});
-  }
+  let timeAfterBackground = new Date().getTime();
+  let deltaBackground = timeAfterBackground - timeAfterCamera;
 
   //square at 0,0
   let origin = CAMERA.translate({x:0, y:0});
@@ -160,7 +184,12 @@ function draw(){
 
   //Main state, players
   STATES.update(deltaTime);
+  let timeAfterStateUpdate = new Date().getTime();
+  let deltaStateUpdate = timeAfterStateUpdate - timeAfterBackground;
+
   STATES.draw(deltaTime);
+  let timeAfterStateDraw = new Date().getTime();
+  let deltaStateDraw = timeAfterStateDraw - timeAfterStateUpdate;
 
   //World drawing
   let objectsToDraw = {};
@@ -184,9 +213,11 @@ function draw(){
           console.log("Object not recognized to Draw");
       }
     }
-    BACKGROUND.updateWithWorldData(WORLD);
-
+    if(!BACKGROUND.backgroundGenerated) BACKGROUND.updateWithWorldData(WORLD);
   }//if World has been received from Server
+  let timeAfterWorldDraw = new Date().getTime();
+  let deltaWorldDraw = timeAfterWorldDraw - timeAfterStateDraw;
+
 
   let playersInRange = {};
   if(myPlayer != null){
@@ -198,12 +229,22 @@ function draw(){
   }
 
   //Line of sight Stuff
-  LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LINEOFSIGHT.draw(STATES.frameState);
+  // LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  let timeAfterSightUpdate = new Date().getTime();
+  let deltaSightUpdate = timeAfterSightUpdate - timeAfterWorldDraw;
+
+  // LINEOFSIGHT.draw(STATES.frameState);
+  let timeAfterSightDraw = new Date().getTime();
+  let deltaSightDraw = timeAfterSightDraw - timeAfterSightUpdate;
 
   //Lighting Stuff
-  LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-  LIGHTING.draw(STATES.frameState);
+  // LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+  let timeAfterLightUpdate = new Date().getTime();
+  let deltaLightUpdate = timeAfterLightUpdate - timeAfterSightDraw;
+
+  // LIGHTING.draw(STATES.frameState);
+  let timeAfterLightDraw = new Date().getTime();
+  let deltaLightDraw = timeAfterLightDraw - timeAfterLightUpdate;
   
 
   //once a second
@@ -213,12 +254,23 @@ function draw(){
     HUD.debugUpdate({
       FrameRate: Math.round((lastFrames*0.8) + (frames*0.2)),
       ScreenSize: WIDTH+", "+HEIGHT,
+      WindowSize: screenWidth+", "+screenHeight,
       Ping: NETWORK.ping,
       // ServerUPS: STATES.serverUpdatesPerSecond,
       timeDiffernce: NETWORK.timeDiffernce,
       objectsToDraw: Object.keys(objectsToDraw).length,
       RENDERDISTANCE: RENDERDISTANCE,
-      CAMERA: CAMERA.x+", "+CAMERA.y
+      CAMERA: CAMERA.x+", "+CAMERA.y,
+      deltaTime: deltaTime,
+      timeCamera:      (Math.round((deltaCamera / deltaTime) * 100)) + "%",
+      timeBackground:  (Math.round((deltaBackground / deltaTime) * 100)) + "%",
+      timeStateUpdate: (Math.round((deltaStateUpdate / deltaTime) * 100)) + "%",
+      timeStateDraw:   (Math.round((deltaStateDraw / deltaTime) * 100)) + "%",
+      timeWorldDraw:   (Math.round((deltaWorldDraw / deltaTime) * 100)) + "%", 
+      timeSightUpdate: (Math.round((deltaSightUpdate / deltaTime) * 100)) + "%",
+      timeSightDraw:   (Math.round((deltaSightDraw / deltaTime) * 100)) + "%",
+      timeLightUpdate: (Math.round((deltaLightUpdate / deltaTime) * 100)) + "%",
+      timeLightDraw:   (Math.round((deltaLightDraw / deltaTime) * 100)) + "%"
     });
     lastSecond = currentTime;
     lastFrames = frames;

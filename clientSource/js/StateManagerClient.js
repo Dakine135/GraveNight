@@ -48,12 +48,12 @@ export default class StatesManager{
 
 		// if(this.nextState != null) this.state = State.clone(this.nextState);
 		// if(this.nextState != null) State.copyProperties(this.state, this.nextState);
-		// if(this.nextState != null && this.serverUpdateCount < 2) this.state = State.clone(this.nextState);
 		this.serverUpdateCount++;
 		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
-		// State.updateWithNewData(this.nextState, data);
-		State.updateWithNewData(this.state, data);
+		State.updateWithNewData(this.nextState, data);
+		if(this.nextState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.nextState);
+		// State.updateWithNewData(this.state, data);
 		if(this.timeSinceLastServerUpdate > 0){
 			this.serverUpdatesPerSecond = Math.round(
 				((1000/this.timeSinceLastServerUpdate)*0.7) + 
@@ -78,10 +78,12 @@ export default class StatesManager{
 		}
 
 		//for debug when comparing server and client states
-		// if(this.nextState == null) return;
-		// for(var id in this.nextState.players){
-		// 	Player.draw(this.nextState.players[id], this.render, this.CAMERA);
-		// }
+		if(this.nextState == null) return;
+		for(var id in this.nextState.players){
+			let player = this.nextState.players[id];
+			player.name = "Server";
+			Player.draw(player, this.render, this.CAMERA);
+		}
 		
 	}//draw
 
