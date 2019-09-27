@@ -19,9 +19,10 @@ export default class StatesManager{
 		this.clientSimulation = clientSimulation;
 		this.state = State.createStartState({debug:this.debugState});
 		this.frameState = this.state;
-		this.nextState = State.createNextState(this.state);
+		this.serverState = State.createNextState(this.state);
 		//set by server tick, then added as delta time progresses, not actual system time
 		this.currentDeltaTime = 0;
+		this.currentTimeInSimulation = 0;
 		this.render = render;
 		this.CAMERA = CAMERA;
 
@@ -37,22 +38,25 @@ export default class StatesManager{
 	Currently takes entire state each time, ideally we would just take in delta and construct from previous State TODO.
 	But also only take in what is in the vicinity of the client.
 
-	We are keeping the nextState and only drawing the "last State" from the server, this way we can interpolate between frames. We can generate more frames than the server can send states.
+	We are keeping the serverState and only drawing the "last State" from the server, this way we can interpolate between frames. We can generate more frames than the server can send states.
 	*/
 	reciveServerState(data){
 		if(this.debug) console.log("StateManager Server Update",data);
 		// if(this.debug) console.log("================================");
 		// if(this.debug) console.log("CurrentState:",this.state);
-		// if(this.debug) console.log("NextState:",this.nextState);
+		// if(this.debug) console.log("NextState:",this.serverState);
 		// if(this.debug) console.log("================================");
 
-		// if(this.nextState != null) this.state = State.clone(this.nextState);
-		// if(this.nextState != null) State.copyProperties(this.state, this.nextState);
+		// if(this.serverState != null) this.state = State.clone(this.serverState);
+		// if(this.serverState != null) State.copyProperties(this.state, this.serverState);
 		this.serverUpdateCount++;
 		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
-		State.updateWithNewData(this.nextState, data);
-		if(this.nextState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.nextState);
+		State.updateWithNewData(this.serverState, data);
+		//TODO need function to migrate properties from server state to main client state before overwriting with latest server
+		//TODO need to make smooth corrections to client state where off to keep aligned with server
+		if(this.serverState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.serverState);
+		this.state.time = this.serverState.time;
 		// State.updateWithNewData(this.state, data);
 		if(this.timeSinceLastServerUpdate > 0){
 			this.serverUpdatesPerSecond = Math.round(
@@ -63,8 +67,8 @@ export default class StatesManager{
 	}//reciveServerState
 
 	update(deltaTime){
-		let currentTimeInSimulation = this.state.time + deltaTime;
-		if(this.clientSimulation) State.simulateForClient(this.state, currentTimeInSimulation);
+		this.currentTimeInSimulation = this.state.time + deltaTime;
+		if(this.clientSimulation) State.simulateForClient(this.state, this.currentTimeInSimulation);
 	}
 
 	draw(deltaTime){
@@ -78,15 +82,16 @@ export default class StatesManager{
 		}
 
 		//for debug when comparing server and client states
-		if(this.nextState == null) return;
-		for(var id in this.nextState.players){
-			let player = this.nextState.players[id];
+		if(this.serverState == null) return;
+		for(var id in this.serverState.players){
+			let player = this.serverState.players[id];
 			player.name = "Server";
 			Player.draw(player, this.render, this.CAMERA);
 		}
 		
 	}//draw
 
+	//TODO this should only interpolate others, and not your own player
 	getIntermediateState(deltaTime){
 		this.currentDeltaTime += deltaTime;
 		if(!this.stateInterpolation){
@@ -97,16 +102,16 @@ export default class StatesManager{
 			this.frameState = this.state;
 			return this.frameState;
 		}
-		//interpolate between this.state and this.nextState
-		let totalTimeBetweenStates = this.nextState.time - this.state.time;
+		//interpolate between this.state and this.serverState
+		let totalTimeBetweenStates = this.serverState.time - this.state.time;
 		let percent = this.currentDeltaTime / totalTimeBetweenStates;
 		// console.log("Percent:",percent);
 		if(percent >= 1){
-			this.frameState = this.nextState;
-			return this.nextState;
+			this.frameState = this.serverState;
+			return this.serverState;
 		}
 		else{
-			this.frameState = State.InterpolateCreateNew(this.state, this.nextState, percent);
+			this.frameState = State.InterpolateCreateNew(this.state, this.serverState, percent);
 			return this.frameState;
 		}
 	}// getIntermediateState

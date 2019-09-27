@@ -52,7 +52,7 @@ module.exports = class Networking{
               saveTo: this.WORLD
         });
         this.WORLD.grid = data.grid;
-        this.STATES.nextState.world = this.WORLD;
+        this.STATES.serverState.world = this.WORLD;
         console.log(this.WORLD.grid);
     }
 

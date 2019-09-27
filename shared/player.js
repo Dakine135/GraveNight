@@ -13,8 +13,8 @@ exports.create = ({
 		cursorY = 500,
 		speedMultiplier = 300, //increments "pixels" per second
 		angle = 0,
-		width = 50,
-		height = 50,
+		width = 32,
+		height = 32,
 		color = Utilities.randomColor(),
 		energy = 600,
 		flashlightFocus = 0.5
@@ -230,13 +230,13 @@ exports.draw = (obj, render, CAMERA)=>{
 	render.fillRect(-obj.width/2, -obj.width/2, obj.width, obj.height);
 	//draw eyes
 	render.fillStyle = "blue";
-	render.arc(15, 10,  5, 0, 2*Math.PI);
+	render.arc(obj.width*0.3, obj.height*0.2,  obj.height/10, 0, 2*Math.PI);
 	render.fill();
-	render.arc(15, -10, 5, 0, 2*Math.PI);
+	render.arc(obj.width*0.3, -obj.height*0.2, obj.height/10, 0, 2*Math.PI);
 	render.fill();
 	//draw flashlight
 	render.fillStyle = "black";
-	render.fillRect(15, 20, 20, 10);
+	render.fillRect(obj.width/4, obj.height/2, obj.width/2, obj.height/4);
 	//second light
 	// render.fillStyle = "black";
 	// render.fillRect(15, -30, 20, 10);

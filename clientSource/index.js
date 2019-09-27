@@ -133,18 +133,6 @@ function windowResized(){
   stage.style.transformOrigin = '0 0'; //scale from top left
   // stage.style.transform = 'scale(' + scaleToFit + ')';
   stage.style.transform = 'scale('+scaleX+','+scaleY+')';
-
-
-  // WIDTH = window.innerWidth;
-  // HEIGHT = window.innerHeight;
-  // console.log("Resize: ", WIDTH, HEIGHT);
-  // canvas.width  = WIDTH;
-  // canvas.height = HEIGHT;
-  // RENDERDISTANCE = Math.max(WIDTH, HEIGHT);
-  // LIGHTING.resize({width: WIDTH, height: HEIGHT, renderDistance: RENDERDISTANCE});
-  // HUD.resize({width: WIDTH, height: HEIGHT});
-  // CAMERA.resize({width: WIDTH, height: HEIGHT});
-  // BACKGROUND.resize({width: WIDTH, height: HEIGHT});
 } //window Resized
 
 function draw(){

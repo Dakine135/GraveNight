@@ -16,7 +16,7 @@ var io = socket(server);
 app.use(express.static('./public'));
 console.log(`GraveNight server running on port ${port}`);
 let config = {
-	ticRate: 20, //delay between ticks  16.667 is 60 a second
+	ticRate: 30, //delay between ticks  16.667 is 60 a second
 	debugEngine: false,
   debugStateManager: false, 
 	debugStates: false,

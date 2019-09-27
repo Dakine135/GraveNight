@@ -9,7 +9,7 @@ export default class Controls{
 		this.CAMERA = CAMERA;
 
 		this.mouse = {x:0, y:0};
-		this.keysBringPressed = {};
+		this.keysBeingPressed = {};
 
 		this.leftClickPressed=false;
 		this.middleClickPressed=false;
@@ -37,10 +37,10 @@ export default class Controls{
 	}//constructor
 
 	scrollEvent(event){
-		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.STATES.serverState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerScroll',
-			time: eventTime
+			time: this.STATES.currentTimeInSimulation
 		};
 		if(event.deltaY > 0){
 			if(this.debug) console.log("scroll Down");
@@ -58,35 +58,39 @@ export default class Controls{
 		let keyCode = event.keyCode;
 		let key     = event.key;
 		if(this.debug) console.log(`Pressed: ${keyCode}, ${key}`);
-		if(!this.keysBringPressed[keyCode]) this.keysBringPressed[keyCode] = true;
+		if(!this.keysBeingPressed[keyCode]) this.keysBeingPressed[keyCode] = true;
 		else{ 
 			//console.log("key already pressed:", keyCode); 
 			return;
 		};
-		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.STATES.state.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:true,
-			time: eventTime
+			time: this.STATES.currentTimeInSimulation
 		};
 		let validKey = true;
 		switch(keyCode){
 			case 65: //A
+			case 37: //left arrow
 				//player move Left
 				data.x = -1;
 				data.y = 0;
 				break;
 			case 68: //D
+			case 39: //right arrow
 				//Player move Right
 				data.x = 1;
 				data.y = 0;
 				break;
 			case 87: //W
+			case 38: //arrow up
 				//Player Move Up
 				data.x = 0;
 				data.y = -1;
 				break;
 			case 83: //S
+			case 40: //arrow down
 				//Player Move Down
 				data.x = 0;
 				data.y = 1;
@@ -106,35 +110,39 @@ export default class Controls{
 		let keyCode = event.keyCode;
 		let key     = event.key;
 		if(this.debug) console.log(`Released: ${keyCode}, ${key}`);
-		if(this.keysBringPressed[keyCode]) this.keysBringPressed[keyCode] = false;
+		if(this.keysBeingPressed[keyCode]) this.keysBeingPressed[keyCode] = false;
 		else{ 
 			//console.log("key never pressed but Released:", keyCode); 
 			return;
 		};
-		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.STATES.state.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:false,
-			time: eventTime
+			time: this.STATES.currentTimeInSimulation
 		};
 		let validKey = true;
 		switch(keyCode){
 			case 65: //A
+			case 37: //left arrow
 				//player move Left
 				data.x = -1;
 				data.y = 0;
 				break;
 			case 68: //D
+			case 39: //right arrow
 				//Player move Right
 				data.x = 1;
 				data.y = 0;
 				break;
 			case 87: //W
+			case 38: //arrow up
 				//Player Move Up
 				data.x = 0;
 				data.y = -1;
 				break;
 			case 83: //S
+			case 40: //arrow down
 				//Player Move Down
 				data.x = 0;
 				data.y = 1;
@@ -163,12 +171,12 @@ export default class Controls{
 		let mouseY = event.pageY;
 		this.mouse = {x: mouseX, y: mouseY};
 		let locInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
-		let eventTime = this.STATES.nextState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.STATES.serverState.time + this.STATES.currentDeltaTime;
 		let data = {
 			type:'playerCursor',
 			x: locInWorld.x,
 			y: locInWorld.y,
-			time: eventTime
+			time: this.STATES.currentTimeInSimulation
 		};
 		this.NETWORK.sendClientAction(data);
 		data.socketId = this.NETWORK.mySocketId;

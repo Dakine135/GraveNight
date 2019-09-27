@@ -103,8 +103,9 @@ module.exports = class lighting{
 				//create entry
 				let newPlayerInRange = {};
 				newPlayerInRange.lineOfSightOrigin = {x: player.x, y: player.y};
-				let x = (player.x + player.width *0.5 + 5);
-    		let y = (player.y + player.height*0.5);
+        // render.fillRect(obj.width/4, obj.height/2, obj.width/2, obj.height/4);
+				let x = (player.x + player.width*2);
+    		let y = (player.y + player.height*2);
 	    	newPlayerInRange.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
 	    		center:newPlayerInRange.lineOfSightOrigin,
 	    		point:{x: x, y: y},
@@ -145,8 +146,8 @@ module.exports = class lighting{
 				//update entry
 				let playerLightEntry = this.playersToDraw[id];
 				playerLightEntry.lineOfSightOrigin = {x: player.x, y: player.y};
-				let x = (player.x + player.width *0.5 + 5);
-	    	let y = (player.y + player.height*0.5);
+				let x = (player.x + player.width *0.5);
+	    	let y = (player.y + player.height*0.625);
 	    	playerLightEntry.lineOfSightFlashlightOrigin = this.CAMERA.rotatePoint({
 	    		center:playerLightEntry.lineOfSightOrigin,
 	    		point:{x: x, y: y},
