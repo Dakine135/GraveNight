@@ -78,7 +78,8 @@ export default class StatesManager{
 		// console.log(drawingState.toString({verbose:true}));
 		//TODO only draw players in range of you
 		for(var id in drawingState.players){
-			Player.draw(drawingState.players[id], this.render, this.CAMERA);
+			let player = drawingState.players[id];
+			Player.draw(player, this.render, this.CAMERA);
 		}
 
 		//for debug when comparing server and client states

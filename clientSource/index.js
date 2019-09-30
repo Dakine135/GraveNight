@@ -9,6 +9,8 @@ import Background from './js/background.js';
 import World from '../shared/World.js';
 import Block from '../shared/Block.js';
 
+// import Engine from './js/clientEngine.js';
+
 console.log("index.js loaded in bundle");
 var STATES = {};
 var CONTROLS = {};
@@ -250,15 +252,24 @@ function draw(){
       RENDERDISTANCE: RENDERDISTANCE,
       CAMERA: CAMERA.x+", "+CAMERA.y,
       deltaTime: deltaTime,
-      timeCamera:      (Math.round((deltaCamera / deltaTime) * 100)) + "%",
-      timeBackground:  (Math.round((deltaBackground / deltaTime) * 100)) + "%",
-      timeStateUpdate: (Math.round((deltaStateUpdate / deltaTime) * 100)) + "%",
-      timeStateDraw:   (Math.round((deltaStateDraw / deltaTime) * 100)) + "%",
-      timeWorldDraw:   (Math.round((deltaWorldDraw / deltaTime) * 100)) + "%", 
-      timeSightUpdate: (Math.round((deltaSightUpdate / deltaTime) * 100)) + "%",
-      timeSightDraw:   (Math.round((deltaSightDraw / deltaTime) * 100)) + "%",
-      timeLightUpdate: (Math.round((deltaLightUpdate / deltaTime) * 100)) + "%",
-      timeLightDraw:   (Math.round((deltaLightDraw / deltaTime) * 100)) + "%"
+      timeCamera:      
+        (Math.round((deltaCamera / deltaTime) * 100)) + "%",
+      timeBackground:  
+        (Math.round((deltaBackground / deltaTime) * 100)) + "%",
+      timeStateUpdate: 
+        (Math.round((deltaStateUpdate / deltaTime) * 100)) + "%",
+      timeStateDraw:   
+        (Math.round((deltaStateDraw / deltaTime) * 100)) + "%",
+      timeWorldDraw:   
+        (Math.round((deltaWorldDraw / deltaTime) * 100)) + "%", 
+      timeSightUpdate: 
+        (Math.round((deltaSightUpdate / deltaTime) * 100)) + "%",
+      timeSightDraw:   
+        (Math.round((deltaSightDraw / deltaTime) * 100)) + "%",
+      timeLightUpdate: 
+        (Math.round((deltaLightUpdate / deltaTime) * 100)) + "%",
+      timeLightDraw:   
+        (Math.round((deltaLightDraw / deltaTime) * 100)) + "%"
     });
     lastSecond = currentTime;
     lastFrames = frames;
