@@ -1,5 +1,5 @@
 exports.error = (string)=>{
-	new Error(string);
+	return new Error(string);
 }
 
 function randomColor(){

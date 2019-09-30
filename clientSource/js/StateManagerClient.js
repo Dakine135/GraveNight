@@ -1,16 +1,14 @@
-import Player from '../../shared/Player.js';
-// import Block from '../../shared/Block.js';
-import State from '../../shared/State.js';
-import Utilities from '../../shared/Utilities.js';
+const Player = require('../../shared/Player.js');
+const State = require('../../shared/State.js');
+const Utilities = require('../../shared/Utilities.js');
 
-export default class StatesManager{
+module.exports = class StatesManager{
 	constructor({
 		debug=false, 
 		debugState=false,
 		stateInterpolation=true,
 		clientSimulation=true,
-		render=Utilities.error('client needs render'),
-		CAMERA = Utilities.error('client needs CAMERA')
+		engine=null
 	}){
 		console.log("Create State Manager");
 		this.debug = debug;
@@ -23,8 +21,7 @@ export default class StatesManager{
 		//set by server tick, then added as delta time progresses, not actual system time
 		this.currentDeltaTime = 0;
 		this.currentTimeInSimulation = 0;
-		this.render = render;
-		this.CAMERA = CAMERA;
+		this.ENGINE = engine;
 
 		//debugging client and server simulations differences
 		this.serverUpdateCount = 0;
@@ -52,17 +49,20 @@ export default class StatesManager{
 		this.serverUpdateCount++;
 		this.timeSinceLastServerUpdate = this.currentDeltaTime;
 		this.currentDeltaTime = 0;
-		State.updateWithNewData(this.serverState, data);
 		//TODO need function to migrate properties from server state to main client state before overwriting with latest server
+		State.updateWithNewData(this.serverState, data);
 		//TODO need to make smooth corrections to client state where off to keep aligned with server
 		if(this.serverState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.serverState);
 		this.state.time = this.serverState.time;
 		// State.updateWithNewData(this.state, data);
 		if(this.timeSinceLastServerUpdate > 0){
-			this.serverUpdatesPerSecond = Math.round(
-				((1000/this.timeSinceLastServerUpdate)*0.7) + 
-				(this.serverUpdatesPerSecond*0.3)
-			);
+			this.serverUpdatesPerSecond = 
+				((1000/this.timeSinceLastServerUpdate)*0.8) + 
+				(this.serverUpdatesPerSecond*0.2);
+			this.ENGINE.HUD.debugUpdate({
+				serverUPS: Math.round(this.serverUpdatesPerSecond),
+				serverDeltaUpdates: this.timeSinceLastServerUpdate
+			});
 		}
 	}//reciveServerState
 
@@ -79,7 +79,7 @@ export default class StatesManager{
 		//TODO only draw players in range of you
 		for(var id in drawingState.players){
 			let player = drawingState.players[id];
-			Player.draw(player, this.render, this.CAMERA);
+			Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
 		}
 
 		//for debug when comparing server and client states
@@ -87,7 +87,7 @@ export default class StatesManager{
 		for(var id in this.serverState.players){
 			let player = this.serverState.players[id];
 			player.name = "Server";
-			Player.draw(player, this.render, this.CAMERA);
+			Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
 		}
 		
 	}//draw
@@ -130,7 +130,7 @@ export default class StatesManager{
 	removePlayer(info){
 		if(this.debug) console.log(`Removing Player ${info}`);
 		State.removePlayer(this.state, info);
-    }
+  }// remove Player
 
   //apply player actions immediately for smoothness
   //difficulty is in making the actions results line up with the server's result

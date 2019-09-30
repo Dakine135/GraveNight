@@ -1,12 +1,10 @@
-import Player from '../../shared/Player.js';
+const Player = require('../../shared/Player.js');
 
-export default class Controls{
-	constructor({debug=false, NETWORK=null, STATES=null, CAMERA=null}){
+module.exports = class Controls{
+	constructor({debug=false, engine=null}){
 		console.log("Create Controls");
 		this.debug = debug;
-		this.NETWORK = NETWORK;
-		this.STATES = STATES;
-		this.CAMERA = CAMERA;
+		this.ENGINE = engine;
 
 		this.mouse = {x:0, y:0};
 		this.keysBeingPressed = {};
@@ -37,10 +35,10 @@ export default class Controls{
 	}//constructor
 
 	scrollEvent(event){
-		// let eventTime = this.STATES.serverState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.ENGINE.STATES.serverState.time + this.ENGINE.STATES.currentDeltaTime;
 		let data = {
 			type:'playerScroll',
-			time: this.STATES.currentTimeInSimulation
+			time: this.ENGINE.STATES.currentTimeInSimulation
 		};
 		if(event.deltaY > 0){
 			if(this.debug) console.log("scroll Down");
@@ -49,9 +47,9 @@ export default class Controls{
 			if(this.debug) console.log("scroll up");
 			data.direction = -1;
 		}
-		this.NETWORK.sendClientAction(data);
-		data.socketId = this.NETWORK.mySocketId;
-		this.STATES.addAction(data);
+		this.ENGINE.NETWORK.sendClientAction(data);
+		data.socketId = this.ENGINE.NETWORK.mySocketId;
+		this.ENGINE.STATES.addAction(data);
 	}
 
 	keyPressed(event) {
@@ -63,11 +61,11 @@ export default class Controls{
 			//console.log("key already pressed:", keyCode); 
 			return;
 		};
-		// let eventTime = this.STATES.state.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.ENGINE.STATES.state.time + this.ENGINE.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:true,
-			time: this.STATES.currentTimeInSimulation
+			time: this.ENGINE.STATES.currentTimeInSimulation
 		};
 		let validKey = true;
 		switch(keyCode){
@@ -100,9 +98,9 @@ export default class Controls{
 				validKey = false;
 		}//switch
 		if(validKey){
-			this.NETWORK.sendClientAction(data);
-			data.socketId = this.NETWORK.mySocketId;
-			this.STATES.addAction(data);
+			this.ENGINE.NETWORK.sendClientAction(data);
+			data.socketId = this.ENGINE.NETWORK.mySocketId;
+			this.ENGINE.STATES.addAction(data);
 		}
 	} //keyPressed
 
@@ -115,11 +113,11 @@ export default class Controls{
 			//console.log("key never pressed but Released:", keyCode); 
 			return;
 		};
-		// let eventTime = this.STATES.state.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.ENGINE.STATES.state.time + this.ENGINE.STATES.currentDeltaTime;
 		let data = {
 			type:'playerMove', 
 			pressed:false,
-			time: this.STATES.currentTimeInSimulation
+			time: this.ENGINE.STATES.currentTimeInSimulation
 		};
 		let validKey = true;
 		switch(keyCode){
@@ -152,17 +150,17 @@ export default class Controls{
 				validKey = false;
 		}
 		if(validKey){
-			this.NETWORK.sendClientAction(data);
-			data.socketId = this.NETWORK.mySocketId;
-			this.STATES.addAction(data);
+			this.ENGINE.NETWORK.sendClientAction(data);
+			data.socketId = this.ENGINE.NETWORK.mySocketId;
+			this.ENGINE.STATES.addAction(data);
 		}
 	} // keyReleased
 
 	translateScreenLocToWorld(x,y){
-		let offsetX = x - (this.CAMERA.width/2);
-		let offsetY = y - (this.CAMERA.height/2);
-		let worldX = Math.round((this.CAMERA.x) + offsetX);
-		let worldY = Math.round((this.CAMERA.y) + offsetY);
+		let offsetX = x - (this.ENGINE.width/2);
+		let offsetY = y - (this.ENGINE.height/2);
+		let worldX = Math.round((this.ENGINE.CAMERA.x) + offsetX);
+		let worldY = Math.round((this.ENGINE.CAMERA.y) + offsetY);
 		return {x:worldX, y:worldY};
 	}
 
@@ -171,16 +169,16 @@ export default class Controls{
 		let mouseY = event.pageY;
 		this.mouse = {x: mouseX, y: mouseY};
 		let locInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
-		// let eventTime = this.STATES.serverState.time + this.STATES.currentDeltaTime;
+		// let eventTime = this.ENGINE.STATES.serverState.time + this.ENGINE.STATES.currentDeltaTime;
 		let data = {
 			type:'playerCursor',
 			x: locInWorld.x,
 			y: locInWorld.y,
-			time: this.STATES.currentTimeInSimulation
+			time: this.ENGINE.STATES.currentTimeInSimulation
 		};
-		this.NETWORK.sendClientAction(data);
-		data.socketId = this.NETWORK.mySocketId;
-		this.STATES.addAction(data);
+		this.ENGINE.NETWORK.sendClientAction(data);
+		data.socketId = this.ENGINE.NETWORK.mySocketId;
+		this.ENGINE.STATES.addAction(data);
 	}
 
 

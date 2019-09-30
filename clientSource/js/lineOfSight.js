@@ -10,24 +10,13 @@ module.exports = class lighting{
   constructor({
     debug=false,
     divId="lineOfSight-layer",
-    width=0,
-    height=0,
-    renderDistance=null,
-    CAMERA=null,
-    HUD=null,
-    CONTROLS=null
+    engine=null
   }){
-    this.width = width;
-    this.height = height;
-    this.renderDistance = renderDistance;
-    if(this.renderDistance === null) this.renderDistance = Math.max(this.width, this.height)*0.6;
-    this.CONTROLS = CONTROLS;
-    this.CAMERA = CAMERA;
-    this.HUD = HUD;
+    this.ENGINE = engine;
     //main canvas that exists in dom
     this.canvas = document.getElementById(divId);
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
+    this.canvas.width = this.ENGINE.width;
+    this.canvas.height = this.ENGINE.height;
     this.render = this.canvas.getContext("2d");
 
     this.debug = debug;
@@ -38,29 +27,29 @@ module.exports = class lighting{
     this.listOfPoints = [];
     this.workerCalculating == false;
     this.timeSinceLastUpdate = 0;
-    this.offset = this.CAMERA;
+    this.offset = this.ENGINE.CAMERA;
     this.lineOfSightOrigin = {};
 
     this.lineOfSightWorker.onmessage = function(event){
       // console.log("return from worker:", event.data);
       this.listOfPoints = event.data.points;
       this.offset = event.data.offset;
-      let originPTrans = this.CAMERA.translate(this.lineOfSightOrigin);
+      let originPTrans = this.ENGINE.CAMERA.translate(this.lineOfSightOrigin);
       let lineOfSight = this.getLineOfSightPath({
         listOfPoints:this.listOfPoints, 
         origin:      originPTrans, 
-        distance:    this.renderDistance
+        distance:    this.ENGINE.renderDistance
       });
       this.lineOfSightPath = lineOfSight;
       this.workerCalculating = false;
     }.bind(this);
 
     this.offscreenCanvas = document.createElement('canvas');
-    this.offscreenCanvas.width = this.width;
-    this.offscreenCanvas.height = this.height;
+    this.offscreenCanvas.width = this.ENGINE.width;
+    this.offscreenCanvas.height = this.ENGINE.height;
     this.offscreenRender = this.offscreenCanvas.getContext("2d");
 
-    console.log("Created lineOfSight-layer", this.width, this.height);
+    console.log("Created lineOfSight-layer", this.ENGINE.width, this.ENGINE.height);
   }//constructor
 
   resize({
@@ -68,13 +57,13 @@ module.exports = class lighting{
     height,
     renderDistance
   }){
-    this.width = width;
-    this.height = height;
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
-    this.offscreenCanvas.width = this.width;
-    this.offscreenCanvas.height = this.height;
-    this.renderDistance = renderDistance;
+    this.ENGINE.width = width;
+    this.ENGINE.height = height;
+    this.canvas.width = this.ENGINE.width;
+    this.canvas.height = this.ENGINE.height;
+    this.offscreenCanvas.width = this.ENGINE.width;
+    this.offscreenCanvas.height = this.ENGINE.height;
+    this.ENGINE.renderDistance = renderDistance;
   }
 
  update(deltaTime, objectsToDraw, myPlayer, playersInRange){
@@ -92,8 +81,8 @@ module.exports = class lighting{
         this.lineOfSightWorker.postMessage({
           objectsInRange: this.objectsInRange,
           origin:         this.lineOfSightOrigin,
-          renderDistance: this.renderDistance,
-          camera:         this.CAMERA
+          renderDistance: this.ENGINE.renderDistance,
+          camera:         this.ENGINE.CAMERA
         });
       }
     }
@@ -111,24 +100,24 @@ module.exports = class lighting{
     //clear the canvas
     this.render.save();
     this.render.setTransform(1, 0, 0, 1, 0, 0);
-    this.render.clearRect(0, 0, this.width, this.height);
+    this.render.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
     this.render.beginPath();
     this.render.restore();
 
     // //fill black
     this.render.save();
     this.render.fillStyle = "black";
-    this.render.fillRect(0,0,this.width,this.height);
+    this.render.fillRect(0,0,this.ENGINE.width,this.ENGINE.height);
 
     //fill black
     this.offscreenRender.save();
     this.offscreenRender.fillStyle = "black";
-    this.offscreenRender.fillRect(0,0,this.width,this.height);
+    this.offscreenRender.fillRect(0,0,this.ENGINE.width,this.ENGINE.height);
 
      //clear the canvas
     this.offscreenRender.save();
     this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
-    this.offscreenRender.clearRect(0, 0, this.width, this.height);
+    this.offscreenRender.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
     this.offscreenRender.beginPath();
     this.offscreenRender.restore();
 
@@ -161,10 +150,10 @@ module.exports = class lighting{
       x: Math.round(x),
       y: Math.round(y)
     }
-    let originPTrans = this.CAMERA.translate(origin);
+    let originPTrans = this.ENGINE.CAMERA.translate(origin);
 
-    let offsetX = Math.round(offset.x - this.CAMERA.x);
-    let offsetY = Math.round(offset.y - this.CAMERA.y);
+    let offsetX = Math.round(offset.x - this.ENGINE.CAMERA.x);
+    let offsetY = Math.round(offset.y - this.ENGINE.CAMERA.y);
     
     //draw full line-of-Sight
     if(lineOfSight){

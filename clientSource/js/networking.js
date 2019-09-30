@@ -1,11 +1,8 @@
 var World = require('../../shared/World.js');
 module.exports = class Networking{
-	constructor({debug=false, STATES=null, WORLD=null, HUD=null}){
+	constructor({debug=false, engine=null}){
 		console.log("Create Networking");
-        if(STATES==null) throw new error("Networking Needs STATES");
-        this.STATES = STATES;
-        this.WORLD = WORLD;
-        this.HUD = HUD;
+        this.ENGINE = engine;
 		this.debug = debug;
 		this.socket = io();
 		this.mySocketId = null;
@@ -20,7 +17,7 @@ module.exports = class Networking{
 	}//constructor
 
     getMyPlayer(){
-        return this.STATES.getPlayer(this.mySocketId);
+        return this.ENGINE.STATES.getPlayer(this.mySocketId);
     }
 
 	clientConnects(data){
@@ -31,7 +28,7 @@ module.exports = class Networking{
 	processGameState(data){
 		if(this.debug) console.log("Networking:",data);
         // let startTime = new Date().getTime();
-		this.STATES.reciveServerState(data);
+		this.ENGINE.STATES.reciveServerState(data);
         // let endtime = new Date().getTime();
         // let timeElapsed = endtime - startTime;
         // if(this.HUD && this.HUD.debugUpdate){
@@ -44,16 +41,16 @@ module.exports = class Networking{
 	} //processGameState
 
     reciveWorld(data){
-        console.log("world:",data);
+        // console.log("world:",data);
         World.create({
               width:data.width,
               height:data.height,
               gridSize:data.gridSize,
-              saveTo: this.WORLD
+              saveTo: this.ENGINE.WORLD
         });
-        this.WORLD.grid = data.grid;
-        this.STATES.serverState.world = this.WORLD;
-        console.log(this.WORLD.grid);
+        this.ENGINE.WORLD.grid = data.grid;
+        this.ENGINE.STATES.serverState.world = this.ENGINE.WORLD;
+        console.log(this.ENGINE.WORLD.grid);
     }
 
 	sendClientAction(data){

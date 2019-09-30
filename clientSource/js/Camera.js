@@ -1,27 +1,18 @@
+const Utilities = require('../../shared/Utilities.js');
 module.exports = class Camera{
 	constructor({
 		x=0, y=0, 
-		width=500, 
-		height=500, 
+		engine=Utilities.error("engine not linked"),
 		speed=0.3,
 		debug=false
 	}){
 		this.x = x;
 		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.engine = engine;
 		this.debug = debug;
 		this.goalX = x;
 		this.goalY = y;
 		this.speed = speed; //1 would be instant camera, percent to move each update toward player of remaining distance
-	}
-
-	resize({
-		width,
-		height
-	}){
-		this.width = width;
-		this.height = height;
 	}
 	
 	moveTo(x, y){
@@ -35,8 +26,8 @@ module.exports = class Camera{
 	}
 
 	translate({x=0, y=0}){
-		let orgiginX = this.x - (this.width/2);
-		let orgiginY = this.y - (this.height/2);
+		let orgiginX = this.x - (this.engine.width/2);
+		let orgiginY = this.y - (this.engine.height/2);
 		let tx = Math.round(x - orgiginX);
 		let ty = Math.round(y - orgiginY);
 		return {x:tx, y:ty};

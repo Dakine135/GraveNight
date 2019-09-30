@@ -6,29 +6,19 @@ module.exports = class lighting{
   constructor({
     debug=false,
     divId="background-layer",
-    width=0,
-    height=0,
-    gridSize = 64,
-    CAMERA=null,
-    HUD = null
+    engine=null
   }){
-    this.width = width;
-    this.height = height;
-    this.gridSize = gridSize;
+    this.debug = debug;
+    this.ENGINE = engine;
     this.canvas = document.getElementById(divId);
     this.render = this.canvas.getContext("2d", {alpha:false});
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
+    this.canvas.width = this.ENGINE.width;
+    this.canvas.height = this.ENGINE.height;
     // this.offscreenCanvas = document.createElement('canvas');
     // this.offscreenRender = this.offscreenCanvas.getContext("2d");
-    // this.offscreenCanvas.width = this.width;
-    // this.offscreenCanvas.height = this.height;
+    // this.offscreenCanvas.width = this.ENGINE.width;
+    // this.offscreenCanvas.height = this.ENGINE.height;
     
-    
-    this.debug = debug;
-    this.CAMERA = CAMERA;
-    this.HUD = HUD;
-    this.WORLD = null;
 
     this.worldLoaded = false;
     this.imageLoaded = false;
@@ -46,22 +36,22 @@ module.exports = class lighting{
    
     
 
-    console.log("Created background-layer",this.width, this.height);
+    console.log("Created background-layer", this.ENGINE.width, this.ENGINE.height);
   }//constructor
 
   updateWithWorldData(WORLD){
     this.worldLoaded = true;
-    this.WORLD = WORLD;
-    // this.offscreenCanvas.width  = this.WORLD.width;
-    // this.offscreenCanvas.height = this.WORLD.height;
+    this.ENGINE.WORLD = WORLD;
+    // this.offscreenCanvas.width  = this.ENGINE.WORLD.width;
+    // this.offscreenCanvas.height = this.ENGINE.WORLD.height;
     this.generateSpriteGrid();
   }
 
   generateSpriteGrid(){
     if(this.backgroundGenerated || !this.worldLoaded || !this.imageLoaded) return;
     this.backgroundGenerated = true;
-    let numOfColumns = this.WORLD.width/this.WORLD.gridSize;
-    let numOfRows = this.WORLD.height/this.WORLD.gridSize;
+    let numOfColumns = this.ENGINE.WORLD.width/this.ENGINE.WORLD.gridSize;
+    let numOfRows = this.ENGINE.WORLD.height/this.ENGINE.WORLD.gridSize;
     //go through and set inital grass
     for(  let column=0; column<numOfColumns;  column++){
       for(let row   =0; row   <numOfRows;     row++){
@@ -180,10 +170,10 @@ module.exports = class lighting{
     width,
     height
   }){
-    this.width = width;
-    this.height = height;
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
+    this.ENGINE.width = width;
+    this.ENGINE.height = height;
+    this.canvas.width = this.ENGINE.width;
+    this.canvas.height = this.ENGINE.height;
   }
 
   //input world cords and get sprite offset that should be used.
@@ -191,8 +181,8 @@ module.exports = class lighting{
     // console.log("get sprite offset at world:", x, y);
     let halfWidth    = this.spriteGrid.length/2;
     let halfHeight   = this.spriteGrid[0].length/2;
-    let spriteSheetX = Math.floor((x/this.gridSize) + halfWidth);
-    let spriteSheetY = Math.floor((y/this.gridSize) + halfHeight);
+    let spriteSheetX = Math.floor((x/this.ENGINE.gridSize) + halfWidth);
+    let spriteSheetY = Math.floor((y/this.ENGINE.gridSize) + halfHeight);
     if(spriteSheetX < 0 || spriteSheetX >= this.spriteGrid.length){
       spriteSheetX = 0;
     }
@@ -214,12 +204,12 @@ module.exports = class lighting{
   draw(){
     if(!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated) return;
     // let cameraOffset = {
-    //   x: Math.floor(this.CAMERA.x % this.WORLD.gridSize),
-    //   y: Math.floor(this.CAMERA.y % this.WORLD.gridSize)
+    //   x: Math.floor(this.ENGINE.CAMERA.x % this.ENGINE.WORLD.gridSize),
+    //   y: Math.floor(this.ENGINE.CAMERA.y % this.ENGINE.WORLD.gridSize)
     // }
     let cameraOffset = {
-      x: this.CAMERA.x,
-      y: this.CAMERA.y
+      x: this.ENGINE.CAMERA.x,
+      y: this.ENGINE.CAMERA.y
     }
     if(this.debug){
       let x = cameraOffset.x;
@@ -232,25 +222,25 @@ module.exports = class lighting{
     let spriteSheetSize = 64;
     let x = 0;
     let y = 0;
-    for(  let offsetX=-this.gridSize-(this.CAMERA.x%this.gridSize); 
-          offsetX<this.width;  offsetX+=this.gridSize){
+    for(  let offsetX=-this.ENGINE.gridSize-(this.ENGINE.CAMERA.x%this.ENGINE.gridSize); 
+          offsetX<this.ENGINE.width;  offsetX+=this.ENGINE.gridSize){
       y = 0;
-      for(let offsetY=-this.gridSize-(this.CAMERA.y%this.gridSize); 
-          offsetY<this.height; offsetY+=this.gridSize){
-        let worldLocX = this.CAMERA.x + (offsetX);
-        let worldLocY = this.CAMERA.y + (offsetY);
+      for(let offsetY=-this.ENGINE.gridSize-(this.ENGINE.CAMERA.y%this.ENGINE.gridSize); 
+          offsetY<this.ENGINE.height; offsetY+=this.ENGINE.gridSize){
+        let worldLocX = this.ENGINE.CAMERA.x + (offsetX);
+        let worldLocY = this.ENGINE.CAMERA.y + (offsetY);
         let imageOffset = this.getImageOffset(worldLocX, worldLocY);
         this.render.save();
-        this.render.translate(offsetX+(this.gridSize/2), offsetY+(this.gridSize/2));
+        this.render.translate(offsetX+(this.ENGINE.gridSize/2), offsetY+(this.ENGINE.gridSize/2));
         this.render.rotate(imageOffset.rotate);
-        this.render.translate(-(this.gridSize/2), -(this.gridSize/2));
+        this.render.translate(-(this.ENGINE.gridSize/2), -(this.ENGINE.gridSize/2));
         this.render.drawImage(
           this.grassSpriteSheet,            //image source
           (imageOffset.x * spriteSheetSize),//cord x to clip source
           (imageOffset.y * spriteSheetSize),//cord y to clip source
           spriteSheetSize, spriteSheetSize, //width and height of source
           0, 0,                 //cord x and y to paste on canvas
-          this.gridSize, this.gridSize      //size of paste (can stretch or reduce image)
+          this.ENGINE.gridSize, this.ENGINE.gridSize      //size of paste (can stretch or reduce image)
         );
         this.render.restore();
         y++;
