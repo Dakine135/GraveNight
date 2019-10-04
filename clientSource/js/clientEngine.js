@@ -200,11 +200,11 @@ module.exports = class clientEngine{
     }
 
     //Line of sight Stuff
-    // this.LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+    this.LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
     let timeAfterSightUpdate = new Date().getTime();
     let deltaSightUpdate = timeAfterSightUpdate - timeAfterWorldDraw;
 
-    // this.LINEOFSIGHT.draw(this.STATES.frameState);
+    this.LINEOFSIGHT.draw(this.STATES.frameState);
     let timeAfterSightDraw = new Date().getTime();
     let deltaSightDraw = timeAfterSightDraw - timeAfterSightUpdate;
 

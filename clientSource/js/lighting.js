@@ -120,11 +120,11 @@ module.exports = class lighting{
 					// console.log("return from worker:", event.data);
 					newPlayerInRange.listOfPoints = event.data.points;
 					newPlayerInRange.offset = event.data.offset;
-					let originPTrans = that.CAMERA.translate(newPlayerInRange.lineOfSightFlashlightOrigin);
+					let originPTrans = that.ENGINE.CAMERA.translate(newPlayerInRange.lineOfSightFlashlightOrigin);
 					let lineOfSight = that.getLineOfSightPath({
 						listOfPoints:newPlayerInRange.listOfPoints, 
 						origin:      originPTrans, 
-						distance:    that.renderDistance
+						distance:    that.ENGINE.renderDistance
 					});
 					newPlayerInRange.lineOfSightPath = lineOfSight;
 					newPlayerInRange.workerCalculating = false;
@@ -156,7 +156,11 @@ module.exports = class lighting{
 					objectsInRange: this.objectsInRange,
 					origin:         playerLightEntry.lineOfSightFlashlightOrigin,
 					renderDistance: this.ENGINE.renderDistance,
-					camera:         this.ENGINE.CAMERA
+					camera:         {x: this.ENGINE.CAMERA.x,
+		                             y: this.ENGINE.CAMERA.y,
+		                             width: this.ENGINE.width,
+		                             height: this.ENGINE.height
+		                            }
 				});
 			}//if worker is not still busy with the last calculation
 		}//for each player in range

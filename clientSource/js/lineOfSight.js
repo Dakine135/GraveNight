@@ -82,7 +82,11 @@ module.exports = class lighting{
           objectsInRange: this.objectsInRange,
           origin:         this.lineOfSightOrigin,
           renderDistance: this.ENGINE.renderDistance,
-          camera:         this.ENGINE.CAMERA
+          camera:         {x: this.ENGINE.CAMERA.x,
+                           y: this.ENGINE.CAMERA.y,
+                           width: this.ENGINE.width,
+                           height: this.ENGINE.height
+                          }
         });
       }
     }
@@ -160,7 +164,7 @@ module.exports = class lighting{
       this.offscreenRender.save();
       this.offscreenRender.fillStyle = "white";
       this.offscreenRender.strokeStyle = "white";
-      this.offscreenRender.lineWidth = 32;
+      this.offscreenRender.lineWidth = Math.floor(this.ENGINE.gridSize*0.8);
       this.offscreenRender.translate(offsetX, offsetY);
       this.offscreenRender.fill(lineOfSight);
       this.offscreenRender.stroke(lineOfSight);
