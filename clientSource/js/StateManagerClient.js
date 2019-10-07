@@ -16,6 +16,7 @@ module.exports = class StatesManager{
 		this.stateInterpolation = stateInterpolation;
 		this.clientSimulation = clientSimulation;
 		this.state = State.createStartState({debug:this.debugState});
+		this.errorCorrectionState = State.createStartState({});
 		this.frameState = this.state;
 		this.serverState = State.createNextState(this.state);
 		//set by server tick, then added as delta time progresses, not actual system time
@@ -52,6 +53,20 @@ module.exports = class StatesManager{
 		//TODO need function to migrate properties from server state to main client state before overwriting with latest server
 		State.updateWithNewData(this.serverState, data);
 		//TODO need to make smooth corrections to client state where off to keep aligned with server
+
+		//testing
+		//TODO calculate difference and spread over frames before next server update
+		if(this.ENGINE.myPlayerId){
+			let clientPlayer = this.state.players[this.ENGINE.myPlayerId];
+			let serverPlayer = this.serverState.players[this.ENGINE.myPlayerId];
+			clientPlayer.x = serverPlayer.x;
+			clientPlayer.y = serverPlayer.y;
+			clientPlayer.angle = serverPlayer.angle;
+			clientPlayer.engery = serverPlayer.energy;
+		}
+		
+
+
 		if(this.serverState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.serverState);
 		this.state.time = this.serverState.time;
 		// State.updateWithNewData(this.state, data);
@@ -83,12 +98,12 @@ module.exports = class StatesManager{
 		}
 
 		//for debug when comparing server and client states
-		if(this.serverState == null) return;
-		for(var id in this.serverState.players){
-			let player = this.serverState.players[id];
-			player.name = "Server";
-			Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
-		}
+		// if(this.serverState == null) return;
+		// for(var id in this.serverState.players){
+		// 	let player = this.serverState.players[id];
+		// 	player.name = "Server";
+		// 	Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
+		// }
 		
 	}//draw
 
