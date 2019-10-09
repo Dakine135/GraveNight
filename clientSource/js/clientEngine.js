@@ -209,11 +209,11 @@ module.exports = class clientEngine{
     let deltaSightDraw = timeAfterSightDraw - timeAfterSightUpdate;
 
     //Lighting Stuff
-    // this.LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+    this.LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
     let timeAfterLightUpdate = new Date().getTime();
     let deltaLightUpdate = timeAfterLightUpdate - timeAfterSightDraw;
 
-    // this.LIGHTING.draw(this.STATES.frameState);
+    this.LIGHTING.draw(this.STATES.frameState);
     let timeAfterLightDraw = new Date().getTime();
     let deltaLightDraw = timeAfterLightDraw - timeAfterLightUpdate;
     
