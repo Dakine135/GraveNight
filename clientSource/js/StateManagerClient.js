@@ -16,7 +16,7 @@ module.exports = class StatesManager{
 		this.stateInterpolation = stateInterpolation;
 		this.clientSimulation = clientSimulation;
 		this.state = State.createStartState({debug:this.debugState});
-		this.errorCorrectionState = State.createStartState({});
+		this.errorCorrection = {players:{}};
 		this.frameState = this.state;
 		this.serverState = State.createNextState(this.state);
 		//set by server tick, then added as delta time progresses, not actual system time
@@ -30,6 +30,7 @@ module.exports = class StatesManager{
 		//stats
 		this.timeSinceLastServerUpdate = 0;
 		this.serverUpdatesPerSecond = 10;
+		this.clientUpdatesSinceLastServerUpdate = 0;
 	}//constructor
 
 	/*
@@ -47,9 +48,7 @@ module.exports = class StatesManager{
 
 		// if(this.serverState != null) this.state = State.clone(this.serverState);
 		// if(this.serverState != null) State.copyProperties(this.state, this.serverState);
-		this.serverUpdateCount++;
-		this.timeSinceLastServerUpdate = this.currentDeltaTime;
-		this.currentDeltaTime = 0;
+		
 		//TODO need function to migrate properties from server state to main client state before overwriting with latest server
 		State.updateWithNewData(this.serverState, data);
 		//TODO need to make smooth corrections to client state where off to keep aligned with server
@@ -59,10 +58,32 @@ module.exports = class StatesManager{
 		if(this.ENGINE.myPlayerId){
 			let clientPlayer = this.state.players[this.ENGINE.myPlayerId];
 			let serverPlayer = this.serverState.players[this.ENGINE.myPlayerId];
-			clientPlayer.x = serverPlayer.x;
-			clientPlayer.y = serverPlayer.y;
-			clientPlayer.angle = serverPlayer.angle;
-			clientPlayer.engery = serverPlayer.energy;
+			if(!this.errorCorrection.players[this.ENGINE.myPlayerId]){
+				this.errorCorrection.players[this.ENGINE.myPlayerId] = {
+					currentAmountRemainingX: 0,
+					currentAmountRemainingY: 0,
+					directionX: 0,
+					directionY: 0,
+					incrementX: 0,
+					incrementY: 0
+				};
+			}
+			let errorPlayer = this.errorCorrection.players[this.ENGINE.myPlayerId];
+			//settle last bit of error before calculating new error
+			// clientPlayer.x = clientPlayer.x + (errorPlayer.currentAmountRemainingX * errorPlayer.directionX);
+			// clientPlayer.y = clientPlayer.y + (errorPlayer.currentAmountRemainingY * errorPlayer.directionY);
+
+			let diffX = serverPlayer.x - clientPlayer.x;
+			let diffY = serverPlayer.y - clientPlayer.y;
+			errorPlayer.directionX = Math.sign(diffX);
+			errorPlayer.directionY = Math.sign(diffY);
+			errorPlayer.currentAmountRemainingX = Math.abs(diffX);
+			errorPlayer.currentAmountRemainingY = Math.abs(diffY);
+			errorPlayer.incrementX = Math.floor(Math.abs(diffX / this.clientUpdatesSinceLastServerUpdate));
+			errorPlayer.incrementY = Math.floor(Math.abs(diffY / this.clientUpdatesSinceLastServerUpdate));
+			
+			// clientPlayer.angle = serverPlayer.angle;
+			// clientPlayer.engery = serverPlayer.energy;
 		}
 		
 
@@ -70,20 +91,46 @@ module.exports = class StatesManager{
 		if(this.serverState != null && this.serverUpdateCount < 3) State.copyProperties(this.state, this.serverState);
 		this.state.time = this.serverState.time;
 		// State.updateWithNewData(this.state, data);
+		this.serverUpdateCount++;
+		this.timeSinceLastServerUpdate = this.currentDeltaTime;
+		this.currentDeltaTime = 0;
+
 		if(this.timeSinceLastServerUpdate > 0){
 			this.serverUpdatesPerSecond = 
 				((1000/this.timeSinceLastServerUpdate)*0.8) + 
 				(this.serverUpdatesPerSecond*0.2);
 			this.ENGINE.HUD.debugUpdate({
 				serverUPS: Math.round(this.serverUpdatesPerSecond),
-				serverDeltaUpdates: this.timeSinceLastServerUpdate
+				serverDeltaUpdates: this.timeSinceLastServerUpdate,
+				clientUpdatesSinceLastServerUpdate: this.clientUpdatesSinceLastServerUpdate
 			});
 		}
+		this.clientUpdatesSinceLastServerUpdate = 0;
 	}//reciveServerState
 
 	update(deltaTime){
 		this.currentTimeInSimulation = this.state.time + deltaTime;
+		this.clientUpdatesSinceLastServerUpdate++;
 		if(this.clientSimulation) State.simulateForClient(this.state, this.currentTimeInSimulation);
+		//client error correction
+		for(var id in this.errorCorrection.players){
+			let errorPlayer = this.errorCorrection.players[id];
+			let clientPlayer = this.state.players[id];
+			if(errorPlayer.currentAmountRemainingX > errorPlayer.incrementX){
+				clientPlayer.x = clientPlayer.x + (errorPlayer.incrementX * errorPlayer.directionX);
+				errorPlayer.currentAmountRemainingX - errorPlayer.incrementX;
+			} else {
+				clientPlayer.x = clientPlayer.x + (errorPlayer.currentAmountRemainingX * errorPlayer.directionX);
+				errorPlayer.currentAmountRemainingX = 0;
+			}
+			if(errorPlayer.currentAmountRemainingY > errorPlayer.incrementY){
+				clientPlayer.y = clientPlayer.y + (errorPlayer.incrementY * errorPlayer.directionY);
+				errorPlayer.currentAmountRemainingY - errorPlayer.incrementY;
+			} else {
+				clientPlayer.y = clientPlayer.y + (errorPlayer.currentAmountRemainingY * errorPlayer.directionY);
+				errorPlayer.currentAmountRemainingY = 0;
+			}
+		}
 	}
 
 	draw(deltaTime){
@@ -98,12 +145,12 @@ module.exports = class StatesManager{
 		}
 
 		//for debug when comparing server and client states
-		// if(this.serverState == null) return;
-		// for(var id in this.serverState.players){
-		// 	let player = this.serverState.players[id];
-		// 	player.name = "Server";
-		// 	Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
-		// }
+		if(this.serverState == null) return;
+		for(var id in this.serverState.players){
+			let player = this.serverState.players[id];
+			player.name = "Server";
+			Player.draw(player, this.ENGINE.render, this.ENGINE.CAMERA);
+		}
 		
 	}//draw
 

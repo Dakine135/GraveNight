@@ -53,8 +53,8 @@ module.exports = class Camera{
 		let ynew = newPoint.x * s + newPoint.y * c;
 
 		// translate point back:
-		newPoint.x = xnew + center.x;
-		newPoint.y = ynew + center.y;
+		newPoint.x = Math.round(xnew + center.x);
+		newPoint.y = Math.round(ynew + center.y);
 		return newPoint;
 	}
 

@@ -14,7 +14,9 @@ module.exports = class clientEngine{
    FRAMERATE = 60,
    DARKNESS = 1, //1 full dark, 0 full light
    BRIGHTNESS = 1,  //1 full white, 0 no light
-   gridSize = 32
+   gridSize = 32,
+   lineOfSightActive = true,
+   lightingActive = true
 	}){
 		this.STATES = {};
     this.CONTROLS = {};
@@ -29,6 +31,8 @@ module.exports = class clientEngine{
     this.DARKNESS = DARKNESS; //1 full dark, 0 full light
     this.BRIGHTNESS = BRIGHTNESS;  //1 full white, 0 no light
     this.gridSize = gridSize;
+    this.lineOfSightActive = lineOfSightActive;
+    this.lightingActive = lightingActive;
 
     //main layer with players and walls
     let divId = "main-layer";
@@ -200,20 +204,20 @@ module.exports = class clientEngine{
     }
 
     //Line of sight Stuff
-    this.LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+    if(this.lineOfSightActive) this.LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
     let timeAfterSightUpdate = new Date().getTime();
     let deltaSightUpdate = timeAfterSightUpdate - timeAfterWorldDraw;
 
-    this.LINEOFSIGHT.draw(this.STATES.frameState);
+    if(this.lineOfSightActive) this.LINEOFSIGHT.draw(this.STATES.frameState);
     let timeAfterSightDraw = new Date().getTime();
     let deltaSightDraw = timeAfterSightDraw - timeAfterSightUpdate;
 
     //Lighting Stuff
-    this.LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
+    if(this.lightingActive) this.LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
     let timeAfterLightUpdate = new Date().getTime();
     let deltaLightUpdate = timeAfterLightUpdate - timeAfterSightDraw;
 
-    this.LIGHTING.draw(this.STATES.frameState);
+    if(this.lightingActive) this.LIGHTING.draw(this.STATES.frameState);
     let timeAfterLightDraw = new Date().getTime();
     let deltaLightDraw = timeAfterLightDraw - timeAfterLightUpdate;
     

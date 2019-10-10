@@ -32,14 +32,14 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "png-js": "^0.1.1",
-    "reload": "^3.0.1",
-    "socket.io": "^2.2.0",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5",
+    "reload": "^3.0.2",
+    "socket.io": "^2.3.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9",
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.3"
   },
   "nodemonConfig": {
     "ignore": [
