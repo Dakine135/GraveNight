@@ -111,7 +111,7 @@ module.exports = class StatesManager{
 	getIntermediateState(deltaTime){
 		this.currentDeltaTime += deltaTime;
 		if(!this.stateInterpolation){
-			//trying to fix Cycle collector issues
+			// trying to fix Cycle collector issues
 			// let tempState = State.clone(this.state);
 			// this.frameState = tempState;
 			// return this.frameState;

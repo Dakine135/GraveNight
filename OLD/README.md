@@ -34,10 +34,10 @@ Hosted at welbornhome.duckdns.org/gravenight on Unbunut 17 Sever running pm2 nod
 * JavaScript
 * Nodejs
 
-## Author
+## Authors
 
-<!-- * **Graham Shroyer**
-* **Alexander Scott** -->
+* **Graham Shroyer**
+* **Alexander Scott**
 * **Dustin Welborn**
 
 See also the list of [contributors](https://github.com/Dakine135/GraveNight/graphs/contributors) who participated in this project.

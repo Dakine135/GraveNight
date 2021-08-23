@@ -34,14 +34,12 @@
     "png-js": "^0.1.1",
     "reload": "^3.0.1",
     "socket.io": "^2.2.0",
-    "vue": "^2.6.14",
-    "vue-cli": "^2.9.6",
     "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5",
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1",
-    "webpack-cli": "^3.3.12"
+    "nodemon": "^1.19.1"
   },
   "nodemonConfig": {
     "ignore": [
