@@ -7,6 +7,36 @@
         <router-view />
     </div>
 </template>
+<script>
+export default {
+    data() {
+        return {
+            debugMode: false
+        };
+    },
+    components: {},
+    computed: {
+        layout() {
+            return `${this.$route.meta.layout || 'default'}-layout`;
+        }
+    },
+    methods: {},
+
+    watch: {},
+
+    created() {
+        //Ctrl + F12 Debug Toggle Listener
+        window.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 'F12') {
+                this.debugMode = !this.debugMode;
+            }
+        });
+    },
+    mounted() {
+        document.title = 'Grave Night';
+    }
+};
+</script>
 
 <style>
 #app {

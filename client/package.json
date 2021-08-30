@@ -1,5 +1,5 @@
 {
-    "name": "client",
+    "name": "grave_night_client",
     "version": "0.1.0",
     "private": true,
     "author": "Dustin Welborn",
@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "core-js": "^3.6.5",
+        "png-js": "^1.0.0",
         "register-service-worker": "^1.7.1",
         "vue": "^2.6.11",
         "vue-router": "^3.2.0",

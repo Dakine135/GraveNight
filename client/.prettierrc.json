@@ -7,5 +7,6 @@
     "printWidth": 160,
     "jsxBracketSameLine": true,
     "angleBracketSameLine": true,
-    "html-whitespace-sensitivity": "ignore"
+    "html-whitespace-sensitivity": "ignore",
+    "endOfLine": "auto"
 }
