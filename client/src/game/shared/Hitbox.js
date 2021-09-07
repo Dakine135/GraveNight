@@ -254,6 +254,7 @@ function collideLineLine(line1, line2) {
 exports.collideLineLine = collideLineLine;
 
 function collideLineRect(line, rec) {
+    //TODO not sure this function is being used, or that it works
     //x1, y1, x2, y2,   rx, ry, rw, rh
 
     //check if the line has hit any of the rectangle's sides. uses the collideLineLine function above
@@ -276,3 +277,9 @@ function collideLineRect(line, rec) {
     return false;
 }
 exports.collideLineRect = collideLineRect;
+
+function collidePointRect({ x, y }, { rx, ry, rw, rh }) {
+    if (rx <= x && x <= rx + rw && ry <= y && y <= ry + rh) return true;
+    return false;
+}
+exports.collidePointRect = collidePointRect;

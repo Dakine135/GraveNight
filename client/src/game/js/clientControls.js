@@ -157,7 +157,7 @@ module.exports = class Controls {
                     this.ENGINE.CAMERA.moveGoal(0, 10);
                     break;
                 default:
-                    console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
+                    // console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
                     validKey = false;
             } //switch
             if (validKey) {

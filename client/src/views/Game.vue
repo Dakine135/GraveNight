@@ -18,7 +18,6 @@ export default {
     name: 'Game',
     data: function () {
         return {
-            testVar: 'test Var Value',
             engine: null
         };
     },

@@ -21,6 +21,8 @@ module.exports = class background {
         this.backgroundGenerated = false;
         this.spriteGrid = [];
 
+        this.firstDraw = true;
+
         //assets
         this.grassSpriteSheet = new Image();
         this.grassSpriteSheet.src = '../../assets/grassTiles64.png';
@@ -41,6 +43,7 @@ module.exports = class background {
     }
 
     generateSpriteGrid() {
+        //TODO i think a good optimization would be to render chunks of the background to some off-screen canvases so that can be drawn in one go, instead of drawing ever sprite image separately every time
         if (this.backgroundGenerated || !this.worldLoaded || !this.imageLoaded) return;
         this.backgroundGenerated = true;
         let numOfColumns = this.ENGINE.WORLD.width / this.ENGINE.WORLD.gridSize;
@@ -157,10 +160,11 @@ module.exports = class background {
 
     draw() {
         if (!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated) return;
-        if (this.ENGINE.CAMERA.cameraMovedSinceLastUpdate == false) {
+        if (this.ENGINE.CAMERA.cameraMovedSinceLastUpdate == false && !this.firstDraw) {
             // console.log('skipping background Draw');
             return;
         }
+        this.firstDraw = false;
         // let cameraOffset = {
         //   x: Math.floor(this.ENGINE.CAMERA.x % this.ENGINE.WORLD.gridSize),
         //   y: Math.floor(this.ENGINE.CAMERA.y % this.ENGINE.WORLD.gridSize)
