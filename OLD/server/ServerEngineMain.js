@@ -1,153 +1,159 @@
-var StateManager = require('./StateManager.js');
-var World = require('../shared/World.js');
-var PNG = require('png-js');
+var StateManager = require("./StateManager.js");
+var World = require("../shared/World.js");
+var PNG = require("png-js");
 
 module.exports = class Engine {
-  constructor({
-    ticRate=20,
-    debugEngine=false,
-    debugStateManager=false,
-    debugStates=false,
-    verbose=false,
-    io=this.throwError("socket io not provided to server")
-  }){
-    console.log("create game instance tickRate is %s",ticRate);
-    this.id = null;
-    this.io = io;
-    this.tickCount = 0;
-    this.timeStep = 1000 / this.ticRate;
-    this.running = false;
-    this.debug = debugEngine;
-    this.verbose = verbose;
+    constructor({
+        ticRate = 20,
+        debugEngine = false,
+        debugStateManager = false,
+        debugStates = false,
+        verbose = false,
+        io = this.throwError("socket io not provided to server"),
+    }) {
+        console.log("create game instance tickRate is %s", ticRate);
+        this.id = null;
+        this.io = io;
+        this.tickCount = 0;
+        this.timeStep = 1000 / this.ticRate;
+        this.running = false;
+        this.debug = debugEngine;
+        this.verbose = verbose;
 
-    this.secondsIntoNanoseconds = 1e9;
-    this.nanosecondsIntoSeconds = 1 / this.secondsIntoNanoseconds;
-    this.millisecondsIntoNanoseconds = 1e6;
-    this.nanosecondsIntoMiliseconds = 1/this.millisecondsIntoNanoseconds;
+        this.secondsIntoNanoseconds = 1e9;
+        this.nanosecondsIntoSeconds = 1 / this.secondsIntoNanoseconds;
+        this.millisecondsIntoNanoseconds = 1e6;
+        this.nanosecondsIntoMiliseconds = 1 / this.millisecondsIntoNanoseconds;
 
-    //for MainLoop
-    this.tickRateMS = ticRate;
-    this.ticRate = this.tickRateMS * this.millisecondsIntoNanoseconds;
-    this.previousTime = this.getCurrentTimeInNanoseconds();
-    this.targertNextTickTime = this.getCurrentTimeInNanoseconds();
-    this.acumulatedTime = 0;
+        //for MainLoop
+        this.tickRateMS = ticRate;
+        this.ticRate = this.tickRateMS * this.millisecondsIntoNanoseconds;
+        this.previousTime = this.getCurrentTimeInNanoseconds();
+        this.targetNextTickTime = this.getCurrentTimeInNanoseconds();
+        this.accumulatedTime = 0;
 
-    //StateManager
-    let now = this.getCurrentTimeInNanoseconds();
-    let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
+        //StateManager
+        let now = this.getCurrentTimeInNanoseconds();
+        let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
 
-    //World, static objects, world gen
-    this.world = World.create({
-      width:10000,
-      height:10000,
-      gridSize:32
-    });
-    World.createBounderies(this.world);
-    let imageLocation = ".\\LevelEditor\\levels\\levelTest.png"; //..\LevelEditor\
-    // let imageBuffer = PNG.load(imageLocation);
-    PNG.decode(imageLocation, function(pixels) {
-      World.createWorldFromImage(this.world, pixels);
-      // pixels is a 1d array (in rgba order) of decoded pixel data
-    }.bind(this));
-    
-    // World.randomWorld(this.world);
+        //World, static objects, world gen
+        this.world = World.create({
+            width: 10000,
+            height: 10000,
+            gridSize: 32,
+        });
+        World.createBoundaries(this.WORLD);
+        let imageLocation = ".\\LevelEditor\\levels\\levelTest.png"; //..\LevelEditor\
+        // let imageBuffer = PNG.load(imageLocation);
+        PNG.decode(
+            imageLocation,
+            function (pixels) {
+                World.createWorldFromImage(this.world, pixels);
+                // pixels is a 1d array (in rgba order) of decoded pixel data
+            }.bind(this)
+        );
 
-    this.stateManager = new StateManager({debug:debugStateManager, debugStates:debugStates, verbose:verbose, startTime:timeInMiliseconds, world:this.world});
-  }//constructor
+        // World.randomWorld(this.world);
 
-  getCurrentTimeInNanoseconds() {
-    //see https://nodejs.org/api/process.html#process_process_hrtime_time
-    var hrtime = process.hrtime();
-    return (+hrtime[0]) * this.secondsIntoNanoseconds + (+hrtime[1]);
-  }
+        this.stateManager = new StateManager({
+            debug: debugStateManager,
+            debugStates: debugStates,
+            verbose: verbose,
+            startTime: timeInMiliseconds,
+            world: this.world,
+        });
+    } //constructor
 
-  mainLoop(){
-    if(!this.running) return;
-
-    let now = this.getCurrentTimeInNanoseconds();
-    let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
-
-    if(now >= this.targertNextTickTime){
-      let deltaTime = now - this.previousTime;
-      this.acumulatedTime = this.acumulatedTime + deltaTime;
-
-      this.previousTime = now;
-      this.targertNextTickTime = now + this.ticRate;
-      //run update
-      while(this.acumulatedTime >= this.ticRate){
-        this.tickCount++;
-        this.acumulatedTime = this.acumulatedTime - this.ticRate;
-        if((this.tickCount % 1) == 0){
-          if(this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${(deltaTime * this.nanosecondsIntoMiliseconds)}`);
-          if(deltaTime > this.ticRate*2) console.log("DetlaTimeBehind", deltaTime, "should be", this.ticRate);
-        }
-        this.update(this.tickRateMS);
-
-      }
+    getCurrentTimeInNanoseconds() {
+        //see https://nodejs.org/api/process.html#process_process_hrtime_time
+        var hrtime = process.hrtime();
+        return +hrtime[0] * this.secondsIntoNanoseconds + +hrtime[1];
     }
 
-    let remainingTimeInTick = this.targertNextTickTime - this.getCurrentTimeInNanoseconds();
-		setTimeout(this.mainLoop.bind(this), (this.tickRate * this.nanosecondsIntoMiliseconds));
+    mainLoop() {
+        if (!this.running) return;
 
-  }//end mainLoop
+        let now = this.getCurrentTimeInNanoseconds();
+        let timeInMiliseconds = now * this.nanosecondsIntoMiliseconds;
 
-  start(){
-    this.running = true;
-    console.log('start Engine MainLoop');
-    this.mainLoop();
-  }//end start function
+        if (now >= this.targetNextTickTime) {
+            let deltaTime = now - this.previousTime;
+            this.accumulatedTime = this.accumulatedTime + deltaTime;
 
-  stop(){
-    //stop the loop
-    console.log('start Engine MainLoop');
-    this.running = false;
-  }
+            this.previousTime = now;
+            this.targetNextTickTime = now + this.ticRate;
+            //run update
+            while (this.accumulatedTime >= this.ticRate) {
+                this.tickCount++;
+                this.accumulatedTime = this.accumulatedTime - this.ticRate;
+                if (this.tickCount % 1 == 0) {
+                    if (this.debug) console.log(`GameTick=${this.tickCount}, deltaTime=${deltaTime * this.nanosecondsIntoMiliseconds}`);
+                    if (deltaTime > this.ticRate * 2) console.log("DetlaTimeBehind", deltaTime, "should be", this.ticRate);
+                }
+                this.update(this.tickRateMS);
+            }
+        }
 
-  update(deltaTime){
-    // console.log("deltaTime update:", deltaTime);
-    this.stateManager.createNextState(this.tickCount, deltaTime);
-    this.sendGameStateToClients(this.tickCount);
-  }
+        let remainingTimeInTick = this.targetNextTickTime - this.getCurrentTimeInNanoseconds();
+        setTimeout(this.mainLoop.bind(this), this.tickRate * this.nanosecondsIntoMiliseconds);
+    } //end mainLoop
 
-  sendGameStateToClients(tick){
-    //current state if none specified
-    // let clients = this.io.sockets.clients(); //could put a room name
-    let clients = Object.keys(this.io.sockets.sockets);
-    clients.forEach((socketId)=>{
-      // console.log(socketId);
-      // this.io.emit('serverGameState', this.stateManager.package({tick:tick}));
-      this.io.to(`${socketId}`).emit('serverGameState', this.stateManager.package({tick:tick, playerId:socketId}));
-    });
-  }
+    start() {
+        this.running = true;
+        console.log("start Engine MainLoop");
+        this.mainLoop();
+    } //end start function
 
-  sendFullState({socketId:socketId}){
-    this.io.to(`${socketId}`).emit('serverGameState', this.stateManager.package({tick:this.tickCount, playerId:socketId, full:true}));
-  }
+    stop() {
+        //stop the loop
+        console.log("start Engine MainLoop");
+        this.running = false;
+    }
 
-  sendWorld({socketId:socketId}){
-    this.io.to(`${socketId}`).emit('world', this.world);
-  }
+    update(deltaTime) {
+        // console.log("deltaTime update:", deltaTime);
+        this.stateManager.createNextState(this.tickCount, deltaTime);
+        this.sendGameStateToClients(this.tickCount);
+    }
 
-  updatePlayerNetworkData(data){
-    if(this.debug) console.log(`network update:`,data);
-    this.stateManager.updatePlayerNetworkData(data);
-  }
+    sendGameStateToClients(tick) {
+        //current state if none specified
+        // let clients = this.io.sockets.clients(); //could put a room name
+        let clients = Object.keys(this.io.sockets.sockets);
+        clients.forEach((socketId) => {
+            // console.log(socketId);
+            // this.io.emit('serverGameState', this.stateManager.package({tick:tick}));
+            this.io.to(`${socketId}`).emit("serverGameState", this.stateManager.package({ tick: tick, playerId: socketId }));
+        });
+    }
 
-  addPlayer(info){
-    this.stateManager.addPlayer(info);
-  }
+    sendFullState({ socketId: socketId }) {
+        this.io.to(`${socketId}`).emit("serverGameState", this.stateManager.package({ tick: this.tickCount, playerId: socketId, full: true }));
+    }
 
-  removePlayer(info){
-    this.stateManager.removePlayer(info);
-  }
+    sendWorld({ socketId: socketId }) {
+        this.io.to(`${socketId}`).emit("world", this.world);
+    }
 
-  clientAction(data){
-    if(this.debug) console.log(`clientAction:`,data);
-    this.stateManager.addAction(data);
-  }
+    updatePlayerNetworkData(data) {
+        if (this.debug) console.log(`network update:`, data);
+        this.stateManager.updatePlayerNetworkData(data);
+    }
 
-  throwError(error){
-    throw new Error(error);
-  }
+    addPlayer(info) {
+        this.stateManager.addPlayer(info);
+    }
 
-}//end class Engine
+    removePlayer(info) {
+        this.stateManager.removePlayer(info);
+    }
+
+    clientAction(data) {
+        if (this.debug) console.log(`clientAction:`, data);
+        this.stateManager.addAction(data);
+    }
+
+    throwError(error) {
+        throw new Error(error);
+    }
+}; //end class Engine

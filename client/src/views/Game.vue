@@ -1,27 +1,50 @@
 <template>
     <div>
-        <canvas id="hud-layer"></canvas>
-        <canvas id="lineOfSight-layer"></canvas>
-        <canvas id="lighting-layer"></canvas>
-        <canvas id="main-layer"></canvas>
-        <canvas id="background-layer"></canvas>
+        <div id="stage" ref="stage">
+            <canvas id="hud-layer" ref="hud-layer"></canvas>
+            <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas>
+            <canvas id="lighting-layer" ref="lighting-layer"></canvas> -->
+            <canvas id="main-layer" ref="main-layer"></canvas>
+            <canvas id="background-layer" ref="background-layer"></canvas>
+        </div>
     </div>
 </template>
 <script>
 // import socket io
 // import game engine
+import EngineClass from '../game/js/clientEngine.js';
+console.log('Game Route');
 export default {
     name: 'Game',
     data: function () {
         return {
-            testVar: 'test Var Value'
+            engine: null
         };
     },
-    methods: {},
+    methods: {
+        setup() {
+            console.log('SETUP');
+        }, //SETUP
+
+        draw() {
+            this.engine.update();
+            this.engine.draw();
+            window.requestAnimationFrame(this.draw);
+        } //draw
+    },
 
     mounted: function () {
         //disabled right-click menu
+        let mainLayerCanvas = this.$refs['main-layer'];
+        let stage = this.$refs['stage'];
+        let backgroundCanvas = this.$refs['background-layer'];
+        let lightingCanvas = this.$refs['lighting-layer'];
+        let lineOfSightCanvas = this.$refs['lineOfSight-layer'];
+        let hudCanvas = this.$refs['hud-layer'];
+        this.engine = new EngineClass({ mainCanvas: mainLayerCanvas, stage, backgroundCanvas, lightingCanvas, lineOfSightCanvas, hudCanvas });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
+        this.setup();
+        this.draw();
     }
 };
 </script>
