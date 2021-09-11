@@ -1,3 +1,4 @@
+const EnergyNode = require('../Entities/EnergyNode.js');
 const Button = require('./button.js');
 
 module.exports = class HUD {
@@ -14,13 +15,16 @@ module.exports = class HUD {
         this.debugButton = debugButton;
         this.crossHairSize = 10;
 
+        this.drawMode = 'drawCrossHair';
+        this.ghost = null;
+
         this.fontSize = fontSize;
         this.startX = 10;
         this.startY = this.fontSize;
         this.debugVars = {};
         this.buttons = [];
         this.createButtons();
-        console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
+        if (debug) console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
 
     resize({ width, height }) {
@@ -40,7 +44,13 @@ module.exports = class HUD {
             label: 'Create Energy Node',
             debug: this.debugButton,
             click: () => {
-                console.log('Create Energy Node Mode');
+                // console.log('Create Energy Node Mode');
+                this.ENGINE.CONTROLS.leftClickHandled = true;
+                this.ENGINE.CONTROLS.leftClickAction = 'placeEnergyNode';
+                this.drawMode = 'drawGhost';
+                this.debugUpdate({ hudDrawMode: this.drawMode });
+                this.ghost = new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y });
+                this.ENGINE.HUD.debugUpdate({ leftClickAction: this.ENGINE.CONTROLS.leftClickAction });
             }
         });
         this.buttons.push(newButton);
@@ -48,6 +58,10 @@ module.exports = class HUD {
 
     update() {
         this.updateButtons();
+        if (this.drawMode == 'drawGhost' && this.ghost) {
+            this.ghost.x = this.ENGINE.CONTROLS.mouseLocationInWorld.x;
+            this.ghost.y = this.ENGINE.CONTROLS.mouseLocationInWorld.y;
+        }
     }
 
     debugUpdate(obj) {
@@ -115,6 +129,14 @@ module.exports = class HUD {
             let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
             this.render.fillText(mouseWorld.x + ',' + mouseWorld.y, this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize * 2);
         }
+
+        this.render.restore();
+    }
+
+    drawGhost() {
+        if (!this.ghost) return;
+        this.render.save();
+        this.ghost.draw(this.render, this.ENGINE.CAMERA, true);
         this.render.restore();
     }
 
@@ -142,9 +164,9 @@ module.exports = class HUD {
         this.render.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
         this.render.beginPath();
 
-        this.drawButtons();
         if (this.debug) this.drawDebugText();
-        this.drawCrossHair();
+        this.drawButtons();
+        this[this.drawMode]();
 
         this.render.restore();
     } //draw

@@ -1,5 +1,3 @@
-const Player = require('../shared/Player.js');
-
 module.exports = class Controls {
     constructor({ debug = false, engine = null }) {
         console.log('Create Controls');
@@ -18,17 +16,26 @@ module.exports = class Controls {
         this.leftClickPressed = false;
         this.middleClickPressed = false;
         this.rightClickPressed = false;
+        this.leftClickHandled = true;
+        this.middleClickHandled = true;
+        this.rightClickHandled = true;
+        this.leftClickAction = null;
+        this.middleClickAction = null;
+        this.rightClickAction = null;
         window.addEventListener('mousedown', (event) => {
             if (this.debug) console.log('mousePressed:', event.button);
             switch (event.button) {
                 case 0:
                     this.leftClickPressed = true;
+                    this.leftClickHandled = false;
                     break;
                 case 1:
                     this.middleClickPressed = true;
+                    this.middleClickHandled = false;
                     break;
                 case 2:
                     this.rightClickPressed = true;
+                    this.rightClickHandled = false;
                     break;
             }
         });
@@ -165,8 +172,27 @@ module.exports = class Controls {
         });
     } //handleHeldKeys
 
+    handlePressedKeys() {
+        // if (Object.keys(this.keysBeingPressed).length > 0) console.log('this.keysBeingPressed :>> ', this.keysBeingPressed);
+
+        //handleMouseButtons
+        if (this.leftClickPressed && !this.leftClickHandled) {
+            if (this.leftClickAction) this.ENGINE.STATES[this.leftClickAction]();
+            this.leftClickHandled = true;
+        }
+        if (this.middleClickPressed && !this.middleClickHandled) {
+            if (this.middleClickAction) this.ENGINE.STATES[this.middleClickAction]();
+            this.middleClickHandled = true;
+        }
+        if (this.rightClickPressed && !this.rightClickHandled) {
+            if (this.rightClickAction) this.ENGINE.STATES[this.rightClickAction]();
+            this.rightClickHandled = true;
+        }
+    } //handlePressedKeys
+
     update() {
         this.handleHeldKeys();
+        this.handlePressedKeys();
     }
 
     translateScreenLocToWorld(x, y) {
@@ -181,7 +207,7 @@ module.exports = class Controls {
         let mouseX = event.pageX;
         let mouseY = event.pageY;
         this.mouse = { x: mouseX, y: mouseY };
-        let locInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
+        this.mouseLocationInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
         // let eventTime = this.ENGINE.STATES.serverState.time + this.ENGINE.STATES.currentDeltaTime;
         // let data = {
         //     type: 'playerCursor',
