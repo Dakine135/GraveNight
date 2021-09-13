@@ -1,4 +1,4 @@
-const StatesManager = require('./StateManagerClient.js');
+const StatesManager = require('./StateManager.js');
 const Controls = require('./clientControls.js');
 // const Networking = require('./networking.js');
 const Camera = require('./Camera.js');
@@ -79,8 +79,6 @@ module.exports = class clientEngine {
         this.STATES = new StatesManager({
             debug: false,
             debugState: false,
-            stateInterpolation: false,
-            clientSimulation: true,
             engine: this
         });
         // this.NETWORK = new Networking({
@@ -145,8 +143,8 @@ module.exports = class clientEngine {
         this.accumulatedDeltaTime += this.deltaTimeUpdate;
 
         this.CAMERA.update();
-        this.CONTROLS.update();
         this.HUD.update();
+        this.CONTROLS.update();
 
         while (this.accumulatedDeltaTime >= this.targetDeltaTime) {
             this.accumulatedDeltaTime -= this.targetDeltaTime;
@@ -189,7 +187,7 @@ module.exports = class clientEngine {
         this.render.fillText(0 + ',' + 0, origin.x, origin.y);
         this.render.restore();
 
-        // this.STATES.draw(deltaTime);
+        this.STATES.draw(deltaTime);
         let timeAfterStateDraw = new Date().getTime();
         let deltaStateDraw = timeAfterStateDraw - timeAfterBackground;
 

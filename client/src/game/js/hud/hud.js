@@ -1,3 +1,4 @@
+const EnergyNode = require('../Entities/EnergyNode.js');
 const Button = require('./button.js');
 
 module.exports = class HUD {
@@ -14,14 +15,41 @@ module.exports = class HUD {
         this.debugButton = debugButton;
         this.crossHairSize = 10;
 
+        this.drawMode = 'drawCrossHair';
+        this.ghost = null;
+
         this.fontSize = fontSize;
         this.startX = 10;
         this.startY = this.fontSize;
         this.debugVars = {};
-        this.buttons = [];
+        this.buttons = {};
         this.createButtons();
-        console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
+        if (debug) console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
+
+    setDrawMode(mode, ghostEntity) {
+        if (this.debug) console.log('Setting Hud draw mode:', mode);
+        switch (mode) {
+            case 'default':
+            case 'clear':
+            case null:
+            case '':
+            case 'drawCrossHair':
+                this.drawMode = 'drawCrossHair';
+                break;
+            case 'drawGhost':
+                if (ghostEntity == null) {
+                    throw Error('ghostEntity Null in Hud.setDrawMode');
+                }
+                this.drawMode = 'drawGhost';
+                this.ghost = ghostEntity;
+                break;
+            default:
+                console.log('setDrawMode unknown :>> ', mode);
+                this.drawMode = 'drawCrossHair';
+        }
+        this.debugUpdate({ hudDrawMode: this.drawMode });
+    } //setDrawMode
 
     resize({ width, height }) {
         this.ENGINE.width = width;
@@ -34,20 +62,35 @@ module.exports = class HUD {
     }
 
     createButtons() {
-        let newButton = new Button({
+        let createEnergyNodeButton = new Button({
             x: 50,
             y: this.height - 50,
+            width: 150,
             label: 'Create Energy Node',
+            shortCutText: '1',
             debug: this.debugButton,
             click: () => {
-                console.log('Create Energy Node Mode');
+                // console.log('Create Energy Node Mode');
+                this.ENGINE.CONTROLS.leftClickHandled = true;
+                this.ENGINE.CONTROLS.setLeftClickAction('placeEnergyNode');
+                this.setDrawMode('drawGhost', new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y }));
             }
         });
-        this.buttons.push(newButton);
+        this.buttons['createEnergyNode'] = createEnergyNodeButton;
+    }
+
+    pressButtonProgrammatically(buttonId) {
+        if (buttonId in this.buttons) {
+            this.buttons[buttonId].onClick();
+        }
     }
 
     update() {
         this.updateButtons();
+        if (this.drawMode == 'drawGhost' && this.ghost) {
+            this.ghost.x = this.ENGINE.CONTROLS.mouseLocationInWorld.x;
+            this.ghost.y = this.ENGINE.CONTROLS.mouseLocationInWorld.y;
+        }
     }
 
     debugUpdate(obj) {
@@ -115,17 +158,25 @@ module.exports = class HUD {
             let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
             this.render.fillText(mouseWorld.x + ',' + mouseWorld.y, this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize * 2);
         }
+
+        this.render.restore();
+    }
+
+    drawGhost() {
+        if (!this.ghost) return;
+        this.render.save();
+        this.ghost.draw(this.ENGINE, true);
         this.render.restore();
     }
 
     drawButtons() {
-        this.buttons.forEach((button) => {
+        Object.entries(this.buttons).forEach(([name, button]) => {
             button.draw(this.render);
         });
     }
 
     updateButtons() {
-        this.buttons.forEach((button) => {
+        Object.entries(this.buttons).forEach(([name, button]) => {
             button.update({
                 mouseX: this.ENGINE.CONTROLS.mouse.x,
                 mouseY: this.ENGINE.CONTROLS.mouse.y,
@@ -142,9 +193,9 @@ module.exports = class HUD {
         this.render.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
         this.render.beginPath();
 
-        this.drawButtons();
         if (this.debug) this.drawDebugText();
-        this.drawCrossHair();
+        this.drawButtons();
+        this[this.drawMode]();
 
         this.render.restore();
     } //draw
