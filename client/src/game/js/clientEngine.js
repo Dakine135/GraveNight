@@ -86,7 +86,7 @@ module.exports = class clientEngine {
         //     engine: this
         // });
         this.CONTROLS = new Controls({
-            debug: false,
+            debug: true,
             engine: this
         });
         this.HUD = new Hud({

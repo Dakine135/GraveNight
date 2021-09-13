@@ -9,7 +9,8 @@
         "build": "vue-cli-service build --verbosity silent",
         "lint": "vue-cli-service lint",
         "dev": "vue-cli-service serve --port 3033 --open",
-        "staging": "vue-cli-service build --mode staging"
+        "staging": "vue-cli-service build --mode staging",
+        "deploy": "vue-cli-service build --verbosity silent && firebase deploy"
     },
     "dependencies": {
         "core-js": "^3.6.5",

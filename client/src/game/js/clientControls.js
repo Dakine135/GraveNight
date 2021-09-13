@@ -61,11 +61,16 @@ module.exports = class Controls {
     } //constructor
 
     scrollEvent(event) {
+        event.preventDefault();
         // let eventTime = this.ENGINE.STATES.serverState.time + this.ENGINE.STATES.currentDeltaTime;
         if (event.deltaY > 0) {
             if (this.debug) console.log('scroll Down');
+            //zoom out
+            this.ENGINE.CAMERA.zoomOut();
         } else {
             if (this.debug) console.log('scroll up');
+            //zoom in
+            this.ENGINE.CAMERA.zoomIn();
         }
     }
 

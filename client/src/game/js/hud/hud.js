@@ -73,7 +73,7 @@ module.exports = class HUD {
                 // console.log('Create Energy Node Mode');
                 this.ENGINE.CONTROLS.leftClickHandled = true;
                 this.ENGINE.CONTROLS.setLeftClickAction('placeEnergyNode');
-                this.setDrawMode('drawGhost', new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y }));
+                this.setDrawMode('drawGhost', new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y, engine: this.ENGINE }));
             }
         });
         this.buttons['createEnergyNode'] = createEnergyNodeButton;
@@ -108,9 +108,8 @@ module.exports = class HUD {
         this.render.textAlign = 'left';
         let offset = 0;
         for (let id in this.debugVars) {
-            let text = id + ': ' + this.debugVars[id];
-            this.render.fillText(text, this.startX, this.startY + offset);
-            this.render.strokeText(text, this.startX, this.startY + offset);
+            this.render.fillText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + offset);
+            this.render.strokeText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + offset);
             offset += this.fontSize;
         }
         this.render.restore();

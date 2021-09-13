@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="stage" ref="stage">
-            <canvas id="hud-layer" ref="hud-layer"></canvas>
+            <canvas id="hud-layer" ref="hud-layer">Your browser does not support HTML5 canvas</canvas>
             <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas>
             <canvas id="lighting-layer" ref="lighting-layer"></canvas> -->
             <canvas id="main-layer" ref="main-layer"></canvas>

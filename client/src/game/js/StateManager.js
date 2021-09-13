@@ -36,7 +36,7 @@ module.exports = class StatesManager {
 
     placeEnergyNode({ x = this.ENGINE.CONTROLS.mouseLocationInWorld.x, y = this.ENGINE.CONTROLS.mouseLocationInWorld.y } = {}) {
         console.log('placeEnergyNode');
-        let newEnergyNode = new EnergyNode({ id: this.currentEntityId, x, y });
+        let newEnergyNode = new EnergyNode({ id: this.currentEntityId, x, y, engine: this.ENGINE });
         this.updatableEntities[this.currentEntityId] = newEnergyNode;
         this.drawableEntities[this.currentEntityId] = newEnergyNode;
         this.energyLinkableEntities[this.currentEntityId] = newEnergyNode;

@@ -25,7 +25,7 @@ module.exports = class background {
 
         //assets
         this.grassSpriteSheet = new Image();
-        this.grassSpriteSheet.src = '../../assets/grassTiles64.png';
+        this.grassSpriteSheet.src = require('../../assets/grassTiles64.png');
         this.grassSpriteSheet.onload = () => {
             this.imageLoaded = true;
             this.generateSpriteGrid();

@@ -11,6 +11,20 @@ function randomColor() {
 }
 exports.randomColor = randomColor;
 
+function colorBlend(startColor, endColor, fraction) {
+    let diffR = endColor.r - startColor.r;
+    let diffG = endColor.g - startColor.g;
+    let diffB = endColor.b - startColor.b;
+    let diffA = endColor.a - startColor.a;
+    return {
+        r: Math.floor(startColor.r + diffR * fraction),
+        g: Math.floor(startColor.g + diffG * fraction),
+        b: Math.floor(startColor.b + diffB * fraction),
+        a: Math.floor(startColor.a + diffA * fraction)
+    };
+}
+exports.colorBlend = colorBlend;
+
 exports.midPoint = (point1, point2) => {
     let middleX = point2.x - (point2.x - point2.x) / 2;
     let middleY = point2.y - (point2.y - point1.y) / 2;

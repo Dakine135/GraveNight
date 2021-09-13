@@ -8,8 +8,41 @@ module.exports = class Camera {
         this.goalX = x;
         this.goalY = y;
         this.speed = speed; //1 would be instant camera, percent to move each update toward player of remaining distance
+        // this.currentZoomLevelIndex = 3;
+        // this.zoomLevels = [4, 3, 2, 1, 0.8, 0.5, 0.2, 0.1]; //scale levels for  https://www.w3schools.com/jsref/canvas_scale.asp
+        this.currentZoomLevelIndex = 0;
+        this.zoomLevels = [1, 0.5]; //scale levels
 
         this.cameraMovedSinceLastUpdate = true;
+    }
+
+    zoomIn() {
+        this.currentZoomLevelIndex--;
+        if (this.currentZoomLevelIndex < 0) {
+            this.currentZoomLevelIndex = 0;
+        } else {
+            this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
+            this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+        }
+    }
+
+    zoomOut() {
+        this.currentZoomLevelIndex++;
+        if (this.currentZoomLevelIndex >= this.zoomLevels.length) {
+            this.currentZoomLevelIndex = this.zoomLevels.length - 1;
+        } else {
+            this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
+            this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+        }
+    }
+
+    get zoomLevel() {
+        return this.zoomLevels[this.currentZoomLevelIndex];
+    }
+
+    goToOrigin() {
+        this.goalX = 0;
+        this.goalY = 0;
     }
 
     moveTo(x, y) {
