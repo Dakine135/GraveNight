@@ -5,6 +5,7 @@ module.exports = class Controls {
         this.ENGINE = engine;
 
         this.mouse = { x: 0, y: 0 };
+        this.mouseLocationInWorld = { x: 0, y: 0 };
         this.keysBeingPressed = {};
         this.cameraMovement = {
             vx: 0,
@@ -85,6 +86,9 @@ module.exports = class Controls {
         // };
         let validKey = true;
         switch (keyCode) {
+            case 49: //1
+                this.ENGINE.HUD.pressButtonProgrammatically('createEnergyNode');
+                break;
             case 65: //A
             case 37: //left arrow
                 break;
@@ -96,6 +100,10 @@ module.exports = class Controls {
                 break;
             case 83: //S
             case 40: //arrow down
+                break;
+            case 27: //escape key
+                this.ENGINE.HUD.setDrawMode('');
+                this.setLeftClickAction();
                 break;
             default:
                 console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
@@ -117,6 +125,8 @@ module.exports = class Controls {
         // let eventTime = this.ENGINE.STATES.state.time + this.ENGINE.STATES.currentDeltaTime;
         let validKey = true;
         switch (keyCode) {
+            case 49: //1
+                break;
             case 65: //A
             case 37: //left arrow
                 break;
@@ -128,6 +138,8 @@ module.exports = class Controls {
                 break;
             case 83: //S
             case 40: //arrow down
+                break;
+            case 27: //escape key
                 break;
             default:
                 console.log(`Key Not Used Released: ${keyCode}, ${key}`);
@@ -218,5 +230,30 @@ module.exports = class Controls {
         // this.ENGINE.NETWORK.sendClientAction(data);
         // data.socketId = this.ENGINE.NETWORK.mySocketId;
         // this.ENGINE.STATES.addAction(data);
+    }
+
+    setLeftClickAction(action) {
+        if (this.debug) console.log('Setting left CLick Action:', action);
+        switch (action) {
+            case 'default':
+            case 'clear':
+            case undefined:
+            case null:
+            case '':
+                this.leftClickAction = null;
+                break;
+            case 'placeEnergyNode':
+                this.leftClickAction = 'placeEnergyNode';
+                break;
+            default:
+                console.log('setLeftClickAction unknown :>> ', action);
+                this.leftClickAction = null;
+        }
+
+        this.ENGINE.HUD.debugUpdate({ leftClickAction: this.leftClickAction ? this.leftClickAction : 'None' });
+    } //setLeftClickAction
+
+    updateCameraMoved() {
+        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
     }
 }; //Controls Class

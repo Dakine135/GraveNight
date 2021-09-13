@@ -22,10 +22,34 @@ module.exports = class HUD {
         this.startX = 10;
         this.startY = this.fontSize;
         this.debugVars = {};
-        this.buttons = [];
+        this.buttons = {};
         this.createButtons();
         if (debug) console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
+
+    setDrawMode(mode, ghostEntity) {
+        if (this.debug) console.log('Setting Hud draw mode:', mode);
+        switch (mode) {
+            case 'default':
+            case 'clear':
+            case null:
+            case '':
+            case 'drawCrossHair':
+                this.drawMode = 'drawCrossHair';
+                break;
+            case 'drawGhost':
+                if (ghostEntity == null) {
+                    throw Error('ghostEntity Null in Hud.setDrawMode');
+                }
+                this.drawMode = 'drawGhost';
+                this.ghost = ghostEntity;
+                break;
+            default:
+                console.log('setDrawMode unknown :>> ', mode);
+                this.drawMode = 'drawCrossHair';
+        }
+        this.debugUpdate({ hudDrawMode: this.drawMode });
+    } //setDrawMode
 
     resize({ width, height }) {
         this.ENGINE.width = width;
@@ -38,22 +62,27 @@ module.exports = class HUD {
     }
 
     createButtons() {
-        let newButton = new Button({
+        let createEnergyNodeButton = new Button({
             x: 50,
             y: this.height - 50,
+            width: 150,
             label: 'Create Energy Node',
+            shortCutText: '1',
             debug: this.debugButton,
             click: () => {
                 // console.log('Create Energy Node Mode');
                 this.ENGINE.CONTROLS.leftClickHandled = true;
-                this.ENGINE.CONTROLS.leftClickAction = 'placeEnergyNode';
-                this.drawMode = 'drawGhost';
-                this.debugUpdate({ hudDrawMode: this.drawMode });
-                this.ghost = new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y });
-                this.ENGINE.HUD.debugUpdate({ leftClickAction: this.ENGINE.CONTROLS.leftClickAction });
+                this.ENGINE.CONTROLS.setLeftClickAction('placeEnergyNode');
+                this.setDrawMode('drawGhost', new EnergyNode({ x: this.ENGINE.CONTROLS.mouse.x, y: this.ENGINE.CONTROLS.mouse.y }));
             }
         });
-        this.buttons.push(newButton);
+        this.buttons['createEnergyNode'] = createEnergyNodeButton;
+    }
+
+    pressButtonProgrammatically(buttonId) {
+        if (buttonId in this.buttons) {
+            this.buttons[buttonId].onClick();
+        }
     }
 
     update() {
@@ -136,18 +165,18 @@ module.exports = class HUD {
     drawGhost() {
         if (!this.ghost) return;
         this.render.save();
-        this.ghost.draw(this.render, this.ENGINE.CAMERA, true);
+        this.ghost.draw(this.ENGINE, true);
         this.render.restore();
     }
 
     drawButtons() {
-        this.buttons.forEach((button) => {
+        Object.entries(this.buttons).forEach(([name, button]) => {
             button.draw(this.render);
         });
     }
 
     updateButtons() {
-        this.buttons.forEach((button) => {
+        Object.entries(this.buttons).forEach(([name, button]) => {
             button.update({
                 mouseX: this.ENGINE.CONTROLS.mouse.x,
                 mouseY: this.ENGINE.CONTROLS.mouse.y,

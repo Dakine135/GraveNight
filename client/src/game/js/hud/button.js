@@ -10,6 +10,7 @@ module.exports = class Button {
         hover = () => {},
         hoverLeave = () => {},
         label = 'NoLabel',
+        shortCutText,
         color = { r: 255, g: 255, b: 255 },
         labelColor = { r: 100, g: 100, b: 100 },
         debug = false,
@@ -22,6 +23,7 @@ module.exports = class Button {
         this.width = width;
         this.height = height;
         this.label = label;
+        this.shortCutText = shortCutText;
         this.color = color;
         this.labelColor = labelColor;
         this.isActive = false;
@@ -85,13 +87,27 @@ module.exports = class Button {
         render.stroke();
         render.fill();
 
+        //button keyboard shortcut text
+        let shortCutTextWidth = 0;
+        if (this.shortCutText && this.shortCutText.length > 0) {
+            render.font = '15px Arial';
+            render.fillStyle = `rgba(${this.labelColor.r}, ${this.labelColor.g}, ${this.labelColor.b}, 1)`;
+            render.textAlign = 'left';
+            render.textBaseline = 'top';
+            shortCutTextWidth = render.measureText(this.shortCutText).width;
+            render.fillText(this.shortCutText, this.x + 2, this.y);
+            render.lineWidth = 1;
+            render.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
+            render.rect(this.x, this.y, shortCutTextWidth + 4, this.height / 2);
+            render.stroke();
+        }
+
         //Button Label
         render.font = '20px Arial';
         render.fillStyle = `rgba(${this.labelColor.r}, ${this.labelColor.g}, ${this.labelColor.b}, 1)`;
         render.textAlign = 'center';
         render.textBaseline = 'middle';
-        //render.measureText(this.label).width
-        render.fillText(this.label, this.x + this.width / 2, this.y + this.height / 2, this.width - 10);
+        render.fillText(this.label, this.x + this.width / 2 + shortCutTextWidth, this.y + this.height / 2, this.width - 10 - shortCutTextWidth);
 
         render.closePath();
         render.restore(); // Restore original state
