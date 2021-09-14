@@ -159,7 +159,14 @@ module.exports = class background {
     update() {}
 
     draw() {
-        if (!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated) return;
+        if (!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated || this.ENGINE.CAMERA.zoomLevel <= 0.5) {
+            this.render.save();
+            this.render.setTransform(1, 0, 0, 1, 0, 0);
+            this.render.fillStyle = '#3c9f4c';
+            this.render.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.render.restore();
+            return;
+        }
         if (this.ENGINE.CAMERA.cameraMovedSinceLastUpdate == false && !this.firstDraw) {
             // console.log('skipping background Draw');
             return;
@@ -186,19 +193,20 @@ module.exports = class background {
         let y = 0;
         for (
             let offsetX = -this.ENGINE.gridSize - (this.ENGINE.CAMERA.x % this.ENGINE.gridSize);
-            offsetX < this.ENGINE.width;
+            offsetX < this.ENGINE.CAMERA.worldViewWidth;
             offsetX += this.ENGINE.gridSize
         ) {
             y = 0;
             for (
                 let offsetY = -this.ENGINE.gridSize - (this.ENGINE.CAMERA.y % this.ENGINE.gridSize);
-                offsetY < this.ENGINE.height;
+                offsetY < this.ENGINE.CAMERA.worldViewHeight;
                 offsetY += this.ENGINE.gridSize
             ) {
                 let worldLocX = this.ENGINE.CAMERA.x + offsetX;
                 let worldLocY = this.ENGINE.CAMERA.y + offsetY;
                 let imageOffset = this.getImageOffset(worldLocX, worldLocY);
                 this.render.save();
+                this.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
                 this.render.translate(offsetX + this.ENGINE.gridSize / 2, offsetY + this.ENGINE.gridSize / 2);
                 this.render.rotate(imageOffset.rotate);
                 this.render.translate(-(this.ENGINE.gridSize / 2), -(this.ENGINE.gridSize / 2));

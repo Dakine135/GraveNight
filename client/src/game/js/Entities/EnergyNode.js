@@ -79,8 +79,8 @@ module.exports = class EnergyNode {
     draw(ENGINE, ghost = false) {
         // Start a new drawing state
         ENGINE.render.save();
-        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
         let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
+        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
         ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
 
         //EnergyNode location for debugging
@@ -127,23 +127,33 @@ module.exports = class EnergyNode {
             //draw main body
             ENGINE.render.beginPath();
             // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
-            let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-            gradient.addColorStop(0, `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`);
-            gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`);
-            ENGINE.render.fillStyle = gradient;
-            //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
-            ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-            ENGINE.render.fill();
-            ENGINE.render.closePath();
-
-            //draw energyPackets
-            this.energyPackets.forEach((packet) => {
-                ENGINE.render.beginPath();
-                ENGINE.render.fillStyle = 'white';
-                ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
+            if (this.ENGINE.CAMERA.zoomLevel <= 0.5) {
+                ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
+                ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
                 ENGINE.render.fill();
                 ENGINE.render.closePath();
-            });
+            } else {
+                let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+                gradient.addColorStop(
+                    0,
+                    `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
+                );
+                gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`);
+                ENGINE.render.fillStyle = gradient;
+                //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
+                ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
+                ENGINE.render.fill();
+                ENGINE.render.closePath();
+
+                //draw energyPackets
+                this.energyPackets.forEach((packet) => {
+                    ENGINE.render.beginPath();
+                    ENGINE.render.fillStyle = 'white';
+                    ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
+                    ENGINE.render.fill();
+                    ENGINE.render.closePath();
+                });
+            }
         }
 
         ENGINE.render.restore(); // Restore original state

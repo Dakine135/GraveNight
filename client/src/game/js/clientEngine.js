@@ -86,7 +86,7 @@ module.exports = class clientEngine {
         //     engine: this
         // });
         this.CONTROLS = new Controls({
-            debug: true,
+            debug: false,
             engine: this
         });
         this.HUD = new Hud({
@@ -180,11 +180,14 @@ module.exports = class clientEngine {
         //square at 0,0
         let origin = this.CAMERA.translate({ x: 0, y: 0 });
         this.render.save();
+        this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
+        this.render.translate(origin.x, origin.y);
+        // let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
         this.render.strokeStyle = 'black';
-        this.render.strokeRect(origin.x - 10, origin.y - 10, 20, 20);
+        this.render.strokeRect(-10, -10, 20, 20);
         // render.font = "px Arial";
         this.render.textAlign = 'center';
-        this.render.fillText(0 + ',' + 0, origin.x, origin.y);
+        this.render.fillText(0 + ',' + 0, 0, 0);
         this.render.restore();
 
         this.STATES.draw(deltaTime);
