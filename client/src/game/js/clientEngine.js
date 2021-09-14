@@ -67,18 +67,20 @@ module.exports = class clientEngine {
         this.windowResized();
         window.addEventListener('resize', this.windowResized.bind(this));
 
+        this.isProduction = process.env.NODE_ENV == 'production';
+
         this.myPlayerId = null;
 
         this.CAMERA = new Camera({
-            debug: false,
+            debug: this.isProduction ? false : false,
             x: 0,
             y: 0,
             speed: 0.1,
             engine: this
         });
         this.STATES = new StatesManager({
-            debug: false,
-            debugState: false,
+            debug: this.isProduction ? false : false,
+            debugState: this.isProduction ? false : false,
             engine: this
         });
         // this.NETWORK = new Networking({
@@ -86,28 +88,28 @@ module.exports = class clientEngine {
         //     engine: this
         // });
         this.CONTROLS = new Controls({
-            debug: false,
+            debug: this.isProduction ? false : false,
             engine: this
         });
         this.HUD = new Hud({
             engine: this,
             canvas: hudCanvas,
-            debug: true,
-            debugButton: false
+            debug: this.isProduction ? false : true,
+            debugButton: this.isProduction ? false : false
         });
         // this.LIGHTING = new Lighting({
-        //     debug: false,
+        //     debug: this.isProduction ? false : false,
         //     engine: this,
         //     darkness: this.DARKNESS, //darkness level 0-1
         //     brightness: this.BRIGHTNESS
         // });
         // // this.LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
         // this.LINEOFSIGHT = new LineOfSight({
-        //     debug: false,
+        //     debug: this.isProduction ? false : false,
         //     engine: this
         // });
         this.BACKGROUND = new Background({
-            debug: false,
+            debug: this.isProduction ? false : false,
             engine: this,
             canvas: backgroundCanvas
         });
