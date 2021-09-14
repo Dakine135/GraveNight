@@ -51,8 +51,18 @@ module.exports = class clientEngine {
         this.lastFrames = 60;
         this.frames = 0;
 
+        this.isProduction = process.env.NODE_ENV == 'production';
+        this.debug = this.isProduction ? false : false;
+
+        //performance
+        this.startOfDrawPerformance = performance.now();
+        this.endOfDrawPerformance = performance.now();
+        this.lastTimeStampPerformance = performance.now();
+        this.performanceMetrics = {};
+
         //update Times
         this.lastUpdateTime = new Date().getTime();
+        this.deltaTime = 0;
         this.deltaTimeUpdate = 0;
         this.targetDeltaTime = 50; //20 updates per 1000ms or 1s
         this.accumulatedDeltaTime = 0;
@@ -66,8 +76,6 @@ module.exports = class clientEngine {
         this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
         this.windowResized();
         window.addEventListener('resize', this.windowResized.bind(this));
-
-        this.isProduction = process.env.NODE_ENV == 'production';
 
         this.myPlayerId = null;
 
@@ -87,15 +95,15 @@ module.exports = class clientEngine {
         //     debug: false,
         //     engine: this
         // });
-        this.CONTROLS = new Controls({
-            debug: this.isProduction ? false : false,
-            engine: this
-        });
         this.HUD = new Hud({
             engine: this,
             canvas: hudCanvas,
             debug: this.isProduction ? false : true,
             debugButton: this.isProduction ? false : false
+        });
+        this.CONTROLS = new Controls({
+            debug: this.isProduction ? false : false,
+            engine: this
         });
         // this.LIGHTING = new Lighting({
         //     debug: this.isProduction ? false : false,
@@ -155,6 +163,11 @@ module.exports = class clientEngine {
         }
     } //update
 
+    performanceCheckPoint(name) {
+        this.performanceMetrics[name] = performance.now() - this.lastTimeStampPerformance;
+        this.lastTimeStampPerformance = performance.now();
+    }
+
     draw() {
         //background "wipes" the screen every frame
         //clear the canvas
@@ -165,19 +178,16 @@ module.exports = class clientEngine {
         this.render.restore();
 
         this.currentTime = new Date().getTime();
-        let deltaTime = this.currentTime - this.lastFrame;
+        if (this.debug) {
+            this.startOfDrawPerformance = performance.now();
+            this.lastTimeStampPerformance = performance.now();
+        }
+        this.deltaTime = this.currentTime - this.lastFrame;
         this.lastFrame = this.currentTime;
         this.frames++;
 
-        // let myPlayer = this.NETWORK.getMyPlayer();
-        // if (myPlayer != null) {
-        //     this.CAMERA.setGoal(myPlayer.x, myPlayer.y);
-        //     if (this.myPlayerId == null) this.myPlayerId = myPlayer.id;
-        // }
-
         this.BACKGROUND.draw();
-        let timeAfterBackground = new Date().getTime();
-        let deltaBackground = timeAfterBackground - this.currentTime;
+        if (this.debug) this.performanceCheckPoint('backgroundDraw');
 
         //square at 0,0
         let origin = this.CAMERA.translate({ x: 0, y: 0 });
@@ -192,9 +202,8 @@ module.exports = class clientEngine {
         this.render.fillText(0 + ',' + 0, 0, 0);
         this.render.restore();
 
-        this.STATES.draw(deltaTime);
-        let timeAfterStateDraw = new Date().getTime();
-        let deltaStateDraw = timeAfterStateDraw - timeAfterBackground;
+        this.STATES.draw(this.deltaTime);
+        if (this.debug) this.performanceCheckPoint('statesDraw');
 
         //World drawing
         let objectsToDraw = {};
@@ -220,45 +229,17 @@ module.exports = class clientEngine {
             }
             if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
         } //if World has been received from Server
-        let timeAfterWorldDraw = new Date().getTime();
-        let deltaWorldDraw = timeAfterWorldDraw - timeAfterStateDraw;
+        if (this.debug) this.performanceCheckPoint('worldDraw');
 
         this.HUD.draw();
-        let timeAfterHudDraw = new Date().getTime();
-        let deltaHudDraw = timeAfterHudDraw - timeAfterWorldDraw;
-
-        let playersInRange = {};
-        // if (myPlayer != null) {
-        //     playersInRange = this.STATES.getPlayersInRange({
-        //         x: myPlayer.x,
-        //         y: myPlayer.y,
-        //         distance: this.renderDistance
-        //     });
-        // }
-
-        //Line of sight Stuff
-        // this.LINEOFSIGHT.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-        // let timeAfterSightUpdate = new Date().getTime();
-        // let deltaSightUpdate = timeAfterSightUpdate - timeAfterWorldDraw;
-
-        // this.LINEOFSIGHT.draw(this.STATES.frameState);
-        // let timeAfterSightDraw = new Date().getTime();
-        // let deltaSightDraw = timeAfterSightDraw - timeAfterSightUpdate;
-
-        // //Lighting Stuff
-        // this.LIGHTING.update(deltaTime, objectsToDraw, myPlayer, playersInRange);
-        // let timeAfterLightUpdate = new Date().getTime();
-        // let deltaLightUpdate = timeAfterLightUpdate - timeAfterSightDraw;
-
-        // this.LIGHTING.draw(this.STATES.frameState);
-        // let timeAfterLightDraw = new Date().getTime();
-        // let deltaLightDraw = timeAfterLightDraw - timeAfterLightUpdate;
+        if (this.debug) this.performanceCheckPoint('hudDraw');
 
         //once a second
         if (this.currentTime % this.lastSecond >= 1000) {
             // console.log(STATES.state);
             // this.NETWORK.updateServerTimeDiffernce();
-            if (this.HUD.debug) {
+            this.endOfDrawPerformance = performance.now();
+            if (this.debug && this.HUD.debug) {
                 this.HUD.debugUpdate({
                     FrameRate: Math.round(this.lastFrames * 0.8 + this.frames * 0.2),
                     GameResolution: this.width + ', ' + this.height,
@@ -268,17 +249,12 @@ module.exports = class clientEngine {
                     objectsToDraw: Object.keys(objectsToDraw).length,
                     renderDistance: this.renderDistance,
                     CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
-                    deltaTime: deltaTime,
-                    // timeCamera: Math.round((deltaCamera / deltaTime) * 100) + '%',
-                    timeBackground: Math.round((deltaBackground / deltaTime) * 100) + '%',
-                    // timeStateUpdate: Math.round((deltaStateUpdate / deltaTime) * 100) + '%',
-                    timeStateDraw: Math.round((deltaStateDraw / deltaTime) * 100) + '%',
-                    timeWorldDraw: Math.round((deltaWorldDraw / deltaTime) * 100) + '%',
-                    timeHudDraw: Math.round((deltaHudDraw / deltaTime) * 100) + '%'
-                    // timeSightUpdate: Math.round((deltaSightUpdate / deltaTime) * 100) + '%',
-                    // timeSightDraw: Math.round((deltaSightDraw / deltaTime) * 100) + '%',
-                    // timeLightUpdate: Math.round((deltaLightUpdate / deltaTime) * 100) + '%',
-                    // timeLightDraw: Math.round((deltaLightDraw / deltaTime) * 100) + '%'
+                    deltaTime: this.deltaTime,
+                    timeBackground:
+                        Math.round((this.performanceMetrics['backgroundDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
+                    timeStateDraw: Math.round((this.performanceMetrics['statesDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
+                    timeWorldDraw: Math.round((this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
+                    timeHudDraw: Math.round((this.performanceMetrics['hudDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%'
                 });
             }
             this.lastSecond = this.currentTime;

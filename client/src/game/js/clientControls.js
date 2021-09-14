@@ -5,6 +5,7 @@ module.exports = class Controls {
         this.ENGINE = engine;
 
         this.mouse = { x: 0, y: 0 };
+        this.mouseLocked = false;
         this.mouseLocationInWorld = { x: 0, y: 0 };
         this.keysBeingPressed = {};
         this.cameraMovement = {
@@ -57,7 +58,20 @@ module.exports = class Controls {
         window.addEventListener('wheel', this.scrollEvent.bind(this));
         window.addEventListener('keydown', this.keyPressed.bind(this));
         window.addEventListener('keyup', this.keyReleased.bind(this));
-        window.addEventListener('mousemove', this.mouseMoved.bind(this));
+        // window.addEventListener('mousemove', this.mouseMoved.bind(this));
+        // pointer lock object forking for cross browser
+
+        this.ENGINE.HUD.canvas.requestPointerLock = this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
+        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+        this.ENGINE.HUD.canvas.onclick = () => {
+            // console.log('clicked hud canvas');
+            this.ENGINE.HUD.canvas.requestPointerLock();
+            this.ENGINE.HUD.canvas.onclick = null;
+        };
+        // Hook pointer lock state change events for different browsers
+        document.addEventListener('pointerlockchange', this.lockChange.bind(this), false);
+        document.addEventListener('mozpointerlockchange', this.lockChange.bind(this), false);
+        // this.ENGINE.HUD.canvas.requestPointerLock();
     } //constructor
 
     scrollEvent(event) {
@@ -106,9 +120,12 @@ module.exports = class Controls {
             case 83: //S
             case 40: //arrow down
                 break;
-            case 27: //escape key
+            case 81: //Q
                 this.ENGINE.HUD.setDrawMode('');
                 this.setLeftClickAction();
+                break;
+            case 27: //escape key
+                //now used to break mouse lock from game
                 break;
             default:
                 console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
@@ -143,6 +160,8 @@ module.exports = class Controls {
                 break;
             case 83: //S
             case 40: //arrow down
+                break;
+            case 81: //Q
                 break;
             case 27: //escape key
                 break;
@@ -221,20 +240,30 @@ module.exports = class Controls {
     }
 
     mouseMoved(event) {
-        let mouseX = event.pageX;
-        let mouseY = event.pageY;
-        this.mouse = { x: mouseX, y: mouseY };
-        this.mouseLocationInWorld = this.translateScreenLocToWorld(mouseX, mouseY);
-        // let eventTime = this.ENGINE.STATES.serverState.time + this.ENGINE.STATES.currentDeltaTime;
-        // let data = {
-        //     type: 'playerCursor',
-        //     x: locInWorld.x,
-        //     y: locInWorld.y,
-        //     time: this.ENGINE.STATES.currentTimeInSimulation
-        // };
-        // this.ENGINE.NETWORK.sendClientAction(data);
-        // data.socketId = this.ENGINE.NETWORK.mySocketId;
-        // this.ENGINE.STATES.addAction(data);
+        if (!this.mouseLocked) return;
+        this.mouse = { x: this.mouse.x + event.movementX, y: this.mouse.y + event.movementY };
+        if (this.mouse.x > this.ENGINE.width) this.mouse.x = this.ENGINE.width;
+        if (this.mouse.y > this.ENGINE.height) this.mouse.y = this.ENGINE.height;
+        if (this.mouse.x < 0) this.mouse.x = 0;
+        if (this.mouse.y < 0) this.mouse.y = 0;
+        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
+    }
+
+    lockChange() {
+        if (document.pointerLockElement === this.ENGINE.HUD.canvas || document.mozPointerLockElement === this.ENGINE.HUD.canvas) {
+            // console.log('The pointer lock status is now locked');
+            document.addEventListener('mousemove', this.mouseMoved.bind(this), false);
+            this.mouseLocked = true;
+        } else {
+            // console.log('The pointer lock status is now unlocked');
+            document.removeEventListener('mousemove', this.mouseMoved.bind(this), false);
+            this.mouseLocked = false;
+            this.ENGINE.HUD.canvas.onclick = () => {
+                // console.log('clicked hud canvas');
+                this.ENGINE.HUD.canvas.requestPointerLock();
+                this.ENGINE.HUD.canvas.onclick = null;
+            };
+        }
     }
 
     setLeftClickAction(action) {

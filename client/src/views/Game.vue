@@ -29,11 +29,24 @@ export default {
         draw() {
             this.engine.update();
             this.engine.draw();
-            window.requestAnimationFrame(this.draw);
+            window.requestAnimFrame(this.draw);
         } //draw
     },
 
     mounted: function () {
+        window.requestAnimFrame = (function (callback) {
+            return (
+                window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                }
+            );
+        })();
+
         //disabled right-click menu
         let mainLayerCanvas = this.$refs['main-layer'];
         let stage = this.$refs['stage'];
@@ -58,7 +71,7 @@ body {
 /*Stuff to make the full screen better and remove cursor*/
 canvas {
     position: absolute;
-    cursor: none;
+    /* cursor: none; */
 }
 #stage {
     position: fixed;
