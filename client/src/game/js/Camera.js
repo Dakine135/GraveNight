@@ -72,11 +72,12 @@ module.exports = class Camera {
     }
 
     translate({ x = 0, y = 0 }) {
-        let orgiginX = this.x - this.engine.width / 2;
-        let orgiginY = this.y - this.engine.height / 2;
-        let tx = Math.round(x - orgiginX);
-        let ty = Math.round(y - orgiginY);
-        return { x: tx, y: ty };
+        //TODO might need some zoom love?
+        // let originX = this.x - this.engine.width / 2;
+        // let originY = this.y - this.engine.height / 2;
+        // let tx = Math.round(x - originX);
+        // let ty = Math.round(y - originY);
+        return { x: Math.round(x + this.engine.width / 2 - this.x), y: Math.round(y + this.engine.height / 2 - this.y) };
     }
 
     rotatePoint({ center = { x: 0, y: 0 }, point = { x: 0, y: 0 }, angle = 0 }) {

@@ -153,9 +153,25 @@ module.exports = class HUD {
                 this.ENGINE.CONTROLS.mouse.x,
                 this.ENGINE.CONTROLS.mouse.y - this.crossHairSize
             );
+
             //location in world
-            let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
-            this.render.fillText(mouseWorld.x + ',' + mouseWorld.y, this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize * 2);
+            // let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
+            this.render.save();
+            let translatedLocation = this.ENGINE.CAMERA.translate({
+                x: this.ENGINE.CONTROLS.mouseLocationInWorld.x,
+                y: this.ENGINE.CONTROLS.mouseLocationInWorld.y
+            });
+            this.render.translate(translatedLocation.x, translatedLocation.y);
+            this.render.beginPath();
+            this.render.fillText(this.ENGINE.CONTROLS.mouseLocationInWorld.x + ',' + this.ENGINE.CONTROLS.mouseLocationInWorld.y, 0, this.crossHairSize * 2);
+            this.render.strokeStyle = 'red';
+            this.render.moveTo(-this.crossHairSize, 0);
+            this.render.lineTo(+this.crossHairSize, 0);
+            this.render.stroke();
+            this.render.moveTo(0, -this.crossHairSize);
+            this.render.lineTo(0, +this.crossHairSize);
+            this.render.stroke();
+            this.render.restore();
         }
 
         this.render.restore();

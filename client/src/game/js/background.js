@@ -24,6 +24,7 @@ module.exports = class background {
         this.firstDraw = true;
 
         //assets
+        this.spriteSheetSize = 64;
         this.grassSpriteSheet = new Image();
         this.grassSpriteSheet.src = require('../../assets/grassTiles64.png');
         this.grassSpriteSheet.onload = () => {
@@ -138,22 +139,19 @@ module.exports = class background {
     //input world cords and get sprite offset that should be used.
     getImageOffset(x, y, debug) {
         // console.log("get sprite offset at world:", x, y);
-        let halfWidth = this.spriteGrid.length / 2;
-        let halfHeight = this.spriteGrid[0].length / 2;
-        let spriteSheetX = Math.floor(x / this.ENGINE.gridSize + halfWidth);
-        let spriteSheetY = Math.floor(y / this.ENGINE.gridSize + halfHeight);
+        let spriteSheetX = Math.floor(x / this.ENGINE.gridSize + this.spriteGrid.length / 2);
+        let spriteSheetY = Math.floor(y / this.ENGINE.gridSize + this.spriteGrid[0].length / 2);
         if (spriteSheetX < 0 || spriteSheetX >= this.spriteGrid.length) {
             spriteSheetX = 0;
         }
         if (spriteSheetY < 0 || spriteSheetY >= this.spriteGrid[0].length) {
             spriteSheetY = 0;
         }
-        let imageOffset = this.spriteGrid[spriteSheetX][spriteSheetY];
         // console.log(`${x}=>${spriteSheetX},${y}=>${spriteSheetY}: ${imageOffset}`);
         // console.log(spriteSheetX, spriteSheetY, this.spriteGrid.length);
         // console.log(imageOffset);
         if (debug) return { x: spriteSheetX, y: spriteSheetY };
-        return imageOffset;
+        return this.spriteGrid[spriteSheetX][spriteSheetY];
     }
 
     update() {}
@@ -172,39 +170,27 @@ module.exports = class background {
             return;
         }
         this.firstDraw = false;
-        // let cameraOffset = {
-        //   x: Math.floor(this.ENGINE.CAMERA.x % this.ENGINE.WORLD.gridSize),
-        //   y: Math.floor(this.ENGINE.CAMERA.y % this.ENGINE.WORLD.gridSize)
-        // }
-        let cameraOffset = {
-            x: this.ENGINE.CAMERA.x,
-            y: this.ENGINE.CAMERA.y
-        };
         if (this.debug) {
-            let x = cameraOffset.x;
-            let y = cameraOffset.y;
-            let imageOffset = this.getImageOffset(x, y, true);
+            let imageOffset = this.getImageOffset(this.ENGINE.CAMERA.x, this.ENGINE.CAMERA.y, true);
             this.HUD.debugUpdate({
-                imageOffset: `${x}=>${imageOffset.x},${y}=>${imageOffset.y}`
+                imageOffset: `${this.ENGINE.CAMERA.x}=>${imageOffset.x},${this.ENGINE.CAMERA.y}=>${imageOffset.y}`
             });
         }
-        let spriteSheetSize = 64;
-        let x = 0;
-        let y = 0;
+
+        // let x = 0;
+        // let y = 0;
         for (
             let offsetX = -this.ENGINE.gridSize - (this.ENGINE.CAMERA.x % this.ENGINE.gridSize);
             offsetX < this.ENGINE.CAMERA.worldViewWidth;
             offsetX += this.ENGINE.gridSize
         ) {
-            y = 0;
+            // y = 0;
             for (
                 let offsetY = -this.ENGINE.gridSize - (this.ENGINE.CAMERA.y % this.ENGINE.gridSize);
                 offsetY < this.ENGINE.CAMERA.worldViewHeight;
                 offsetY += this.ENGINE.gridSize
             ) {
-                let worldLocX = this.ENGINE.CAMERA.x + offsetX;
-                let worldLocY = this.ENGINE.CAMERA.y + offsetY;
-                let imageOffset = this.getImageOffset(worldLocX, worldLocY);
+                let imageOffset = this.getImageOffset(this.ENGINE.CAMERA.x + offsetX, this.ENGINE.CAMERA.y + offsetY);
                 this.render.save();
                 this.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
                 this.render.translate(offsetX + this.ENGINE.gridSize / 2, offsetY + this.ENGINE.gridSize / 2);
@@ -212,19 +198,19 @@ module.exports = class background {
                 this.render.translate(-(this.ENGINE.gridSize / 2), -(this.ENGINE.gridSize / 2));
                 this.render.drawImage(
                     this.grassSpriteSheet, //image source
-                    imageOffset.x * spriteSheetSize, //cord x to clip source
-                    imageOffset.y * spriteSheetSize, //cord y to clip source
-                    spriteSheetSize,
-                    spriteSheetSize, //width and height of source
+                    imageOffset.x * this.spriteSheetSize, //cord x to clip source
+                    imageOffset.y * this.spriteSheetSize, //cord y to clip source
+                    this.spriteSheetSize,
+                    this.spriteSheetSize, //width and height of source
                     0,
                     0, //cord x and y to paste on canvas
                     this.ENGINE.gridSize,
                     this.ENGINE.gridSize //size of paste (can stretch or reduce image)
                 );
                 this.render.restore();
-                y++;
+                // y++;
             } //height
-            x++;
+            // x++;
         } //width
     } //draw
 }; //background class

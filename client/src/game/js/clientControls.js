@@ -232,16 +232,19 @@ module.exports = class Controls {
     }
 
     translateScreenLocToWorld(x, y) {
-        let offsetX = x - this.ENGINE.width / 2;
-        let offsetY = y - this.ENGINE.height / 2;
-        let worldX = Math.round(this.ENGINE.CAMERA.x + offsetX);
-        let worldY = Math.round(this.ENGINE.CAMERA.y + offsetY);
-        return { x: worldX, y: worldY };
+        // let offsetX = x - this.ENGINE.width;
+        // let offsetY = y - this.ENGINE.height;
+        // let diffInWidth = (this.ENGINE.CAMERA.worldViewWidth - this.ENGINE.width) / 2;
+        // let diffInHeight = (this.ENGINE.CAMERA.worldViewHeight - this.ENGINE.height) / 2;
+        // let worldX = Math.round(this.ENGINE.CAMERA.x - this.ENGINE.width / 2); /// this.ENGINE.CAMERA.zoomLevel
+        // let worldY = Math.round(this.ENGINE.CAMERA.y - this.ENGINE.height / 2);
+
+        return { x: Math.round(x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x), y: Math.round(y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) };
     }
 
     mouseMoved(event) {
         if (!this.mouseLocked) return;
-        this.mouse = { x: this.mouse.x + event.movementX, y: this.mouse.y + event.movementY };
+        this.mouse = { x: Math.round(this.mouse.x + event.movementX / 2), y: Math.round(this.mouse.y + event.movementY / 2) };
         if (this.mouse.x > this.ENGINE.width) this.mouse.x = this.ENGINE.width;
         if (this.mouse.y > this.ENGINE.height) this.mouse.y = this.ENGINE.height;
         if (this.mouse.x < 0) this.mouse.x = 0;

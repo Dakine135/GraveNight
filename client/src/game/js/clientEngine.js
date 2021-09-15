@@ -52,7 +52,7 @@ module.exports = class clientEngine {
         this.frames = 0;
 
         this.isProduction = process.env.NODE_ENV == 'production';
-        this.debug = this.isProduction ? false : false;
+        this.debug = this.isProduction ? false : true;
 
         //performance
         this.startOfDrawPerformance = performance.now();
@@ -246,8 +246,8 @@ module.exports = class clientEngine {
                     WindowSize: this.screenWidth + ', ' + this.screenHeight,
                     // Ping: this.NETWORK.ping,
                     // timeDiffernce: this.NETWORK.timeDiffernce,
-                    objectsToDraw: Object.keys(objectsToDraw).length,
-                    renderDistance: this.renderDistance,
+                    // objectsToDraw: Object.keys(objectsToDraw).length,
+                    // renderDistance: this.renderDistance,
                     CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
                     deltaTime: this.deltaTime,
                     timeBackground:
