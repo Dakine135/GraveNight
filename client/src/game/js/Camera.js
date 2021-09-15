@@ -29,6 +29,7 @@ module.exports = class Camera {
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;
             this.cameraMovedSinceLastUpdate = true;
+            this.engine.BACKGROUND.firstDraw = true;
             this.engine.CONTROLS.updateCameraMoved();
         }
     }
@@ -44,6 +45,7 @@ module.exports = class Camera {
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;
             this.cameraMovedSinceLastUpdate = true;
+            this.engine.BACKGROUND.firstDraw = true;
             this.engine.CONTROLS.updateCameraMoved();
         }
     }
@@ -109,12 +111,12 @@ module.exports = class Camera {
                 return;
             }
             this.cameraMovedSinceLastUpdate = true;
-            let diffX = this.x - this.goalX;
-            let diffY = this.y - this.goalY;
-            let moveX = this.x - diffX * this.speed;
-            let moveY = this.y - diffY * this.speed;
-            if (Math.abs(diffX) <= 5) moveX = this.goalX;
-            if (Math.abs(diffY) <= 5) moveY = this.goalY;
+            //current location - difference * speed
+            //to cover a fraction of the area remaining each update, will slow down as approaches the goal
+            let moveX = this.x - (this.x - this.goalX) * this.speed;
+            let moveY = this.y - (this.y - this.goalY) * this.speed;
+            if (Math.abs(this.x - this.goalX) <= 5) moveX = this.goalX;
+            if (Math.abs(this.y - this.goalY) <= 5) moveY = this.goalY;
             this.moveTo(moveX, moveY);
             this.engine.CONTROLS.updateCameraMoved();
         }
