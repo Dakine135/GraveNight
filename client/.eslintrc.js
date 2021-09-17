@@ -12,6 +12,7 @@ module.exports = {
         'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         'no-unused-vars': 'off',
         'no-undef': 'off',
-        'no-empty': 'off'
+        'no-empty': 'off',
+        'no-constant-condition': 'off'
     }
 };

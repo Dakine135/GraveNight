@@ -157,10 +157,11 @@ module.exports = class background {
     update() {}
 
     draw() {
-        if (!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated || this.ENGINE.CAMERA.zoomLevel <= 0.5) {
+        if (true || !this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated || this.ENGINE.CAMERA.zoomLevel <= 0.5) {
             this.render.save();
             this.render.setTransform(1, 0, 0, 1, 0, 0);
-            this.render.fillStyle = '#3c9f4c';
+            // this.render.fillStyle = '#3c9f4c';
+            this.render.fillStyle = 'lightgrey';
             this.render.fillRect(0, 0, this.canvas.width, this.canvas.height);
             this.render.restore();
             return;

@@ -43,7 +43,7 @@ module.exports = class EnergyNode {
             this.energyPackets[i].travel -= deltaTime;
             if (this.energyPackets[i].travel <= 0) {
                 //TODO dont send, but delete if at max heat
-                this.sendPacketOut();
+                this.sendPacketOut(this.energyPackets[i].fromId);
                 this.energyPackets.splice(i, 1);
                 continue;
             }
@@ -52,7 +52,7 @@ module.exports = class EnergyNode {
         }
     }
 
-    sendPacketOut() {
+    sendPacketOut(previouslyFromId) {
         // console.log('sendPacketOut');
         //generate heat as packets pass through EnergyNode
         this.heat += 500; //TODO re-balance
@@ -63,6 +63,10 @@ module.exports = class EnergyNode {
             let sendTo = this.otherLinkableEntities[this.currentLinkIndex];
             this.currentLinkIndex++;
             if (this.currentLinkIndex >= this.otherLinkableEntities.length) this.currentLinkIndex = 0;
+            if (sendTo.id == previouslyFromId && this.otherLinkableEntities.length > 1) {
+                this.sendPacketOut(previouslyFromId);
+                return;
+            }
             sendTo.receivePacket(this.x, this.y, this.id);
         }
 
@@ -80,8 +84,8 @@ module.exports = class EnergyNode {
         // Start a new drawing state
         ENGINE.render.save();
         let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
         ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
         if (this.debug) {
@@ -95,16 +99,22 @@ module.exports = class EnergyNode {
 
             //get linkable Nodes
             let linkTo = ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
+            let relativeLocation;
             linkTo.forEach((otherNode) => {
-                let relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
+                //TODO check if colliding with other node
+                relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
                 ENGINE.render.beginPath();
                 ENGINE.render.moveTo(0, 0);
                 ENGINE.render.lineTo(relativeLocation.x, relativeLocation.y);
                 ENGINE.render.stroke();
                 ENGINE.render.closePath();
             });
+            //not sure if helpful to speed up GC
+            linkTo = undefined;
+            relativeLocation = undefined;
 
             //show distance to link
+            //TODO turn red or otherwise indicate if un-placeable
             ENGINE.render.beginPath();
             ENGINE.render.strokeStyle = 'blue';
             ENGINE.render.lineWidth = 1;

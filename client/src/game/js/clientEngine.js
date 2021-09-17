@@ -68,9 +68,11 @@ module.exports = class clientEngine {
         this.accumulatedDeltaTime = 0;
         this.timeTakenToUpdate = 0;
 
-        let scale = 80;
-        this.width = 16 * scale;
-        this.height = 9 * scale;
+        // let scale = 80;
+        // this.width = 16 * scale;
+        // this.height = 9 * scale;
+        this.width = 1000;
+        this.height = 1000;
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
@@ -192,14 +194,14 @@ module.exports = class clientEngine {
         //square at 0,0
         let origin = this.CAMERA.translate({ x: 0, y: 0 });
         this.render.save();
-        this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
         this.render.translate(origin.x, origin.y);
+        this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
         // let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
         this.render.strokeStyle = 'black';
         this.render.strokeRect(-10, -10, 20, 20);
         // render.font = "px Arial";
         this.render.textAlign = 'center';
-        this.render.fillText(0 + ',' + 0, 0, 0);
+        this.render.fillText('0,0', 0, 0);
         this.render.restore();
 
         this.STATES.draw(this.deltaTime);
@@ -236,6 +238,7 @@ module.exports = class clientEngine {
 
         //once a second
         if (this.currentTime % this.lastSecond >= 1000) {
+            // console.log('origin =>', origin);
             // console.log(STATES.state);
             // this.NETWORK.updateServerTimeDiffernce();
             this.endOfDrawPerformance = performance.now();

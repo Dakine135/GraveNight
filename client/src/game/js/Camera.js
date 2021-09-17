@@ -79,7 +79,10 @@ module.exports = class Camera {
         // let originY = this.y - this.engine.height / 2;
         // let tx = Math.round(x - originX);
         // let ty = Math.round(y - originY);
-        return { x: Math.round(x + this.engine.width / 2 - this.x), y: Math.round(y + this.engine.height / 2 - this.y) };
+        return {
+            x: Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x),
+            y: Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y)
+        };
     }
 
     rotatePoint({ center = { x: 0, y: 0 }, point = { x: 0, y: 0 }, angle = 0 }) {

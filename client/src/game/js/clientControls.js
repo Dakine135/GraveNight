@@ -239,7 +239,12 @@ module.exports = class Controls {
         // let worldX = Math.round(this.ENGINE.CAMERA.x - this.ENGINE.width / 2); /// this.ENGINE.CAMERA.zoomLevel
         // let worldY = Math.round(this.ENGINE.CAMERA.y - this.ENGINE.height / 2);
 
-        return { x: Math.round(x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x), y: Math.round(y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) };
+        return {
+            // x: Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x),
+            // y: Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y)
+            x: Math.round((x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x) / this.ENGINE.CAMERA.zoomLevel),
+            y: Math.round((y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) / this.ENGINE.CAMERA.zoomLevel)
+        };
     }
 
     mouseMoved(event) {
