@@ -24,7 +24,8 @@ module.exports = class Camera {
             this.currentZoomLevelIndex = 0;
         } else {
             this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
-            // this.moveGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            //TODO move towards mouse when zooming
+            // this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
             this.goToOrigin();
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;
@@ -40,7 +41,7 @@ module.exports = class Camera {
             this.currentZoomLevelIndex = this.zoomLevels.length - 1;
         } else {
             this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
-            // this.moveGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            // this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
             this.goToOrigin();
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;

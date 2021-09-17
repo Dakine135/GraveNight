@@ -129,11 +129,12 @@ module.exports = class background {
         this.spriteGrid[column][row].lock = lock;
     } //setSprite
 
-    resize({ width, height }) {
-        this.ENGINE.width = width;
-        this.ENGINE.height = height;
+    resize() {
+        //TODO still buggy. not resizing
         this.canvas.width = this.ENGINE.width;
         this.canvas.height = this.ENGINE.height;
+        this.firstDraw = true;
+        // this.generateSpriteGrid();
     }
 
     //input world cords and get sprite offset that should be used.
@@ -157,11 +158,11 @@ module.exports = class background {
     update() {}
 
     draw() {
-        if (true || !this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated || this.ENGINE.CAMERA.zoomLevel <= 0.5) {
+        if (!this.worldLoaded || !this.imageLoaded || !this.backgroundGenerated || this.ENGINE.CAMERA.zoomLevel <= 0.5) {
             this.render.save();
             this.render.setTransform(1, 0, 0, 1, 0, 0);
-            // this.render.fillStyle = '#3c9f4c';
-            this.render.fillStyle = 'lightgrey';
+            this.render.fillStyle = '#3c9f4c';
+            // this.render.fillStyle = 'lightgrey';
             this.render.fillRect(0, 0, this.canvas.width, this.canvas.height);
             this.render.restore();
             return;
@@ -193,6 +194,7 @@ module.exports = class background {
             ) {
                 let imageOffset = this.getImageOffset(this.ENGINE.CAMERA.x + offsetX, this.ENGINE.CAMERA.y + offsetY);
                 this.render.save();
+                //TODO background might need some zoom love
                 this.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
                 this.render.translate(offsetX + this.ENGINE.gridSize / 2, offsetY + this.ENGINE.gridSize / 2);
                 this.render.rotate(imageOffset.rotate);

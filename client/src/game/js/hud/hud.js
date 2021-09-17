@@ -51,13 +51,11 @@ module.exports = class HUD {
         this.debugUpdate({ hudDrawMode: this.drawMode });
     } //setDrawMode
 
-    resize({ width, height }) {
-        this.ENGINE.width = width;
-        this.ENGINE.height = height;
+    resize() {
         this.canvas.width = this.ENGINE.width;
         this.canvas.height = this.ENGINE.height;
-        this.width = width;
-        this.height = height;
+        this.width = this.canvas.width;
+        this.height = this.canvas.height;
         this.createButtons();
     }
 

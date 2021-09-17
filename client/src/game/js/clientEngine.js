@@ -68,15 +68,20 @@ module.exports = class clientEngine {
         this.accumulatedDeltaTime = 0;
         this.timeTakenToUpdate = 0;
 
-        // let scale = 80;
-        // this.width = 16 * scale;
-        // this.height = 9 * scale;
-        this.width = 1000;
-        this.height = 1000;
+        this.useRealScreenSize = true;
+
+        this.windowResized();
+        if (this.useRealScreenSize) {
+            this.width = this.screenWidth;
+            this.height = this.screenHeight;
+        } else {
+            let scale = 80;
+            this.width = 16 * scale;
+            this.height = 9 * scale;
+        }
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
-        this.windowResized();
         window.addEventListener('resize', this.windowResized.bind(this));
 
         this.myPlayerId = null;
@@ -138,15 +143,25 @@ module.exports = class clientEngine {
     windowResized() {
         this.screenWidth = window.innerWidth;
         this.screenHeight = window.innerHeight;
+        if (this.useRealScreenSize) {
+            this.width = this.screenWidth;
+            this.height = this.screenHeight;
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+            this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
+        }
         this.scaleX = this.screenWidth / this.width;
         this.scaleY = this.screenHeight / this.height;
-        // this.stage = document.getElementById('stage');
         this.stage.style.transformOrigin = '0 0';
-        // var scaleToFit = Math.min(scaleX, scaleY);
-        // var scaleToCover = Math.max(scaleX, scaleY);
+        let scaleToFit = Math.min(this.scaleX, this.scaleY);
+        // let scaleToCover = Math.max(this.scaleX, this.scaleY);
         // this.stage.style.transform = 'scale(' + scaleToCover + ')';
-        // this.stage.style.transform = 'scale(' + scaleToFit + ')';
-        this.stage.style.transform = 'scale(' + this.scaleX + ',' + this.scaleY + ')';
+        this.stage.style.transform = 'scale(' + scaleToFit + ')';
+        // this.stage.style.transform = 'scale(' + this.scaleX + ',' + this.scaleY + ')';
+
+        //other canvases
+        if (this.HUD.resize) this.HUD.resize();
+        if (this.BACKGROUND.resize) this.BACKGROUND.resize();
     } //window Resized
 
     update() {
