@@ -1,4 +1,5 @@
 const Utilities = require('../shared/Utilities.js');
+const Hitbox = require('../shared/Hitbox.js');
 const EnergyNode = require('./Entities/EnergyNode');
 
 module.exports = class StatesManager {
@@ -7,6 +8,7 @@ module.exports = class StatesManager {
         this.debug = debug;
         this.debugState = debugState;
         this.ENGINE = engine;
+        this.numberOfDrawLayers = 2;
 
         this.currentEntityId = 0;
 
@@ -24,9 +26,11 @@ module.exports = class StatesManager {
     }
 
     draw(deltaTime) {
-        Object.entries(this.drawableEntities).forEach(([id, entity]) => {
-            entity.draw(this.ENGINE);
-        });
+        for (let i = 0; i < this.numberOfDrawLayers; i++) {
+            Object.entries(this.drawableEntities).forEach(([id, entity]) => {
+                if (entity[`draw${i}`]) entity[`draw${i}`](deltaTime);
+            });
+        }
         // let drawingState = this.getIntermediateState(deltaTime);
 
         // if (drawingState == null) return;
@@ -35,12 +39,31 @@ module.exports = class StatesManager {
     getIntermediateState(deltaTime) {} // getIntermediateState
 
     placeEnergyNode({ x = this.ENGINE.CONTROLS.mouseLocationInWorld.x, y = this.ENGINE.CONTROLS.mouseLocationInWorld.y } = {}) {
-        console.log('placeEnergyNode');
-        let newEnergyNode = new EnergyNode({ id: this.currentEntityId, x, y, engine: this.ENGINE });
-        this.updatableEntities[this.currentEntityId] = newEnergyNode;
-        this.drawableEntities[this.currentEntityId] = newEnergyNode;
-        this.energyLinkableEntities[this.currentEntityId] = newEnergyNode;
-        this.currentEntityId++;
+        // console.log('placeEnergyNode');
+        if (this.ENGINE.HUD.ghost != null) {
+            (x = this.ENGINE.HUD.ghost.x), (y = this.ENGINE.HUD.ghost.y);
+        }
+
+        //get other Nodes
+        //hard coded distance node radius at this time is 12
+        //distance can link is 100
+        let nearby = this.getEntitiesInRange('energyLinkableEntities', { x, y }, 50);
+        let canBePlaced = true;
+        let overlapping = false;
+        nearby.forEach((otherNode) => {
+            overlapping = Hitbox.collideCircleCircle({ x, y, r: 12 }, { x: otherNode.x, y: otherNode.y, r: otherNode.radius });
+            if (overlapping) canBePlaced = false;
+        });
+
+        if (canBePlaced) {
+            let newEnergyNode = new EnergyNode({ id: this.currentEntityId, x, y, engine: this.ENGINE });
+            this.updatableEntities[this.currentEntityId] = newEnergyNode;
+            this.drawableEntities[this.currentEntityId] = newEnergyNode;
+            this.energyLinkableEntities[this.currentEntityId] = newEnergyNode;
+            this.currentEntityId++;
+        } else {
+            // console.log('Something is in the way');
+        }
     }
 
     getEntitiesInRange(type, point, distance) {

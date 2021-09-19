@@ -283,3 +283,15 @@ function collidePointRect({ x, y }, { rx, ry, rw, rh }) {
     return false;
 }
 exports.collidePointRect = collidePointRect;
+
+function collideCircleCircle({ x: x1, y: y1, r: r1 }, { x: x2, y: y2, r: r2 }) {
+    if (Utilities.dist({ x: x1, y: y1 }, { x: x2, y: y2 }) <= r1 + r2) return true;
+    return false;
+}
+exports.collideCircleCircle = collideCircleCircle;
+
+function collidePointCircle({ x: x1, y: y1 }, { x: x2, y: y2, r: r2 }) {
+    if (Utilities.dist({ x: x1, y: y1 }, { x: x2, y: y2 }) <= r2) return true;
+    return false;
+}
+exports.collidePointCircle = collidePointCircle;

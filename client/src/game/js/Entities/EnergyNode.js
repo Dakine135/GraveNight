@@ -1,4 +1,5 @@
 const Utilities = require('../../shared/Utilities.js');
+const Hitbox = require('../../shared/Hitbox.js');
 module.exports = class EnergyNode {
     constructor({ id = null, x = 0, y = 0, debug = false, engine = null } = {}) {
         this.ENGINE = engine;
@@ -17,8 +18,18 @@ module.exports = class EnergyNode {
         this.currentEndColor = { r: 255, g: 255, b: 0, a: 1 };
         this.hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
         this.hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
-        this.energyPackets = [{ travel: this.travelMax, x: this.distanceCanLink, y: 0, startX: this.distanceCanLink, startY: 0, fromId: null }];
+        this.energyPackets = [
+            {
+                travel: this.travelMax,
+                x: this.distanceCanLink,
+                y: 0,
+                startX: this.distanceCanLink,
+                startY: 0,
+                fromId: null
+            }
+        ];
         this.selected = false;
+        this.canBePlaced = true;
 
         this.otherLinkableEntities = this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
         this.currentLinkIndex = 0;
@@ -33,6 +44,7 @@ module.exports = class EnergyNode {
 
     update(deltaTime) {
         //update heat and color
+        this.selected = false;
         this.heat -= deltaTime;
         if (this.heat < 0) this.heat = 0;
         if (this.heat > this.maxHeat) this.heat = this.maxHeat;
@@ -80,92 +92,129 @@ module.exports = class EnergyNode {
         this.energyPackets.push(newPacket);
     }
 
-    draw(ENGINE, ghost = false) {
+    draw0(deltaTime) {
         // Start a new drawing state
-        ENGINE.render.save();
-        let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
-        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
+        this.ENGINE.render.save();
+        let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
+        this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+        this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
         if (this.debug) {
-            ENGINE.render.fillStyle = 'black';
-            ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), this.radius + 2, this.radius + 2);
+            this.ENGINE.render.fillStyle = 'black';
+            this.ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), this.radius + 2, this.radius + 2);
         }
 
-        if (ghost) {
-            ENGINE.render.strokeStyle = 'blue';
-            ENGINE.render.lineWidth = 1;
+        //show distance to link
+        if (this.selected) {
+            this.ENGINE.render.beginPath();
+            this.ENGINE.render.strokeStyle = 'blue';
+            this.ENGINE.render.lineWidth = 1;
+            this.ENGINE.render.arc(0, 0, this.distanceCanLink, 0, 2 * Math.PI);
+            this.ENGINE.render.stroke();
+            this.ENGINE.render.closePath();
+            this.ENGINE.render.beginPath();
+            this.ENGINE.render.strokeStyle = 'orange';
+            this.ENGINE.render.lineWidth = 1;
+            this.ENGINE.render.arc(0, 0, this.distanceCanLink + this.ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
+            this.ENGINE.render.stroke();
+            this.ENGINE.render.closePath();
+        }
 
-            //get linkable Nodes
-            let linkTo = ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
-            let relativeLocation;
-            linkTo.forEach((otherNode) => {
-                //TODO check if colliding with other node
-                relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
-                ENGINE.render.beginPath();
-                ENGINE.render.moveTo(0, 0);
-                ENGINE.render.lineTo(relativeLocation.x, relativeLocation.y);
-                ENGINE.render.stroke();
-                ENGINE.render.closePath();
-            });
-            //not sure if helpful to speed up GC
-            linkTo = undefined;
-            relativeLocation = undefined;
-
-            //show distance to link
-            //TODO turn red or otherwise indicate if un-placeable
-            ENGINE.render.beginPath();
-            ENGINE.render.strokeStyle = 'blue';
-            ENGINE.render.lineWidth = 1;
-            ENGINE.render.arc(0, 0, this.distanceCanLink, 0, 2 * Math.PI);
-            ENGINE.render.stroke();
-            ENGINE.render.closePath();
-            //main body
-            ENGINE.render.beginPath();
-            let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-            gradient.addColorStop(
-                0,
-                `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`
-            );
-            gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`);
-            ENGINE.render.fillStyle = gradient;
-            ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-            ENGINE.render.fill();
-            ENGINE.render.closePath();
+        //draw main body
+        this.ENGINE.render.beginPath();
+        // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
+        if (this.ENGINE.CAMERA.zoomLevel <= 0.5) {
+            this.ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
+            this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
+            this.ENGINE.render.fill();
+            this.ENGINE.render.closePath();
         } else {
-            //draw main body
-            ENGINE.render.beginPath();
-            // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
-            if (this.ENGINE.CAMERA.zoomLevel <= 0.5) {
-                ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
-                ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-                ENGINE.render.fill();
-                ENGINE.render.closePath();
-            } else {
-                let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-                gradient.addColorStop(
-                    0,
-                    `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
-                );
-                gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`);
-                ENGINE.render.fillStyle = gradient;
-                //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
-                ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-                ENGINE.render.fill();
-                ENGINE.render.closePath();
-
-                //draw energyPackets
-                this.energyPackets.forEach((packet) => {
-                    ENGINE.render.beginPath();
-                    ENGINE.render.fillStyle = 'white';
-                    ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
-                    ENGINE.render.fill();
-                    ENGINE.render.closePath();
-                });
-            }
+            let gradient = this.ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+            gradient.addColorStop(0, `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`);
+            gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`);
+            this.ENGINE.render.fillStyle = gradient;
+            //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
+            this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
+            this.ENGINE.render.fill();
+            this.ENGINE.render.closePath();
         }
 
-        ENGINE.render.restore(); // Restore original state
+        this.ENGINE.render.restore(); // Restore original state
+    } //end Draw
+
+    draw1(deltaTime) {
+        //draw energyPackets
+        if (this.ENGINE.CAMERA.zoomLevel >= 0.5) {
+            this.ENGINE.render.save();
+            let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
+            this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+            this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+            this.energyPackets.forEach((packet) => {
+                this.ENGINE.render.beginPath();
+                this.ENGINE.render.fillStyle = 'white';
+                this.ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
+                this.ENGINE.render.fill();
+                this.ENGINE.render.closePath();
+            });
+            this.ENGINE.render.restore(); // Restore original state
+        }
     }
+
+    drawGhost() {
+        // Start a new drawing state
+        this.ENGINE.render.save();
+        let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
+        this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+        this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+
+        //EnergyNode location for debugging
+        if (this.debug) {
+            this.ENGINE.render.fillStyle = 'black';
+            this.ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), this.radius + 2, this.radius + 2);
+        }
+
+        this.ENGINE.render.strokeStyle = 'blue';
+        if (!this.canBePlaced) this.ENGINE.render.strokeStyle = 'red';
+        this.ENGINE.render.lineWidth = 1;
+
+        //get linkable Nodes
+        let linkTo = this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
+        let relativeLocation;
+        this.canBePlaced = true;
+        let overlapping = false;
+        linkTo.forEach((otherNode) => {
+            overlapping = Hitbox.collideCircleCircle({ x: this.x, y: this.y, r: this.radius }, { x: otherNode.x, y: otherNode.y, r: otherNode.radius });
+            if (overlapping) this.canBePlaced = false;
+            relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
+            this.ENGINE.render.beginPath();
+            this.ENGINE.render.moveTo(0, 0);
+            this.ENGINE.render.lineTo(relativeLocation.x, relativeLocation.y);
+            this.ENGINE.render.stroke();
+            this.ENGINE.render.closePath();
+        });
+        //not sure if helpful to speed up GC
+        linkTo = undefined;
+        relativeLocation = undefined;
+
+        //show distance to link
+        this.ENGINE.render.beginPath();
+        this.ENGINE.render.strokeStyle = 'blue';
+        if (!this.canBePlaced) this.ENGINE.render.strokeStyle = 'red';
+        this.ENGINE.render.lineWidth = 1;
+        this.ENGINE.render.arc(0, 0, this.distanceCanLink, 0, 2 * Math.PI);
+        this.ENGINE.render.stroke();
+        this.ENGINE.render.closePath();
+        //main body
+        this.ENGINE.render.beginPath();
+        let gradient = this.ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+        gradient.addColorStop(0, `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`);
+        gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`);
+        this.ENGINE.render.fillStyle = gradient;
+        this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
+        this.ENGINE.render.fill();
+        this.ENGINE.render.closePath();
+
+        this.ENGINE.render.restore(); // Restore original state
+    } //draw ghost
 }; //end EnergyNode Class
