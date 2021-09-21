@@ -4,7 +4,10 @@
             <h2>Change Log</h2>
         </div>
 
-        <div class="row">
+        Grave: Meriting serious consideration. Likely to produce great harm or danger. Significantly Serious. Night: The time from dusk to dawn when no sunlight
+        is visible. The quality or state of being dark.
+
+        <!-- <div class="row">
             <div class="leftcolumn">
                 <div class="card">
                     <h2>TITLE HEADING</h2>
@@ -42,7 +45,7 @@
 
         <div class="footer">
             <h2>Footer</h2>
-        </div>
+        </div> -->
     </div>
 </template>
 <script>
@@ -61,7 +64,7 @@ body {
     padding: 30px;
     font-size: 40px;
     text-align: center;
-    background: white;
+    background: black;
 }
 
 /* Create two unequal columns that floats next to each other */
