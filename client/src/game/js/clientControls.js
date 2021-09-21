@@ -65,6 +65,7 @@ module.exports = class Controls {
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
         this.ENGINE.HUD.canvas.onclick = () => {
             // console.log('clicked hud canvas');
+            this.leftClickHandled = true;
             this.ENGINE.HUD.canvas.requestPointerLock();
             this.ENGINE.HUD.canvas.onclick = null;
         };
@@ -121,7 +122,7 @@ module.exports = class Controls {
             case 40: //arrow down
                 break;
             case 81: //Q
-                this.ENGINE.HUD.setDrawMode('');
+                this.ENGINE.HUD.setDrawMode();
                 this.setLeftClickAction();
                 break;
             case 27: //escape key
@@ -261,13 +262,17 @@ module.exports = class Controls {
         if (document.pointerLockElement === this.ENGINE.HUD.canvas || document.mozPointerLockElement === this.ENGINE.HUD.canvas) {
             // console.log('The pointer lock status is now locked');
             document.addEventListener('mousemove', this.mouseMoved.bind(this), false);
+            this.mouse = { x: Math.round(this.ENGINE.HUD.width / 2), y: Math.round(this.ENGINE.HUD.height / 2) };
             this.mouseLocked = true;
         } else {
             // console.log('The pointer lock status is now unlocked');
             document.removeEventListener('mousemove', this.mouseMoved.bind(this), false);
             this.mouseLocked = false;
+            this.setLeftClickAction();
+            this.ENGINE.HUD.setDrawMode();
             this.ENGINE.HUD.canvas.onclick = () => {
                 // console.log('clicked hud canvas');
+                this.leftClickHandled = true;
                 this.ENGINE.HUD.canvas.requestPointerLock();
                 this.ENGINE.HUD.canvas.onclick = null;
             };

@@ -181,6 +181,9 @@ module.exports = class background {
 
         // let x = 0;
         // let y = 0;
+        // let offsetX;
+        // let offsetY;ssssss
+        // let imageOffset;
         for (
             let offsetX = -this.ENGINE.gridSize - (this.ENGINE.CAMERA.x % this.ENGINE.gridSize);
             offsetX < this.ENGINE.CAMERA.worldViewWidth;
