@@ -1,8 +1,11 @@
 import Vue from 'vue';
 import App from './App.vue';
-// import "./registerServiceWorker";
+import './registerServiceWorker';
 import router from './router';
 import store from './store';
+
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
 
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
@@ -22,6 +25,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const analytics = getAnalytics(firebaseApp);
 
 Vue.config.productionTip = false;
+Vue.prototype.logEvent = logEvent;
+
+Vue.use(ElementUI);
 
 new Vue({
     router,
