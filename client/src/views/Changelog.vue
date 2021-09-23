@@ -3,119 +3,180 @@
         <div class="header">
             <h2>Change Log</h2>
         </div>
+        <el-divider></el-divider>
 
-        Grave: Meriting serious consideration. Likely to produce great harm or danger. Significantly Serious. Night: The time from dusk to dawn when no sunlight
-        is visible. The quality or state of being dark.
+        <p>Grave: Meriting serious consideration. Likely to produce great harm or danger. Significantly Serious.</p>
+        <p>Night: The time from dusk to dawn when no sunlight is visible. The quality or state of being dark.</p>
 
-        <!-- <div class="row">
-            <div class="leftcolumn">
-                <div class="card">
-                    <h2>TITLE HEADING</h2>
-                    <h5>Title description, Dec 7, 2017</h5>
-                    <div class="fakeimg" style="height: 200px">Image</div>
-                    <p>Some text..</p>
-                </div>
-                <div class="card">
-                    <h2>TITLE HEADING</h2>
-                    <h5>Title description, Sep 2, 2017</h5>
-                    <div class="fakeimg" style="height: 200px">Image</div>
-                    <p>Some text..</p>
-                </div>
-            </div>
-            <div class="rightcolumn">
-                <div class="card">
-                    <h2>About Me</h2>
-                    <div class="fakeimg" style="height: 100px">Image</div>
-                    <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
-                </div>
-                <div class="card">
-                    <h3>Popular Post</h3>
-                    <div class="fakeimg">Image</div>
-                    <br />
-                    <div class="fakeimg">Image</div>
-                    <br />
-                    <div class="fakeimg">Image</div>
-                </div>
-                <div class="card">
-                    <h3>Follow Me</h3>
-                    <p>Some text..</p>
-                </div>
-            </div>
+        <el-divider></el-divider>
+
+        <div class="changelogDiv">
+            <el-card v-for="(commit, index) in commits" :key="index" shadow="never" class="changeLogCard">
+                <ul>
+                    <!-- <li>Author:{{ commit.commiter.name }}</li> -->
+                    <li>{{ DateTime.fromISO(new Date(commit.commiter.date).toISOString()).toFormat('ff') }}</li>
+                    <li>{{ commit.subject }}</li>
+                    <!-- <li>Sanitized:{{ commit.sanitized_subject_line }}</li> -->
+                    <!-- <li>Body:{{ commit.body }}</li>
+                    <li>Notes{{ commit.commit_notes }}</li> -->
+                </ul>
+            </el-card>
         </div>
-
-        <div class="footer">
-            <h2>Footer</h2>
-        </div> -->
     </div>
 </template>
 <script>
-export default {};
+import { DateTime } from 'luxon';
+
+//git log --pretty=format:'{%n "subject": "%s",%n  "sanitized_subject_line": "%f",%n  "body": "%b",%n  "commit_notes": "%N",%n  "author": {%n    "name": "%aN",%n  "date": "%aD"%n  },%n  "commiter": {%n  "name": "%cN",%n  "date": "%cD"%n  }%n},' >> output.json
+
+export default {
+    data() {
+        return {
+            DateTime: DateTime,
+            commits: [
+                {
+                    subject: 'Finished Logo, added changelog git commit logs, social logos',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Wed, 22 Sep 2021 17:13:01 -0400'
+                    }
+                },
+                {
+                    subject: 'workin on integrating logo into site',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Wed, 22 Sep 2021 17:13:01 -0400'
+                    }
+                },
+                {
+                    subject: 'some logos, fonts and links added',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Tue, 21 Sep 2021 17:06:19 -0400'
+                    }
+                },
+                {
+                    subject:
+                        'snapping is working pretty well. Would like autoplace when holding mouse and moving out of snap area, but might be tricky. need rework for states to be able to save/restore, and interpolate frames. in the future also for sending to multiplayer clients',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Sat, 18 Sep 2021 23:50:26 -0400'
+                    }
+                },
+                {
+                    subject: 'maybe more work on background',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Fri, 17 Sep 2021 17:11:01 -0400'
+                    }
+                },
+                {
+                    subject: 'YUUUUUSS, zooming seems to be working so far',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Fri, 17 Sep 2021 16:40:02 -0400'
+                    }
+                },
+                {
+                    subject: 'fixed issue with background not rerendering on zoom',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Wed, 15 Sep 2021 16:54:36 -0400'
+                    }
+                },
+                {
+                    subject: 'still working on scaling/zooming, translate functions need work. cleaning up gargage collector issues on the way',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Tue, 14 Sep 2021 23:48:46 -0400'
+                    }
+                },
+                {
+                    subject: 'cursor lock',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Tue, 14 Sep 2021 17:05:39 -0400'
+                    }
+                },
+                {
+                    subject: 'setup prod test to remove debugs',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Mon, 13 Sep 2021 22:46:47 -0400'
+                    }
+                },
+                {
+                    subject: 'working on zoom, especialy camera movement',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Mon, 13 Sep 2021 22:38:50 -0400'
+                    }
+                },
+                {
+                    subject: 'packets not move between energy nodes. working on zooming',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Mon, 13 Sep 2021 17:02:40 -0400'
+                    }
+                },
+
+                {
+                    subject: 'added keyboard shortcut for buttons, lines for links when ghost constructing, working on energy packets',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Sun, 12 Sep 2021 22:30:40 -0400'
+                    }
+                },
+                {
+                    subject: 'hud cursor mode, new statemanager, energynode entity type',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Sat, 11 Sep 2021 16:05:39 -0400'
+                    }
+                },
+
+                {
+                    subject: 'added buttons with callback events',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Mon, 6 Sep 2021 22:39:23 -0400'
+                    }
+                },
+                {
+                    subject: 'making all client, wrapping in vue',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Mon, 30 Aug 2021 08:19:18 -0400'
+                    }
+                },
+                {
+                    subject: 'completely rework gravenight, differnt game direction, add vue to client',
+                    commiter: {
+                        name: 'welbordn',
+                        date: 'Sun, 22 Aug 2021 22:00:11 -0400'
+                    }
+                }
+            ]
+        };
+    },
+    components: {},
+    methods: {},
+    watch: {},
+    created() {},
+    mounted() {}
+};
 </script>
 
 <style scoped>
-body {
-    font-family: Arial;
-    padding: 20px;
-    background: #f1f1f1;
-}
-
-/* Header/Blog Title */
-.header {
-    padding: 30px;
-    font-size: 40px;
+.changelogDiv {
+    display: inline;
     text-align: center;
-    background: black;
 }
-
-/* Create two unequal columns that floats next to each other */
-/* Left column */
-.leftcolumn {
-    float: left;
-    width: 75%;
-}
-
-/* Right column */
-.rightcolumn {
-    float: left;
-    width: 25%;
-    padding-left: 20px;
-}
-
-/* Fake image */
-.fakeimg {
-    background-color: #aaa;
-    width: 100%;
-    padding: 20px;
-}
-
-/* Add a card effect for articles */
-.card {
-    background-color: white;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-/* Clear floats after the columns */
-.row:after {
-    content: '';
-    display: table;
-    clear: both;
-}
-
-/* Footer */
-.footer {
-    padding: 20px;
-    text-align: center;
-    background: #ddd;
-    margin-top: 20px;
-}
-
-/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 800px) {
-    .leftcolumn,
-    .rightcolumn {
-        width: 100%;
-        padding: 0;
-    }
+.changeLogCard {
+    width: 50%;
+    background-color: black !important;
+    box-shadow: 0 2px 12px 0 rgb(255, 255, 255) !important;
+    color: white;
+    margin: 0 auto;
 }
 </style>

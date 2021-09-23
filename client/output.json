@@ -1,0 +1,1862 @@
+{
+ "subject": "merge",
+  "sanitized_subject_line": "merge",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 22 Sep 2021 21:29:12 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 22 Sep 2021 21:29:12 -0400"
+  }
+},
+{
+ "subject": "git ignore update",
+  "sanitized_subject_line": "git-ignore-update",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 22 Sep 2021 21:28:17 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 22 Sep 2021 21:28:17 -0400"
+  }
+},
+{
+ "subject": "workin on integrating logo into site",
+  "sanitized_subject_line": "workin-on-integrating-logo-into-site",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Wed, 22 Sep 2021 17:13:01 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Wed, 22 Sep 2021 17:13:01 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Tue, 21 Sep 2021 17:06:55 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Tue, 21 Sep 2021 17:06:55 -0400"
+  }
+},
+{
+ "subject": "some logos, fonts and links added",
+  "sanitized_subject_line": "some-logos-fonts-and-links-added",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Tue, 21 Sep 2021 17:06:19 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Tue, 21 Sep 2021 17:06:19 -0400"
+  }
+},
+{
+ "subject": "snapping is working pretty well. Would like autoplace when holding mouse and moving out of snap area, but might be tricky. need rework for states to be able to save/restore, and interpolate frames. in the future also for sending to multiplayer clients",
+  "sanitized_subject_line": "snapping-is-working-pretty-well.-Would-like-autoplace-when-holding-mouse-and-moving-out-of-snap-area-but-might-be-tricky.-need-rework-for-states-to-be-able-to-save-restore-and-interpolate-frames.-in-the-future-also-for-sending-to-multiplayer-clients",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sat, 18 Sep 2021 23:50:26 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sat, 18 Sep 2021 23:50:26 -0400"
+  }
+},
+{
+ "subject": "maybe more work on background",
+  "sanitized_subject_line": "maybe-more-work-on-background",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Fri, 17 Sep 2021 17:11:01 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Fri, 17 Sep 2021 17:11:01 -0400"
+  }
+},
+{
+ "subject": "YUUUUUSS, zooming seems to be working so far",
+  "sanitized_subject_line": "YUUUUUSS-zooming-seems-to-be-working-so-far",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Fri, 17 Sep 2021 16:40:02 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Fri, 17 Sep 2021 16:40:02 -0400"
+  }
+},
+{
+ "subject": "fixed issue with background not rerendering on zoom",
+  "sanitized_subject_line": "fixed-issue-with-background-not-rerendering-on-zoom",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Wed, 15 Sep 2021 16:54:36 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Wed, 15 Sep 2021 16:54:36 -0400"
+  }
+},
+{
+ "subject": "still working on scaling/zooming, translate functions need work. cleaning up gargage collector issues on the way",
+  "sanitized_subject_line": "still-working-on-scaling-zooming-translate-functions-need-work.-cleaning-up-gargage-collector-issues-on-the-way",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Tue, 14 Sep 2021 23:48:46 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Tue, 14 Sep 2021 23:48:46 -0400"
+  }
+},
+{
+ "subject": "cursor lock",
+  "sanitized_subject_line": "cursor-lock",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Tue, 14 Sep 2021 17:05:39 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Tue, 14 Sep 2021 17:05:39 -0400"
+  }
+},
+{
+ "subject": "setup prod test to remove debugs",
+  "sanitized_subject_line": "setup-prod-test-to-remove-debugs",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 13 Sep 2021 22:46:47 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 13 Sep 2021 22:46:47 -0400"
+  }
+},
+{
+ "subject": "working on zoom, especialy camera movement",
+  "sanitized_subject_line": "working-on-zoom-especialy-camera-movement",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 13 Sep 2021 22:38:50 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 13 Sep 2021 22:38:50 -0400"
+  }
+},
+{
+ "subject": "packets not move between energy nodes. working on zooming",
+  "sanitized_subject_line": "packets-not-move-between-energy-nodes.-working-on-zooming",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Mon, 13 Sep 2021 17:02:40 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Mon, 13 Sep 2021 17:02:40 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Mon, 13 Sep 2021 08:14:36 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Mon, 13 Sep 2021 08:14:36 -0400"
+  }
+},
+{
+ "subject": "added keyboard shortcut for buttons, lines for links when ghost constructing, working on energy packets",
+  "sanitized_subject_line": "added-keyboard-shortcut-for-buttons-lines-for-links-when-ghost-constructing-working-on-energy-packets",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sun, 12 Sep 2021 22:30:40 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sun, 12 Sep 2021 22:30:40 -0400"
+  }
+},
+{
+ "subject": "hud cursor mode, new statemanager, energynode entity type",
+  "sanitized_subject_line": "hud-cursor-mode-new-statemanager-energynode-entity-type",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sat, 11 Sep 2021 16:05:39 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sat, 11 Sep 2021 16:05:39 -0400"
+  }
+},
+{
+ "subject": "remove package-lock",
+  "sanitized_subject_line": "remove-package-lock",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Tue, 7 Sep 2021 13:30:37 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Tue, 7 Sep 2021 13:30:37 -0400"
+  }
+},
+{
+ "subject": "remove package-lock",
+  "sanitized_subject_line": "remove-package-lock",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "d.welborn",
+  "date": "Tue, 7 Sep 2021 13:18:39 -0400"
+  },
+  "commiter": {
+  "name": "d.welborn",
+  "date": "Tue, 7 Sep 2021 13:18:39 -0400"
+  }
+},
+{
+ "subject": "added buttons with callback events",
+  "sanitized_subject_line": "added-buttons-with-callback-events",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 6 Sep 2021 22:39:23 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 6 Sep 2021 22:39:23 -0400"
+  }
+},
+{
+ "subject": "making all clinet, wrapping in vue",
+  "sanitized_subject_line": "making-all-clinet-wrapping-in-vue",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 30 Aug 2021 08:19:18 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 30 Aug 2021 08:19:18 -0400"
+  }
+},
+{
+ "subject": "completely rework gravenight, differnt game direction, add vue to client",
+  "sanitized_subject_line": "completely-rework-gravenight-differnt-game-direction-add-vue-to-client",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sun, 22 Aug 2021 22:00:11 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sun, 22 Aug 2021 22:00:11 -0400"
+  }
+},
+{
+ "subject": "error correction needs some smoothing, but not to bad so far",
+  "sanitized_subject_line": "error-correction-needs-some-smoothing-but-not-to-bad-so-far",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 9 Oct 2019 14:20:35 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 9 Oct 2019 14:20:35 -0400"
+  }
+},
+{
+ "subject": "working on client error correction",
+  "sanitized_subject_line": "working-on-client-error-correction",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 7 Oct 2019 08:26:00 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 7 Oct 2019 08:26:00 -0400"
+  }
+},
+{
+ "subject": "finished refactor, now finish cleint sim corrects you lazy punk",
+  "sanitized_subject_line": "finished-refactor-now-finish-cleint-sim-corrects-you-lazy-punk",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Thu, 3 Oct 2019 21:11:12 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Thu, 3 Oct 2019 21:11:12 -0400"
+  }
+},
+{
+ "subject": "refactored code into a client game engine class",
+  "sanitized_subject_line": "refactored-code-into-a-client-game-engine-class",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 30 Sep 2019 17:26:23 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 30 Sep 2019 17:26:23 -0400"
+  }
+},
+{
+ "subject": "working on stuff",
+  "sanitized_subject_line": "working-on-stuff",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 30 Sep 2019 08:16:08 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 30 Sep 2019 08:16:08 -0400"
+  }
+},
+{
+ "subject": "Merge remote-tracking branch 'origin/leveleditor'",
+  "sanitized_subject_line": "Merge-remote-tracking-branch-origin-leveleditor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sun, 29 Sep 2019 10:05:21 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sun, 29 Sep 2019 10:05:21 -0400"
+  }
+},
+{
+ "subject": "made player smaller and scalable, progress on client simulation, clock is close, need correction and interpolation",
+  "sanitized_subject_line": "made-player-smaller-and-scalable-progress-on-client-simulation-clock-is-close-need-correction-and-interpolation",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 27 Sep 2019 16:15:56 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 27 Sep 2019 16:15:56 -0400"
+  }
+},
+{
+ "subject": "make game Size static and then scaled to screen size. need to rework movement to calculate more consitantly",
+  "sanitized_subject_line": "make-game-Size-static-and-then-scaled-to-screen-size.-need-to-rework-movement-to-calculate-more-consitantly",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 26 Sep 2019 17:05:06 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 26 Sep 2019 17:05:06 -0400"
+  }
+},
+{
+ "subject": "added buttons",
+  "sanitized_subject_line": "added-buttons",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Graham Shroyer",
+  "date": "Wed, 25 Sep 2019 13:04:10 -0400"
+  },
+  "commiter": {
+  "name": "Graham Shroyer",
+  "date": "Wed, 25 Sep 2019 13:04:10 -0400"
+  }
+},
+{
+ "subject": "added bleed to lighting edges",
+  "sanitized_subject_line": "added-bleed-to-lighting-edges",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 24 Sep 2019 17:08:34 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 24 Sep 2019 17:08:34 -0400"
+  }
+},
+{
+ "subject": "working to make fancier sprite background",
+  "sanitized_subject_line": "working-to-make-fancier-sprite-background",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 24 Sep 2019 13:07:27 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 24 Sep 2019 13:07:27 -0400"
+  }
+},
+{
+ "subject": "sprite sheet renders correctly, need fancy generator for it",
+  "sanitized_subject_line": "sprite-sheet-renders-correctly-need-fancy-generator-for-it",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 23 Sep 2019 12:43:15 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 23 Sep 2019 12:43:15 -0400"
+  }
+},
+{
+ "subject": "Merge remote-tracking branch 'origin/leveleditor'",
+  "sanitized_subject_line": "Merge-remote-tracking-branch-origin-leveleditor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 23 Sep 2019 08:48:04 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 23 Sep 2019 08:48:04 -0400"
+  }
+},
+{
+ "subject": "time to work on sprites backhround",
+  "sanitized_subject_line": "time-to-work-on-sprites-backhround",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 23 Sep 2019 01:20:24 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 23 Sep 2019 01:20:24 -0400"
+  }
+},
+{
+ "subject": "added line of sight. need to fix cycle collection issues",
+  "sanitized_subject_line": "added-line-of-sight.-need-to-fix-cycle-collection-issues",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 19 Sep 2019 16:48:02 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 19 Sep 2019 16:48:02 -0400"
+  }
+},
+{
+ "subject": "fixed lighting for multiple players, change brightness on focus",
+  "sanitized_subject_line": "fixed-lighting-for-multiple-players-change-brightness-on-focus",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 19 Sep 2019 15:12:08 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 19 Sep 2019 15:12:08 -0400"
+  }
+},
+{
+ "subject": "fix multiple player lights overlapping",
+  "sanitized_subject_line": "fix-multiple-player-lights-overlapping",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Wed, 18 Sep 2019 22:34:40 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Wed, 18 Sep 2019 22:34:40 -0400"
+  }
+},
+{
+ "subject": "need a canvas instance per player for lighting",
+  "sanitized_subject_line": "need-a-canvas-instance-per-player-for-lighting",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 18 Sep 2019 17:28:33 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 18 Sep 2019 17:28:33 -0400"
+  }
+},
+{
+ "subject": "fixed issue with cycle collection taking multiple seconds to finish. cuased by interpolation code cloneing every frame",
+  "sanitized_subject_line": "fixed-issue-with-cycle-collection-taking-multiple-seconds-to-finish.-cuased-by-interpolation-code-cloneing-every-frame",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 18 Sep 2019 17:21:20 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 18 Sep 2019 17:21:20 -0400"
+  }
+},
+{
+ "subject": "cant figure out why border is breaking",
+  "sanitized_subject_line": "cant-figure-out-why-border-is-breaking",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Graham Shroyer",
+  "date": "Fri, 30 Aug 2019 15:00:25 -0400"
+  },
+  "commiter": {
+  "name": "Graham Shroyer",
+  "date": "Fri, 30 Aug 2019 15:00:25 -0400"
+  }
+},
+{
+ "subject": "working on level editor",
+  "sanitized_subject_line": "working-on-level-editor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Graham Shroyer",
+  "date": "Mon, 26 Aug 2019 14:24:41 -0400"
+  },
+  "commiter": {
+  "name": "Graham Shroyer",
+  "date": "Mon, 26 Aug 2019 14:24:41 -0400"
+  }
+},
+{
+ "subject": "sprites still needs work, need client simulation",
+  "sanitized_subject_line": "sprites-still-needs-work-need-client-simulation",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 22 Aug 2019 17:09:01 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 22 Aug 2019 17:09:01 -0400"
+  }
+},
+{
+ "subject": "fixed resize, fixed control issue",
+  "sanitized_subject_line": "fixed-resize-fixed-control-issue",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 21 Aug 2019 19:46:24 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 21 Aug 2019 19:46:24 -0400"
+  }
+},
+{
+ "subject": "Merge remote-tracking branch 'origin/leveleditor'",
+  "sanitized_subject_line": "Merge-remote-tracking-branch-origin-leveleditor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 21 Aug 2019 18:47:40 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 21 Aug 2019 18:47:40 -0400"
+  }
+},
+{
+ "subject": "can focus flashlight. remved p5, but movement bug",
+  "sanitized_subject_line": "can-focus-flashlight.-remved-p5-but-movement-bug",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 21 Aug 2019 17:13:34 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 21 Aug 2019 17:13:34 -0400"
+  }
+},
+{
+ "subject": "added zoom, boundaries, some optimization",
+  "sanitized_subject_line": "added-zoom-boundaries-some-optimization",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Wed, 21 Aug 2019 16:10:48 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Wed, 21 Aug 2019 16:10:48 -0400"
+  }
+},
+{
+ "subject": "need sprite tilemap",
+  "sanitized_subject_line": "need-sprite-tilemap",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 17:12:58 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 17:12:58 -0400"
+  }
+},
+{
+ "subject": "Merge remote-tracking branch 'origin/leveleditor'",
+  "sanitized_subject_line": "Merge-remote-tracking-branch-origin-leveleditor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 14:06:59 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 14:06:59 -0400"
+  }
+},
+{
+ "subject": "time to work on something else",
+  "sanitized_subject_line": "time-to-work-on-something-else",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 14:03:01 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 20 Aug 2019 14:03:01 -0400"
+  }
+},
+{
+ "subject": "Edited level editor, can now save as png",
+  "sanitized_subject_line": "Edited-level-editor-can-now-save-as-png",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Tue, 20 Aug 2019 13:52:26 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Tue, 20 Aug 2019 13:52:26 -0400"
+  }
+},
+{
+ "subject": "path only recalculated when light collision is recalculated instead of every frame",
+  "sanitized_subject_line": "path-only-recalculated-when-light-collision-is-recalculated-instead-of-every-frame",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 20 Aug 2019 11:37:17 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 20 Aug 2019 11:37:17 -0400"
+  }
+},
+{
+ "subject": "didnt do much",
+  "sanitized_subject_line": "didnt-do-much",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 19 Aug 2019 00:18:19 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 19 Aug 2019 00:18:19 -0400"
+  }
+},
+{
+ "subject": "need to calculate flashlight line of sight for each player",
+  "sanitized_subject_line": "need-to-calculate-flashlight-line-of-sight-for-each-player",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 16 Aug 2019 13:47:40 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 16 Aug 2019 13:47:40 -0400"
+  }
+},
+{
+ "subject": "worker good progress",
+  "sanitized_subject_line": "worker-good-progress",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 15 Aug 2019 17:02:06 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 15 Aug 2019 17:02:06 -0400"
+  }
+},
+{
+ "subject": "make the worker line of sight return points in world, not on screen, then translate in main thread",
+  "sanitized_subject_line": "make-the-worker-line-of-sight-return-points-in-world-not-on-screen-then-translate-in-main-thread",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 14 Aug 2019 23:37:06 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 14 Aug 2019 23:37:06 -0400"
+  }
+},
+{
+ "subject": "working on web workers",
+  "sanitized_subject_line": "working-on-web-workers",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 14 Aug 2019 17:09:31 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 14 Aug 2019 17:09:31 -0400"
+  }
+},
+{
+ "subject": "need more optimisation",
+  "sanitized_subject_line": "need-more-optimisation",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 12 Aug 2019 17:03:05 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 12 Aug 2019 17:03:05 -0400"
+  }
+},
+{
+ "subject": "fixed bug, next step is line of sight restrictions besides your light",
+  "sanitized_subject_line": "fixed-bug-next-step-is-line-of-sight-restrictions-besides-your-light",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sun, 11 Aug 2019 00:04:27 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sun, 11 Aug 2019 00:04:27 -0400"
+  }
+},
+{
+ "subject": "moved point optimisation to hitbox. still some bugs",
+  "sanitized_subject_line": "moved-point-optimisation-to-hitbox.-still-some-bugs",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sat, 10 Aug 2019 22:10:03 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sat, 10 Aug 2019 22:10:03 -0400"
+  }
+},
+{
+ "subject": "working on cutting out point count",
+  "sanitized_subject_line": "working-on-cutting-out-point-count",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Fri, 9 Aug 2019 17:19:26 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Fri, 9 Aug 2019 17:19:26 -0400"
+  }
+},
+{
+ "subject": "need to optimise line of sight",
+  "sanitized_subject_line": "need-to-optimise-line-of-sight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 9 Aug 2019 10:35:12 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 9 Aug 2019 10:35:12 -0400"
+  }
+},
+{
+ "subject": "very good progress, new solution",
+  "sanitized_subject_line": "very-good-progress-new-solution",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 7 Aug 2019 17:11:03 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 7 Aug 2019 17:11:03 -0400"
+  }
+},
+{
+ "subject": "ill get you lighting",
+  "sanitized_subject_line": "ill-get-you-lighting",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 5 Aug 2019 17:11:08 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 5 Aug 2019 17:11:08 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Fri, 2 Aug 2019 17:06:37 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Fri, 2 Aug 2019 17:06:37 -0400"
+  }
+},
+{
+ "subject": "points tagged correctly, need path order",
+  "sanitized_subject_line": "points-tagged-correctly-need-path-order",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Fri, 2 Aug 2019 17:05:20 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Fri, 2 Aug 2019 17:05:20 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 15:50:31 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 15:50:31 -0400"
+  }
+},
+{
+ "subject": "Started level editor",
+  "sanitized_subject_line": "Started-level-editor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 15:49:47 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 15:49:47 -0400"
+  }
+},
+{
+ "subject": "working on cone",
+  "sanitized_subject_line": "working-on-cone",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 2 Aug 2019 13:34:06 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 2 Aug 2019 13:34:06 -0400"
+  }
+},
+{
+ "subject": "starting level editor",
+  "sanitized_subject_line": "starting-level-editor",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 13:32:42 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Fri, 2 Aug 2019 13:32:42 -0400"
+  }
+},
+{
+ "subject": "working on cone",
+  "sanitized_subject_line": "working-on-cone",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 1 Aug 2019 17:15:06 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 1 Aug 2019 17:15:06 -0400"
+  }
+},
+{
+ "subject": "need saved clipping mask",
+  "sanitized_subject_line": "need-saved-clipping-mask",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 31 Jul 2019 17:27:58 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 31 Jul 2019 17:27:58 -0400"
+  }
+},
+{
+ "subject": "latest rework is on the right track, needs to to have cone effect still",
+  "sanitized_subject_line": "latest-rework-is-on-the-right-track-needs-to-to-have-cone-effect-still",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 30 Jul 2019 17:02:26 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 30 Jul 2019 17:02:26 -0400"
+  }
+},
+{
+ "subject": "progress, need to check negactive angle on box corner",
+  "sanitized_subject_line": "progress-need-to-check-negactive-angle-on-box-corner",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 29 Jul 2019 17:19:04 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 29 Jul 2019 17:19:04 -0400"
+  }
+},
+{
+ "subject": "new plan",
+  "sanitized_subject_line": "new-plan",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sun, 28 Jul 2019 16:05:18 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sun, 28 Jul 2019 16:05:18 -0400"
+  }
+},
+{
+ "subject": "maybe going to do parcial recusion instead of full",
+  "sanitized_subject_line": "maybe-going-to-do-parcial-recusion-instead-of-full",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 26 Jul 2019 11:28:36 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 26 Jul 2019 11:28:36 -0400"
+  }
+},
+{
+ "subject": "not crashing, but still not perfect",
+  "sanitized_subject_line": "not-crashing-but-still-not-perfect",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 24 Jul 2019 11:17:48 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 24 Jul 2019 11:17:48 -0400"
+  }
+},
+{
+ "subject": "too much recursion laaame",
+  "sanitized_subject_line": "too-much-recursion-laaame",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sat, 20 Jul 2019 13:02:04 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sat, 20 Jul 2019 13:02:04 -0400"
+  }
+},
+{
+ "subject": "side tracked alittle",
+  "sanitized_subject_line": "side-tracked-alittle",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Fri, 19 Jul 2019 22:01:38 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Fri, 19 Jul 2019 22:01:38 -0400"
+  }
+},
+{
+ "subject": "still trying recusion",
+  "sanitized_subject_line": "still-trying-recusion",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 19 Jul 2019 16:02:54 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 19 Jul 2019 16:02:54 -0400"
+  }
+},
+{
+ "subject": "making lighting recursive",
+  "sanitized_subject_line": "making-lighting-recursive",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 18 Jul 2019 17:06:31 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 18 Jul 2019 17:06:31 -0400"
+  }
+},
+{
+ "subject": "working on grid optimisations",
+  "sanitized_subject_line": "working-on-grid-optimisations",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 17 Jul 2019 17:04:35 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 17 Jul 2019 17:04:35 -0400"
+  }
+},
+{
+ "subject": "lighting progress",
+  "sanitized_subject_line": "lighting-progress",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 16 Jul 2019 17:03:17 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 16 Jul 2019 17:03:17 -0400"
+  }
+},
+{
+ "subject": "light in sweep, find corners, angle based",
+  "sanitized_subject_line": "light-in-sweep-find-corners-angle-based",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Tue, 16 Jul 2019 00:52:00 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Tue, 16 Jul 2019 00:52:00 -0400"
+  }
+},
+{
+ "subject": "working lighting effect",
+  "sanitized_subject_line": "working-lighting-effect",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 15 Jul 2019 17:52:21 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 15 Jul 2019 17:52:21 -0400"
+  }
+},
+{
+ "subject": "tweaking still",
+  "sanitized_subject_line": "tweaking-still",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Mon, 15 Jul 2019 14:08:38 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Mon, 15 Jul 2019 14:08:38 -0400"
+  }
+},
+{
+ "subject": "tweeking lighting effect",
+  "sanitized_subject_line": "tweeking-lighting-effect",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 15 Jul 2019 10:26:24 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 15 Jul 2019 10:26:24 -0400"
+  }
+},
+{
+ "subject": "lighting working wonderfully, just needs some optimisations to smooth it out",
+  "sanitized_subject_line": "lighting-working-wonderfully-just-needs-some-optimisations-to-smooth-it-out",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sat, 13 Jul 2019 23:04:56 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sat, 13 Jul 2019 23:04:56 -0400"
+  }
+},
+{
+ "subject": "debugging light collision",
+  "sanitized_subject_line": "debugging-light-collision",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 12 Jul 2019 23:10:29 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 12 Jul 2019 23:10:29 -0400"
+  }
+},
+{
+ "subject": "working on light intersetion still",
+  "sanitized_subject_line": "working-on-light-intersetion-still",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Fri, 12 Jul 2019 17:07:16 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Fri, 12 Jul 2019 17:07:16 -0400"
+  }
+},
+{
+ "subject": "grid not bad, collison fixed, working on lighting collision",
+  "sanitized_subject_line": "grid-not-bad-collison-fixed-working-on-lighting-collision",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 12 Jul 2019 13:53:57 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 12 Jul 2019 13:53:57 -0400"
+  }
+},
+{
+ "subject": "working on world",
+  "sanitized_subject_line": "working-on-world",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Thu, 11 Jul 2019 17:15:54 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Thu, 11 Jul 2019 17:15:54 -0400"
+  }
+},
+{
+ "subject": "blah",
+  "sanitized_subject_line": "blah",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Thu, 11 Jul 2019 00:36:29 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Thu, 11 Jul 2019 00:36:29 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 10 Jul 2019 20:39:40 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 10 Jul 2019 20:39:40 -0400"
+  }
+},
+{
+ "subject": "changing timestep calculations to help with client prediction",
+  "sanitized_subject_line": "changing-timestep-calculations-to-help-with-client-prediction",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Wed, 10 Jul 2019 20:39:37 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Wed, 10 Jul 2019 20:39:37 -0400"
+  }
+},
+{
+ "subject": "working on spacial partitioning and delta state updates to clients",
+  "sanitized_subject_line": "working-on-spacial-partitioning-and-delta-state-updates-to-clients",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 9 Jul 2019 17:05:42 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 9 Jul 2019 17:05:42 -0400"
+  }
+},
+{
+ "subject": "blah",
+  "sanitized_subject_line": "blah",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Tue, 9 Jul 2019 00:06:34 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Tue, 9 Jul 2019 00:06:34 -0400"
+  }
+},
+{
+ "subject": "lighting progress -dustin",
+  "sanitized_subject_line": "lighting-progress-dustin",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Mon, 8 Jul 2019 17:03:57 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Mon, 8 Jul 2019 17:03:57 -0400"
+  }
+},
+{
+ "subject": "collision working",
+  "sanitized_subject_line": "collision-working",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 8 Jul 2019 12:54:38 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 8 Jul 2019 12:54:38 -0400"
+  }
+},
+{
+ "subject": "working on collision",
+  "sanitized_subject_line": "working-on-collision",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Sun, 7 Jul 2019 23:51:35 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Sun, 7 Jul 2019 23:51:35 -0400"
+  }
+},
+{
+ "subject": "working on collision",
+  "sanitized_subject_line": "working-on-collision",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Fri, 5 Jul 2019 16:57:16 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Fri, 5 Jul 2019 16:57:16 -0400"
+  }
+},
+{
+ "subject": "need objects and collision system",
+  "sanitized_subject_line": "need-objects-and-collision-system",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 5 Jul 2019 13:33:57 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 5 Jul 2019 13:33:57 -0400"
+  }
+},
+{
+ "subject": "lighting follows player",
+  "sanitized_subject_line": "lighting-follows-player",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 5 Jul 2019 08:39:37 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 5 Jul 2019 08:39:37 -0400"
+  }
+},
+{
+ "subject": "lighting started",
+  "sanitized_subject_line": "lighting-started",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 3 Jul 2019 15:11:18 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 3 Jul 2019 15:11:18 -0400"
+  }
+},
+{
+ "subject": "camera is working, needs smoothing",
+  "sanitized_subject_line": "camera-is-working-needs-smoothing",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 2 Jul 2019 17:09:27 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 2 Jul 2019 17:09:27 -0400"
+  }
+},
+{
+ "subject": "testing templates in functions",
+  "sanitized_subject_line": "testing-templates-in-functions",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Tue, 2 Jul 2019 14:20:58 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Tue, 2 Jul 2019 14:20:58 -0400"
+  }
+},
+{
+ "subject": "working on HUD/debug layer",
+  "sanitized_subject_line": "working-on-HUD-debug-layer",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 2 Jul 2019 12:05:32 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 2 Jul 2019 12:05:32 -0400"
+  }
+},
+{
+ "subject": "giving up on client simulation for now, difficult to time with server",
+  "sanitized_subject_line": "giving-up-on-client-simulation-for-now-difficult-to-time-with-server",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 1 Jul 2019 17:17:47 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 1 Jul 2019 17:17:47 -0400"
+  }
+},
+{
+ "subject": "finishing up interpolation and server time compensation, need debugging tools",
+  "sanitized_subject_line": "finishing-up-interpolation-and-server-time-compensation-need-debugging-tools",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Sun, 30 Jun 2019 15:44:04 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Sun, 30 Jun 2019 15:44:04 -0400"
+  }
+},
+{
+ "subject": "movement is now time based, working on interpolation and client prediction",
+  "sanitized_subject_line": "movement-is-now-time-based-working-on-interpolation-and-client-prediction",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Fri, 28 Jun 2019 07:16:42 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Fri, 28 Jun 2019 07:16:42 -0400"
+  }
+},
+{
+ "subject": "working on making movement timebased instead of tick based",
+  "sanitized_subject_line": "working-on-making-movement-timebased-instead-of-tick-based",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 25 Jun 2019 17:03:17 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 25 Jun 2019 17:03:17 -0400"
+  }
+},
+{
+ "subject": "made player and state functional code and shared between server and client",
+  "sanitized_subject_line": "made-player-and-state-functional-code-and-shared-between-server-and-client",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 25 Jun 2019 14:58:58 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 25 Jun 2019 14:58:58 -0400"
+  }
+},
+{
+ "subject": "got webpack setup and working with nodemon and reload, need to refactor to utalize shared definitions",
+  "sanitized_subject_line": "got-webpack-setup-and-working-with-nodemon-and-reload-need-to-refactor-to-utalize-shared-definitions",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 24 Jun 2019 16:45:12 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 24 Jun 2019 16:45:12 -0400"
+  }
+},
+{
+ "subject": "Started adding hitbox code",
+  "sanitized_subject_line": "Started-adding-hitbox-code",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SCOTT",
+  "date": "Fri, 21 Jun 2019 13:46:20 -0400"
+  },
+  "commiter": {
+  "name": "SCOTT",
+  "date": "Fri, 21 Jun 2019 13:46:20 -0400"
+  }
+},
+{
+ "subject": "player angle networking, crosshair, right click",
+  "sanitized_subject_line": "player-angle-networking-crosshair-right-click",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 16:45:18 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 16:45:18 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 14:45:40 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 14:45:40 -0400"
+  }
+},
+{
+ "subject": "got rotation working",
+  "sanitized_subject_line": "got-rotation-working",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 14:45:35 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Wed, 19 Jun 2019 14:45:35 -0400"
+  }
+},
+{
+ "subject": "removed extra gravenight folder",
+  "sanitized_subject_line": "removed-extra-gravenight-folder",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 18 Jun 2019 15:42:59 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 18 Jun 2019 15:42:59 -0400"
+  }
+},
+{
+ "subject": "working on network timing and delay compensation",
+  "sanitized_subject_line": "working-on-network-timing-and-delay-compensation",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Tue, 18 Jun 2019 15:41:38 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Tue, 18 Jun 2019 15:41:38 -0400"
+  }
+},
+{
+ "subject": "Added assets",
+  "sanitized_subject_line": "Added-assets",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SCOTT",
+  "date": "Tue, 18 Jun 2019 10:59:14 -0400"
+  },
+  "commiter": {
+  "name": "SCOTT",
+  "date": "Tue, 18 Jun 2019 10:59:14 -0400"
+  }
+},
+{
+ "subject": "basic client state, needs timestamp and interpolation",
+  "sanitized_subject_line": "basic-client-state-needs-timestamp-and-interpolation",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Tue, 18 Jun 2019 00:28:13 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Tue, 18 Jun 2019 00:28:13 -0400"
+  }
+},
+{
+ "subject": "working on networking client and server, client state manager",
+  "sanitized_subject_line": "working-on-networking-client-and-server-client-state-manager",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "WELBORN",
+  "date": "Mon, 17 Jun 2019 17:10:23 -0400"
+  },
+  "commiter": {
+  "name": "WELBORN",
+  "date": "Mon, 17 Jun 2019 17:10:23 -0400"
+  }
+},
+{
+ "subject": "basic game state updates to client",
+  "sanitized_subject_line": "basic-game-state-updates-to-client",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Mon, 17 Jun 2019 11:09:21 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Mon, 17 Jun 2019 11:09:21 -0400"
+  }
+},
+{
+ "subject": "working on server player",
+  "sanitized_subject_line": "working-on-server-player",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "welbordn",
+  "date": "Mon, 17 Jun 2019 09:04:41 -0400"
+  },
+  "commiter": {
+  "name": "welbordn",
+  "date": "Mon, 17 Jun 2019 09:04:41 -0400"
+  }
+},
+{
+ "subject": "Made moveable and random squares, started abstracting",
+  "sanitized_subject_line": "Made-moveable-and-random-squares-started-abstracting",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SCOTT",
+  "date": "Fri, 14 Jun 2019 17:13:45 -0400"
+  },
+  "commiter": {
+  "name": "SCOTT",
+  "date": "Fri, 14 Jun 2019 17:13:45 -0400"
+  }
+},
+{
+ "subject": "working on backend server",
+  "sanitized_subject_line": "working-on-backend-server",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 14:11:48 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 14:11:48 -0400"
+  }
+},
+{
+ "subject": "Merge branch 'master' of https://github.com/Dakine135/GraveNight",
+  "sanitized_subject_line": "Merge-branch-master-of-https-github.com-Dakine135-GraveNight",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 09:04:11 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 09:04:11 -0400"
+  }
+},
+{
+ "subject": "merging",
+  "sanitized_subject_line": "merging",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 09:04:07 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Fri, 14 Jun 2019 09:04:07 -0400"
+  }
+},
+{
+ "subject": "communicating between different computers. Client",
+  "sanitized_subject_line": "communicating-between-different-computers.-Client",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "SHROYER",
+  "date": "Thu, 13 Jun 2019 14:44:29 -0400"
+  },
+  "commiter": {
+  "name": "SHROYER",
+  "date": "Thu, 13 Jun 2019 14:44:29 -0400"
+  }
+},
+{
+ "subject": "update readme",
+  "sanitized_subject_line": "update-readme",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 12 Jun 2019 15:09:47 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 12 Jun 2019 15:09:47 -0400"
+  }
+},
+{
+ "subject": "inital setup",
+  "sanitized_subject_line": "inital-setup",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 12 Jun 2019 14:59:26 -0400"
+  },
+  "commiter": {
+  "name": "Dustin Welborn",
+  "date": "Wed, 12 Jun 2019 14:59:26 -0400"
+  }
+},
+{
+ "subject": "Initial commit",
+  "sanitized_subject_line": "Initial-commit",
+  "body": "",
+  "commit_notes": "",
+  "author": {
+    "name": "Dustin Welborn",
+  "date": "Wed, 12 Jun 2019 18:34:29 +0000"
+  },
+  "commiter": {
+  "name": "GitHub",
+  "date": "Wed, 12 Jun 2019 18:34:29 +0000"
+  }
+},

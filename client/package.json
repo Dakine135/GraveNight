@@ -16,6 +16,8 @@
         "core-js": "^3.6.5",
         "element-ui": "^2.15.6",
         "firebase": "^9.0.2",
+        "ionicons": "^5.5.3",
+        "luxon": "^2.0.2",
         "png-js": "^1.0.0",
         "register-service-worker": "^1.7.1",
         "vue": "^2.6.11",
