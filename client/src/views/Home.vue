@@ -2,13 +2,13 @@
     <div class="home">
         <el-row>
             <el-col>
-                <div id="stage" ref="stage">
+                <div id="stage" class="stage" ref="stage">
                     <canvas id="titleCanvas" ref="titleCanvas">Your browser does not support HTML5 canvas</canvas>
                     <canvas id="lightLayer" ref="light-layer"></canvas>
                 </div>
             </el-col>
-        </el-row>
-        <!-- <div id="titleMain" hidden>
+
+            <!-- <div id="titleMain" hidden>
             <svg width="1600" height="400" ref="titleSVG">
                 <image
                     xlink:href="@assets/banner-transp.svg"
@@ -20,7 +20,7 @@
                 />
             </svg>
         </div> -->
-        <el-row>
+
             <el-col>
                 <el-card class="box-card">
                     <div slot="header" class="clearfix">
@@ -158,10 +158,7 @@ export default {
             this.titleCanvas.height = this.titleCanvas.width / 4;
             this.lightCanvas.width = this.screenWidth * 0.9;
             this.lightCanvas.height = this.lightCanvas.width / 4;
-            // document.getElementById('stage').setAttribute('style', `width:${this.screenWidth * 0.9}px;`);
-            // document.getElementById('stage').setAttribute('style', `height:${this.stage.width / 4}px;`);
-            document.getElementById('stage').style.width = this.screenWidth * 0.9 + 'px';
-            document.getElementById('stage').style.height = this.stage.width / 4 + 'px';
+            document.getElementById('stage').setAttribute('style', `height:${this.lightCanvas.height + 20}px;`);
         },
         getMousePos(canvas, event) {
             let rect = canvas.getBoundingClientRect();
@@ -190,7 +187,7 @@ export default {
             );
         })();
 
-        this.stage = this.$refs['stage'];
+        // this.stage = this.$refs['stage'];
         this.titleCanvas = this.$refs['titleCanvas'];
         this.titleRender = this.titleCanvas.getContext('2d');
         this.lightCanvas = this.$refs['light-layer'];
@@ -255,15 +252,9 @@ canvas {
     /* cursor: none; */
 }
 
-#stage canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-#stage {
-    position: relative;
-    /* height: 400px; */
+.stage {
+    position: relative !important;
+    /* height: 20vh; */
     /* width: 512px;
     height: 512px; */
 
