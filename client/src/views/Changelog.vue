@@ -35,10 +35,17 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'Main Title on Home page, flashlight purity effect.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Thur, 24 Sep 2021 0:05:00 -0400'
+                    }
+                },
+                {
                     subject: 'Finished Logo, added changelog git commit logs, social logos',
                     commiter: {
                         name: 'd.welborn',
-                        date: 'Wed, 22 Sep 2021 17:13:01 -0400'
+                        date: 'Thur, 23 Sep 2021 1:00:00 -0400'
                     }
                 },
                 {
