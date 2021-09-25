@@ -1,6 +1,6 @@
 const Utilities = require('../shared/Utilities.js');
 const Hitbox = require('../shared/Hitbox.js');
-const EnergyNode = require('./Entities/EnergyNode');
+const EnergyNodeClass = require('./Entities/EnergyNode');
 
 module.exports = class StatesManager {
     constructor({ debug = false, debugState = false, engine = null }) {
@@ -12,6 +12,10 @@ module.exports = class StatesManager {
 
         this.currentEntityId = 0;
 
+        this.currentState = {};
+        this.previousState = {};
+        this.drawingState = {};
+
         this.updatableEntities = {};
         this.drawableEntities = {};
         this.lightBlockingEntities = {};
@@ -20,19 +24,18 @@ module.exports = class StatesManager {
     } //constructor
 
     update(deltaTime) {
-        Object.entries(this.updatableEntities).forEach(([id, entity]) => {
-            entity.update(deltaTime);
-        });
+        // Object.entries(this.updatableEntities).forEach(([id, entity]) => {
+        //     entity.update(deltaTime);
+        // });
     }
 
     draw(deltaTime) {
-        for (let i = 0; i < this.numberOfDrawLayers; i++) {
-            Object.entries(this.drawableEntities).forEach(([id, entity]) => {
-                if (entity[`draw${i}`]) entity[`draw${i}`](deltaTime);
-            });
-        }
+        // for (let i = 0; i < this.numberOfDrawLayers; i++) {
+        //     Object.entries(this.drawableEntities).forEach(([id, entity]) => {
+        //         if (entity[`draw${i}`]) entity[`draw${i}`](deltaTime);
+        //     });
+        // }
         // let drawingState = this.getIntermediateState(deltaTime);
-
         // if (drawingState == null) return;
     } //draw
 
@@ -56,7 +59,7 @@ module.exports = class StatesManager {
         });
 
         if (canBePlaced) {
-            let newEnergyNode = new EnergyNode({ id: this.currentEntityId, x, y, engine: this.ENGINE });
+            let newEnergyNode = EnergyNodeClass.new({ id: this.currentEntityId, x, y, engine: this.ENGINE });
             this.updatableEntities[this.currentEntityId] = newEnergyNode;
             this.drawableEntities[this.currentEntityId] = newEnergyNode;
             this.energyLinkableEntities[this.currentEntityId] = newEnergyNode;

@@ -1,46 +1,47 @@
 const Utilities = require('../../shared/Utilities.js');
 const Hitbox = require('../../shared/Hitbox.js');
-module.exports = class EnergyNode {
-    constructor({ id = null, x = 0, y = 0, debug = false, engine = null } = {}) {
-        this.ENGINE = engine;
-        this.x = x;
-        this.y = y;
-        this.id = id;
-        this.heat = 0;
-        this.maxHeat = 2000;
-        this.radius = 12;
-        this.distanceCanLink = 100;
-        this.travelMax = 2000;
-        this.debug = debug;
-        this.startColor = { r: 0, g: 255, b: 0, a: 1 };
-        this.endColor = { r: 255, g: 255, b: 0, a: 1 };
-        this.currentStartColor = { r: 0, g: 255, b: 0, a: 1 };
-        this.currentEndColor = { r: 255, g: 255, b: 0, a: 1 };
-        this.hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
-        this.hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
-        this.energyPackets = [
-            {
-                travel: this.travelMax,
-                x: this.distanceCanLink,
-                y: 0,
-                startX: this.distanceCanLink,
-                startY: 0,
-                fromId: null
-            }
-        ];
-        this.selected = false;
-        this.canBePlaced = true;
-
-        this.otherLinkableEntities = this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
-        this.currentLinkIndex = 0;
+const travelMax = 2000;
+const distanceCanLink = 100;
+const maxHeat = 2000;
+const radius = 12;
+const startColor = { r: 0, g: 255, b: 0, a: 1 };
+const endColor = { r: 255, g: 255, b: 0, a: 1 };
+const hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
+const hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
+module.exports = EnergyNodeClass = {
+    new({ id = null, x = 0, y = 0, debug = false, engine = null } = {}) {
+        let newEnergyNode = {
+            x: x,
+            y: y,
+            id: id,
+            heat: 0,
+            debug: debug,
+            currentStartColor: { r: 0, g: 255, b: 0, a: 1 },
+            currentEndColor: { r: 255, g: 255, b: 0, a: 1 },
+            energyPackets: [
+                {
+                    travel: travelMax,
+                    x: distanceCanLink,
+                    y: 0,
+                    startX: distanceCanLink,
+                    startY: 0,
+                    fromId: null
+                }
+            ],
+            selected: false,
+            canBePlaced: true,
+            otherLinkableEntities: this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink),
+            currentLinkIndex: 0
+        };
 
         //add yourself to others linkable
-        this.otherLinkableEntities.forEach((otherLinkable) => {
+        newEnergyNode.otherLinkableEntities.forEach((otherLinkable) => {
             otherLinkable.otherLinkableEntities.push(this);
         });
 
-        if (debug) console.log('Created EnergyNode at', this.x, this.y);
-    } //constructor
+        if (debug) console.log('Created EnergyNode at', x, y);
+        return newEnergyNode;
+    }, //constructor
 
     update(deltaTime) {
         //update heat and color
@@ -62,7 +63,7 @@ module.exports = class EnergyNode {
             this.energyPackets[i].x = (this.energyPackets[i].travel / this.travelMax) * this.energyPackets[i].startX;
             this.energyPackets[i].y = (this.energyPackets[i].travel / this.travelMax) * this.energyPackets[i].startY;
         }
-    }
+    },
 
     sendPacketOut(previouslyFromId) {
         // console.log('sendPacketOut');
@@ -83,14 +84,14 @@ module.exports = class EnergyNode {
         }
 
         //If nowhere to pass, send back, else dont spawn packet, aka lost energy
-    }
+    },
 
     receivePacket(x, y, fromId) {
         let travel = Math.round((Utilities.dist({ x, y }, { x: this.x, y: this.y }) / this.distanceCanLink) * this.travelMax);
         // console.log('receivePacket, travel, fromId,x,y :>> ', travel, fromId, x, y);
         let newPacket = { travel: travel, x: x - this.x, y: y - this.y, startX: x - this.x, startY: y - this.y, fromId };
         this.energyPackets.push(newPacket);
-    }
+    },
 
     draw0(deltaTime) {
         // Start a new drawing state
@@ -141,7 +142,7 @@ module.exports = class EnergyNode {
         }
 
         this.ENGINE.render.restore(); // Restore original state
-    } //end Draw
+    }, //end Draw
 
     draw1(deltaTime) {
         //draw energyPackets
@@ -159,7 +160,7 @@ module.exports = class EnergyNode {
             });
             this.ENGINE.render.restore(); // Restore original state
         }
-    }
+    },
 
     drawGhost() {
         // Start a new drawing state
