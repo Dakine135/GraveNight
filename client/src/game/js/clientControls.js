@@ -61,7 +61,8 @@ module.exports = class Controls {
         // window.addEventListener('mousemove', this.mouseMoved.bind(this));
         // pointer lock object forking for cross browser
 
-        this.ENGINE.HUD.canvas.requestPointerLock = this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
+        this.ENGINE.HUD.canvas.requestPointerLock =
+            this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
         this.ENGINE.HUD.canvas.onclick = () => {
             // console.log('clicked hud canvas');
@@ -73,6 +74,8 @@ module.exports = class Controls {
         document.addEventListener('pointerlockchange', this.lockChange.bind(this), false);
         document.addEventListener('mozpointerlockchange', this.lockChange.bind(this), false);
         // this.ENGINE.HUD.canvas.requestPointerLock();
+
+        this.temp = {};
     } //constructor
 
     scrollEvent(event) {
@@ -108,6 +111,12 @@ module.exports = class Controls {
         switch (keyCode) {
             case 49: //1
                 this.ENGINE.HUD.pressButtonProgrammatically('createEnergyNode');
+                break;
+            case 50: //2
+                this.ENGINE.HUD.pressButtonProgrammatically('saveGame');
+                break;
+            case 51: //3
+                this.ENGINE.HUD.pressButtonProgrammatically('clearSave');
                 break;
             case 65: //A
             case 37: //left arrow
@@ -149,6 +158,8 @@ module.exports = class Controls {
         let validKey = true;
         switch (keyCode) {
             case 49: //1
+            case 50: //2
+            case 51: //3
                 break;
             case 65: //A
             case 37: //left arrow
@@ -182,7 +193,7 @@ module.exports = class Controls {
         if (Object.keys(this.keysBeingPressed).length == 0) return;
         Object.keys(this.keysBeingPressed).forEach((keyCode) => {
             keyCode = parseInt(keyCode);
-            let validKey = true;
+            // this.temp.validKey = true;
             switch (keyCode) {
                 case 65: //A
                 case 37: //left arrow
@@ -201,11 +212,11 @@ module.exports = class Controls {
                     this.ENGINE.CAMERA.moveGoal(0, 10);
                     break;
                 default:
-                    // console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
-                    validKey = false;
+                // console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
+                // this.temp.validKey = false;
             } //switch
-            if (validKey) {
-            }
+            // if (this.temp.validKey) {
+            // }
         });
     } //handleHeldKeys
 
@@ -280,7 +291,7 @@ module.exports = class Controls {
     }
 
     setLeftClickAction(action) {
-        if (this.debug) console.log('Setting left CLick Action:', action);
+        // if (this.debug) console.log('Setting left CLick Action:', action);
         switch (action) {
             case 'default':
             case 'clear':
