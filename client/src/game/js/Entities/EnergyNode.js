@@ -44,7 +44,7 @@ module.exports = EnergyNodeClass = {
             canBePlaced: true,
             otherLinkableEntities: [],
             currentLinkIndex: 0,
-            temp: { linkTo: [] }
+            temp: { linkTo: [], translatedLocation: { x: 0, y: 0 } }
         };
 
         ENGINE.STATES.getEntitiesInRange(newEnergyNode.otherLinkableEntities, 'energyLinkableEntities', { x, y }, distanceCanLink);
@@ -64,8 +64,8 @@ module.exports = EnergyNodeClass = {
         this.heat -= deltaTime;
         if (this.heat < 0) this.heat = 0;
         if (this.heat > maxHeat) this.heat = maxHeat;
-        this.currentStartColor = Utilities.colorBlend(startColor, hotStartColor, this.heat / maxHeat);
-        this.currentEndColor = Utilities.colorBlend(endColor, hotEndColor, this.heat / maxHeat);
+        Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
+        Utilities.colorBlend(this.currentEndColor, endColor, hotEndColor, this.heat / maxHeat);
         // console.log('this.currentStartColor :>> ', this.currentStartColor);
 
         for (let i = this.energyPackets.length - 1; i >= 0; i--) {
@@ -91,6 +91,8 @@ module.exports = EnergyNodeClass = {
         //else pass to next Energy Node
         if (this.otherLinkableEntities.length > 0) {
             this.temp.sendTo = this.otherLinkableEntities[this.currentLinkIndex];
+            // console.log('this.temp.sendTo :>> ', this.temp.sendTo);
+            // console.log('this.otherLinkableEntities :>> ', this.otherLinkableEntities);
             this.currentLinkIndex++;
             if (this.currentLinkIndex >= this.otherLinkableEntities.length) this.currentLinkIndex = 0;
             if (this.temp.sendTo.id == previouslyFromId && this.otherLinkableEntities.length > 1) {
@@ -125,8 +127,8 @@ module.exports = EnergyNodeClass = {
     draw0(ENGINE) {
         // Start a new drawing state
         ENGINE.render.save();
-        let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
         ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
@@ -183,8 +185,8 @@ module.exports = EnergyNodeClass = {
         //draw energyPackets
         if (ENGINE.CAMERA.zoomLevel >= 0.5) {
             ENGINE.render.save();
-            let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-            ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+            ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+            ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
             ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
             this.energyPackets.forEach((packet) => {
                 ENGINE.render.beginPath();
@@ -201,8 +203,8 @@ module.exports = EnergyNodeClass = {
         // console.log('ENGINE :>> ', ENGINE);
         // Start a new drawing state
         ENGINE.render.save();
-        let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
+        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
         ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
@@ -270,7 +272,12 @@ module.exports = EnergyNodeClass = {
             currentStartColor: this.currentStartColor,
             currentEndColor: this.currentEndColor,
             energyPackets: this.energyPackets,
-            otherLinkableEntities: this.otherLinkableEntities.map((other) => other.id),
+            otherLinkableEntities: this.otherLinkableEntities.map((other) => {
+                if (other.id == null) {
+                    console.log('other :>> ', other);
+                }
+                return other.id;
+            }),
             currentLinkIndex: this.currentLinkIndex
         };
     },
@@ -278,7 +285,15 @@ module.exports = EnergyNodeClass = {
         (energyNode.debug = false),
             (energyNode.selected = false),
             (energyNode.canBePlaced = true),
-            (energyNode.otherLinkableEntities = energyNode.otherLinkableEntities.map((id) => STATES.currentState.entities[id])),
-            (energyNode.temp = { linkTo: [] });
+            (energyNode.otherLinkableEntities = energyNode.otherLinkableEntities.map((id) => {
+                if (STATES.currentState.entities[id] == null) {
+                    console.log('energyNode.id :>> ', energyNode.id);
+                    console.log('id :>> ', id);
+                    console.log('STATES.currentState.entities[id] :>> ', STATES.currentState.entities[id]);
+                    console.log('energyNode.otherLinkableEntities :>> ', JSON.stringify(energyNode.otherLinkableEntities));
+                }
+                return STATES.currentState.entities[id];
+            })),
+            (energyNode.temp = { linkTo: [], translatedLocation: { x: 0, y: 0 } });
     }
 }; //end EnergyNode Class

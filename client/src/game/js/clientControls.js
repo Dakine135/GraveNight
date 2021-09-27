@@ -244,16 +244,15 @@ module.exports = class Controls {
     }
 
     translateScreenLocToWorld(x, y) {
-        // let offsetX = x - this.ENGINE.width;
-        // let offsetY = y - this.ENGINE.height;
-        // let diffInWidth = (this.ENGINE.CAMERA.worldViewWidth - this.ENGINE.width) / 2;
-        // let diffInHeight = (this.ENGINE.CAMERA.worldViewHeight - this.ENGINE.height) / 2;
-        // let worldX = Math.round(this.ENGINE.CAMERA.x - this.ENGINE.width / 2); /// this.ENGINE.CAMERA.zoomLevel
-        // let worldY = Math.round(this.ENGINE.CAMERA.y - this.ENGINE.height / 2);
-
+        //new translate  function
+        // let diffX = (x - this.x) * this.zoomLevel;
+        // let diffY = (y - this.y) * this.zoomLevel;
+        // let offsetWidth = diffX + this.engine.width / 2;
+        // let offsetHeight = diffY + this.engine.height / 2;
+        // result.x = Math.round(offsetWidth);
+        // result.y = Math.round(offsetHeight);
+        //TODO rework with new translate function
         return {
-            // x: Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x),
-            // y: Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y)
             x: Math.round((x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x) / this.ENGINE.CAMERA.zoomLevel),
             y: Math.round((y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) / this.ENGINE.CAMERA.zoomLevel)
         };

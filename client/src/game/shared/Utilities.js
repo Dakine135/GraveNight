@@ -11,17 +11,11 @@ function randomColor() {
 }
 exports.randomColor = randomColor;
 
-function colorBlend(startColor, endColor, fraction) {
-    let diffR = endColor.r - startColor.r;
-    let diffG = endColor.g - startColor.g;
-    let diffB = endColor.b - startColor.b;
-    let diffA = endColor.a - startColor.a;
-    return {
-        r: Math.floor(startColor.r + diffR * fraction),
-        g: Math.floor(startColor.g + diffG * fraction),
-        b: Math.floor(startColor.b + diffB * fraction),
-        a: Math.floor(startColor.a + diffA * fraction)
-    };
+function colorBlend(outputColor, startColor, endColor, fraction) {
+    outputColor.r = Math.floor(startColor.r + (endColor.r - startColor.r) * fraction);
+    outputColor.g = Math.floor(startColor.g + (endColor.g - startColor.g) * fraction);
+    outputColor.b = Math.floor(startColor.b + (endColor.b - startColor.b) * fraction);
+    outputColor.a = Math.floor(startColor.a + (endColor.a - startColor.a) * fraction);
 }
 exports.colorBlend = colorBlend;
 

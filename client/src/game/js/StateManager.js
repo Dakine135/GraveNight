@@ -1,6 +1,8 @@
 const Utilities = require('../shared/Utilities.js');
 const Hitbox = require('../shared/Hitbox.js');
 const EnergyNodeClass = require('./Entities/EnergyNode');
+// const QuadTree = require('./dataStructures/quadTree.js');
+// const Rectangle = require('./dataStructures/rectangle.js');
 
 module.exports = class StatesManager {
     constructor({ debug = false, debugState = false, engine = null }) {
@@ -12,6 +14,9 @@ module.exports = class StatesManager {
 
         this.currentEntityId = 0;
 
+        //world size for center quad tree is 10,000
+        // this.quadTreeEntities = new QuadTree(new Rectangle(0, 0, 10000, 10000), 10);
+
         this.currentState = {
             entities: {}
         };
@@ -21,7 +26,10 @@ module.exports = class StatesManager {
         this.drawingState = {
             entities: {}
         };
-        this.temp = { nearby: [] };
+        this.temp = { nearby: [], nearbyDraw: [] };
+        this.entityAddedSinceLastDraw = true;
+        this.cameraChange = true;
+        this.lastCameraStatus = { x: this.ENGINE.CAMERA.x, y: this.ENGINE.CAMERA.y, zoomLevel: this.ENGINE.CAMERA.zoomLevel };
 
         //load saveGame from localStorage
         this.loadSaveGameFromStorage('savedGame');
@@ -35,8 +43,31 @@ module.exports = class StatesManager {
 
     draw(deltaTime) {
         //TODO only draw what is on the screen
+        if (
+            this.lastCameraStatus.x != this.ENGINE.CAMERA.x ||
+            this.lastCameraStatus.y != this.ENGINE.CAMERA.y ||
+            this.lastCameraStatus.zoomLevel != this.ENGINE.CAMERA.zoomLevel
+        ) {
+            this.lastCameraStatus = { x: this.ENGINE.CAMERA.x, y: this.ENGINE.CAMERA.y, zoomLevel: this.ENGINE.CAMERA.zoomLevel };
+            this.cameraChange = true;
+        }
+        if (this.cameraChange || this.entityAddedSinceLastDraw) {
+            this.getEntitiesInRange(
+                this.temp.nearbyDraw,
+                'drawable',
+                this.ENGINE.CAMERA,
+                Math.max(this.ENGINE.CAMERA.worldViewWidth, this.ENGINE.CAMERA.worldViewHeight) / 2 // / this.ENGINE.CAMERA.zoomLevel
+            );
+            this.entityAddedSinceLastDraw = false;
+            this.cameraChange = false;
+            if (this.ENGINE.HUD.debug) {
+                this.ENGINE.HUD.debugUpdate({
+                    entitiesBeingDrawn: this.temp.nearbyDraw.length
+                });
+            }
+        }
         for (let i = 0; i < this.numberOfDrawLayers; i++) {
-            Object.entries(this.currentState.entities).forEach(([id, entity]) => {
+            Object.entries(this.temp.nearbyDraw).forEach(([id, entity]) => {
                 if (this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`])
                     this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`].bind(entity)(this.ENGINE, deltaTime);
             });
@@ -71,6 +102,7 @@ module.exports = class StatesManager {
             let newEnergyNode = EnergyNodeClass.new({ id: this.currentEntityId, x, y, ENGINE: this.ENGINE });
             this.currentState.entities[this.currentEntityId] = newEnergyNode;
             this.currentEntityId++;
+            this.entityAddedSinceLastDraw = true;
         } else {
             // console.log('Something is in the way');
         }
@@ -101,8 +133,12 @@ module.exports = class StatesManager {
         if (saveGameString == null) return;
         this.currentState = JSON.parse(saveGameString);
         Object.entries(this.currentState.entities).forEach(([id, entity]) => {
+            id = Number(id);
+            // console.log('entity.x, typeof entity.x :>> ', entity.x, typeof entity.x);
             if (this.currentEntityId <= id) this.currentEntityId = id + 1;
+            // console.log('this.currentEntityId :>> ', this.currentEntityId, typeof this.currentEntityId);
             this.ENGINE.ENTITY_CLASSES[entity.type].restoreFromSave(this, entity);
+            if (this.debug) entity.debug = true;
         });
         console.log('this.currentEntityId :>> ', this.currentEntityId);
     }

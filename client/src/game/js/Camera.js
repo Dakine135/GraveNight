@@ -27,10 +27,12 @@ module.exports = class Camera {
         } else {
             this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
             //TODO move towards mouse when zooming
-            // this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            this.moveTo(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
             // this.goToOrigin();
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;
+            this.engine.HUD.debugUpdate({ 'World W, H': this.worldViewWidth + ', ' + this.worldViewHeight });
             this.cameraMovedSinceLastUpdate = true;
             this.engine.BACKGROUND.firstDraw = true;
             this.engine.CONTROLS.updateCameraMoved();
@@ -43,10 +45,12 @@ module.exports = class Camera {
             this.currentZoomLevelIndex = this.zoomLevels.length - 1;
         } else {
             this.engine.HUD.debugUpdate({ zoomLevel: this.zoomLevel });
-            // this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            this.moveTo(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
+            this.setGoal(this.engine.CONTROLS.mouseLocationInWorld.x, this.engine.CONTROLS.mouseLocationInWorld.y);
             // this.goToOrigin();
             this.worldViewWidth = this.engine.width / this.zoomLevel;
             this.worldViewHeight = this.engine.height / this.zoomLevel;
+            this.engine.HUD.debugUpdate({ 'World W, H': this.worldViewWidth + ', ' + this.worldViewHeight });
             this.cameraMovedSinceLastUpdate = true;
             this.engine.BACKGROUND.firstDraw = true;
             this.engine.CONTROLS.updateCameraMoved();
@@ -76,11 +80,16 @@ module.exports = class Camera {
         this.setGoal(this.goalX + x, this.goalY + y);
     }
 
-    translate({ x = 0, y = 0 }) {
-        return {
-            x: Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x),
-            y: Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y)
-        };
+    translate(result, x, y) {
+        let diffX = (x - this.x) * this.zoomLevel;
+        let diffY = (y - this.y) * this.zoomLevel;
+        let offsetWidth = diffX + this.engine.width / 2;
+        let offsetHeight = diffY + this.engine.height / 2;
+        result.x = Math.round(offsetWidth);
+        result.y = Math.round(offsetHeight);
+
+        // result.x = Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x);
+        // result.y = Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y);
     }
 
     rotatePoint({ center = { x: 0, y: 0 }, point = { x: 0, y: 0 }, angle = 0 }) {

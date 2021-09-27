@@ -93,13 +93,13 @@ module.exports = class clientEngine {
 
         this.CAMERA = new Camera({
             debug: this.isProduction ? false : false,
-            x: 0,
-            y: 0,
-            speed: 0.1,
+            x: 11,
+            y: -367,
+            speed: 0.5,
             engine: this
         });
         this.STATES = new StatesManager({
-            debug: this.isProduction ? false : false,
+            debug: this.isProduction ? false : true,
             debugState: this.isProduction ? false : false,
             engine: this
         });
@@ -111,7 +111,8 @@ module.exports = class clientEngine {
             engine: this,
             canvas: hudCanvas,
             debug: this.isProduction ? false : true,
-            debugButton: this.isProduction ? false : false
+            debugButton: this.isProduction ? false : false,
+            debugCursor: this.isProduction ? false : true
         });
         this.CONTROLS = new Controls({
             debug: this.isProduction ? false : false,
@@ -143,6 +144,7 @@ module.exports = class clientEngine {
         });
         // World.createBoundaries(this.WORLD);
         // World.randomWorld(this.WORLD);
+        this.temp = { translatedLocation: { x: 0, y: 0 } };
     } //constructor
 
     windowResized() {
@@ -171,6 +173,7 @@ module.exports = class clientEngine {
 
     update() {
         //updateTimings
+        let performanceStart = performance.now();
         this.deltaTimeUpdate = this.currentTime - this.lastUpdateTime;
         this.accumulatedDeltaTime += this.deltaTimeUpdate;
 
@@ -182,6 +185,13 @@ module.exports = class clientEngine {
             this.accumulatedDeltaTime -= this.targetDeltaTime;
             this.STATES.update(this.targetDeltaTime);
             this.lastUpdateTime = new Date().getTime();
+        }
+
+        let timeTaken = performance.now() - performanceStart;
+        if (this.debug && this.HUD.debug && timeTaken > 2) {
+            this.HUD.debugUpdate({
+                timeTakenToUpdate: timeTaken + 'ms'
+            });
         }
     } //update
 
@@ -213,11 +223,10 @@ module.exports = class clientEngine {
 
         //square at 0,0
         if (this.debug) {
-            let origin = this.CAMERA.translate({ x: 0, y: 0 });
+            this.CAMERA.translate(this.temp.translatedLocation, 0, 0);
             this.render.save();
-            this.render.translate(origin.x, origin.y);
+            this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
             this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
-            // let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
             this.render.strokeStyle = 'black';
             this.render.strokeRect(-10, -10, 20, 20);
             // render.font = "px Arial";
@@ -277,21 +286,13 @@ module.exports = class clientEngine {
                     // renderDistance: this.renderDistance,
                     CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
                     deltaTime: this.deltaTime,
-                    timeBackground:
-                        Math.round(
-                            (this.performanceMetrics['backgroundDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
-                        ) + '%',
-                    timeStateDraw:
-                        Math.round(
-                            (this.performanceMetrics['statesDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
-                        ) + '%',
+                    timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
+                    timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
                     // timeWorldDraw:
                     //     Math.round(
                     //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
                     //     ) + '%',
-                    timeHudDraw:
-                        Math.round((this.performanceMetrics['hudDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) +
-                        '%'
+                    timeHudDraw: Math.round(this.performanceMetrics['hudDraw']) + 'ms'
                 });
             }
             this.lastSecond = this.currentTime;

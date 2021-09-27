@@ -28,7 +28,7 @@ module.exports = class HUD {
         this.debugVars = {};
         this.buttons = {};
         this.createButtons();
-        this.temp = { nearby: [], shouldSnapArray: [] };
+        this.temp = { nearby: [], shouldSnapArray: [], translatedLocation: { x: 0, y: 0 } };
         if (debug) console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
 
@@ -259,10 +259,11 @@ module.exports = class HUD {
             // let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
 
             this.render.save();
-            this.temp.translatedLocation = this.ENGINE.CAMERA.translate({
-                x: this.ENGINE.CONTROLS.mouseLocationInWorld.x,
-                y: this.ENGINE.CONTROLS.mouseLocationInWorld.y
-            });
+            this.ENGINE.CAMERA.translate(
+                this.temp.translatedLocation,
+                this.ENGINE.CONTROLS.mouseLocationInWorld.x,
+                this.ENGINE.CONTROLS.mouseLocationInWorld.y
+            );
             this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
             this.render.beginPath();
             this.render.fillText(
