@@ -12,6 +12,9 @@ workers.js
 
 package-lock.json
 
+.firebase
+client/.firebase
+
 # Runtime data
 
 pids

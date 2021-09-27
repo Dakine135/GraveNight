@@ -106,6 +106,8 @@ export default {
             this.titleRender.restore();
 
             //draw flashlight layer
+            //TODO flashlight size based on canvas size instead of static
+            let flashlightSize = this.lightCanvas.width / 8;
             this.lightRender.save();
             this.lightRender.globalCompositeOperation = 'source-over';
             this.lightRender.beginPath();
@@ -122,7 +124,7 @@ export default {
             }
             if (this.mouseX != null && this.mouseY != null) {
                 this.lightRender.globalCompositeOperation = 'xor';
-                let grd = this.lightRender.createRadialGradient(this.mouseX, this.mouseY, 0, this.mouseX, this.mouseY, 200);
+                let grd = this.lightRender.createRadialGradient(this.mouseX, this.mouseY, 0, this.mouseX, this.mouseY, flashlightSize);
                 grd.addColorStop(0, 'rgba(0,0,0,1)');
                 grd.addColorStop(0.7, 'rgba(0,0,0,1)');
                 grd.addColorStop(0.9, 'rgba(0,0,0,0.8)');
@@ -131,12 +133,12 @@ export default {
                 // Fill with gradient
                 this.lightRender.fillStyle = grd;
                 // this.lightRender.fillRect(this.mouseX, this.mouseY, 50, 50);
-                this.lightRender.arc(this.mouseX, this.mouseY, 200, 0, 2 * Math.PI);
+                this.lightRender.arc(this.mouseX, this.mouseY, flashlightSize, 0, 2 * Math.PI);
                 this.lightRender.fill();
 
                 //white light effect
                 this.lightRender.globalCompositeOperation = 'source-over';
-                grd = this.lightRender.createRadialGradient(this.mouseX, this.mouseY, 0, this.mouseX, this.mouseY, 200);
+                grd = this.lightRender.createRadialGradient(this.mouseX, this.mouseY, 0, this.mouseX, this.mouseY, flashlightSize);
                 grd.addColorStop(0, 'rgba(255,255,255,0.3)');
                 // grd.addColorStop(0.7, 'rgba(0,0,0,1)');
                 // grd.addColorStop(0.9, 'rgba(0,0,0,1)');

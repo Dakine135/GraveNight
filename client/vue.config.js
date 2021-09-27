@@ -11,8 +11,10 @@ module.exports = {
     },
     pwa: {
         name: 'GraveNight',
-        themeColor: '#4DBA87',
+        short_name: 'GraveNight',
+        themeColor: '#000000',
         msTileColor: '#000000',
+        display: 'fullscreen',
         appleMobileWebAppCapable: 'yes',
         appleMobileWebAppStatusBarStyle: 'black',
 
@@ -24,11 +26,11 @@ module.exports = {
             // ...other Workbox options...
         },
         iconPaths: {
-            favicon32: null,
-            favicon16: null,
-            appleTouchIcon: null,
-            maskIcon: null,
-            msTileImage: null
+            favicon32: 'src/assets/GNHandLogo512.png',
+            favicon16: 'src/assets/GNHandLogo512.png',
+            appleTouchIcon: 'src/assets/GNHandLogo512.png',
+            maskIcon: 'src/assets/GNHandLogoSVGTransparent2.svg',
+            msTileImage: 'src/assets/GNHandLogo512.png'
         }
     }
 };
