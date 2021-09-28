@@ -86,13 +86,10 @@ exports.calculateAngle = ({ point1, point2, centerPoint = { x: 0, y: 0 } }) => {
     // return  angleOfP2 - angleOfP1;
 };
 
-exports.mapNum = ({ input, start1, end1, start2, end2 }) => {
+exports.mapNum = (input, start1, end1, start2, end2) => {
     if (input < start1) input = start1;
     else if (input > end1) input = end1;
-    let diffRange1 = end1 - start1;
-    let fractionOfFirstRange = (input - start1) / diffRange1;
-    let diffRange2 = end2 - start2;
-    return diffRange2 * fractionOfFirstRange + start2;
+    return (end2 - start2) * ((input - start1) / (end1 - start1)) + start2;
 };
 
 function cloneObject(obj) {

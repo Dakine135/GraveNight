@@ -61,7 +61,7 @@ module.exports = EnergyNodeClass = {
     update(ENGINE, deltaTime) {
         //update heat and color
         this.selected = false;
-        this.heat -= deltaTime;
+        this.heat -= deltaTime / 2;
         if (this.heat < 0) this.heat = 0;
         if (this.heat > maxHeat) this.heat = maxHeat;
         Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
@@ -85,7 +85,7 @@ module.exports = EnergyNodeClass = {
     sendPacketOut(ENGINE, previouslyFromId) {
         // console.log('sendPacketOut');
         //generate heat as packets pass through EnergyNode
-        this.heat += 500; //TODO re-balance
+        this.heat += 100; //TODO re-balance
         //check for Entities in range that want to consume packets
 
         //else pass to next Energy Node
@@ -183,7 +183,7 @@ module.exports = EnergyNodeClass = {
 
     draw1(ENGINE) {
         //draw energyPackets
-        if (ENGINE.CAMERA.zoomLevel >= 0.5) {
+        if (ENGINE.CAMERA.zoomLevel > 0.5) {
             ENGINE.render.save();
             ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
             ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);

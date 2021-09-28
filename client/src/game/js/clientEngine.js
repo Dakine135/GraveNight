@@ -2,7 +2,7 @@ const StatesManager = require('./StateManager.js');
 const Controls = require('./clientControls.js');
 // const Networking = require('./networking.js');
 const Camera = require('./Camera.js');
-// const Lighting = require('./lighting.js');
+const Lighting = require('./lighting.js');
 // const LineOfSight = require('./lineOfSight.js');
 const Hud = require('./hud/hud.js');
 const Background = require('./background.js');
@@ -15,8 +15,8 @@ const EnergyNodeClass = require('./Entities/EnergyNode.js');
 module.exports = class clientEngine {
     constructor({
         FRAMERATE = 60,
-        DARKNESS = 0.5, //1 full dark, 0 full light
-        BRIGHTNESS = 0.5, //1 full white, 0 no light
+        DARKNESS = 1, //1 full dark, 0 full light
+        BRIGHTNESS = 1, //1 full white, 0 no light
         gridSize = 32,
         mainCanvas = null,
         backgroundCanvas = null,
@@ -29,7 +29,7 @@ module.exports = class clientEngine {
         this.CONTROLS = {};
         this.NETWORK = {};
         this.CAMERA = {};
-        // this.LIGHTING = {};
+        this.LIGHTING = {};
         // this.LINEOFSIGHT = {};
         this.HUD = {};
         this.BACKGROUND = {};
@@ -73,7 +73,7 @@ module.exports = class clientEngine {
         this.accumulatedDeltaTime = 0;
         this.timeTakenToUpdate = 0;
 
-        this.useRealScreenSize = true;
+        this.useRealScreenSize = false;
 
         this.windowResized();
         if (this.useRealScreenSize) {
@@ -99,7 +99,7 @@ module.exports = class clientEngine {
             engine: this
         });
         this.STATES = new StatesManager({
-            debug: this.isProduction ? false : true,
+            debug: this.isProduction ? false : false,
             debugState: this.isProduction ? false : false,
             engine: this
         });
@@ -112,18 +112,19 @@ module.exports = class clientEngine {
             canvas: hudCanvas,
             debug: this.isProduction ? false : true,
             debugButton: this.isProduction ? false : false,
-            debugCursor: this.isProduction ? false : true
+            debugCursor: this.isProduction ? false : false
         });
         this.CONTROLS = new Controls({
             debug: this.isProduction ? false : false,
             engine: this
         });
-        // this.LIGHTING = new Lighting({
-        //     debug: this.isProduction ? false : false,
-        //     engine: this,
-        //     darkness: this.DARKNESS, //darkness level 0-1
-        //     brightness: this.BRIGHTNESS
-        // });
+        this.LIGHTING = new Lighting({
+            debug: this.isProduction ? false : false,
+            canvas: lightingCanvas,
+            engine: this,
+            darkness: this.DARKNESS, //darkness level 0-1
+            brightness: this.BRIGHTNESS
+        });
         // // this.LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
         // this.LINEOFSIGHT = new LineOfSight({
         //     debug: this.isProduction ? false : false,
@@ -238,6 +239,9 @@ module.exports = class clientEngine {
         this.STATES.draw(this.deltaTime);
         if (this.debug) this.performanceCheckPoint('statesDraw');
 
+        // this.LIGHTING.draw(this.deltaTime);
+        // if (this.debug) this.performanceCheckPoint('lightingDraw');
+
         //World drawing
         // let objectsToDraw = {};
         // if (this.WORLD != null && this.WORLD.grid != null) {
@@ -288,6 +292,7 @@ module.exports = class clientEngine {
                     deltaTime: this.deltaTime,
                     timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
                     timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
+                    timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
                     // timeWorldDraw:
                     //     Math.round(
                     //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100

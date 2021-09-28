@@ -5,8 +5,8 @@ module.exports = class Controls {
         this.ENGINE = engine;
 
         this.mouse = { x: 0, y: 0 };
-        this.mouseLocked = false;
         this.mouseLocationInWorld = { x: 0, y: 0 };
+        this.mouseLocked = false;
         this.keysBeingPressed = {};
         this.cameraMovement = {
             vx: 0,
@@ -243,19 +243,21 @@ module.exports = class Controls {
         this.handlePressedKeys();
     }
 
-    translateScreenLocToWorld(x, y) {
-        //new translate  function
-        // let diffX = (x - this.x) * this.zoomLevel;
-        // let diffY = (y - this.y) * this.zoomLevel;
-        // let offsetWidth = diffX + this.engine.width / 2;
-        // let offsetHeight = diffY + this.engine.height / 2;
-        // result.x = Math.round(offsetWidth);
-        // result.y = Math.round(offsetHeight);
-        //TODO rework with new translate function
-        return {
-            x: Math.round((x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x) / this.ENGINE.CAMERA.zoomLevel),
-            y: Math.round((y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) / this.ENGINE.CAMERA.zoomLevel)
-        };
+    translateScreenLocToWorld(result, x, y) {
+        // let diffX = (x - this.ENGINE.width / 2) / this.ENGINE.CAMERA.zoomLevel;
+        // let diffY = (y - this.ENGINE.height / 2) / this.ENGINE.CAMERA.zoomLevel;
+        // let offsetWidth = diffX + this.ENGINE.CAMERA.x;
+        // let offsetHeight = diffY + this.ENGINE.CAMERA.y;
+        // result.x = offsetWidth;
+        // result.y = offsetHeight;
+        result.x = (x - this.ENGINE.width / 2) / this.ENGINE.CAMERA.zoomLevel + this.ENGINE.CAMERA.x;
+        result.y = (y - this.ENGINE.height / 2) / this.ENGINE.CAMERA.zoomLevel + this.ENGINE.CAMERA.y;
+    }
+
+    moveMouseToCenterOfScreen() {
+        this.mouse.x = this.ENGINE.width / 2;
+        this.mouse.y = this.ENGINE.height / 2;
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 
     mouseMoved(event) {
@@ -265,7 +267,7 @@ module.exports = class Controls {
         if (this.mouse.y > this.ENGINE.height) this.mouse.y = this.ENGINE.height;
         if (this.mouse.x < 0) this.mouse.x = 0;
         if (this.mouse.y < 0) this.mouse.y = 0;
-        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 
     lockChange() {
@@ -311,6 +313,6 @@ module.exports = class Controls {
     } //setLeftClickAction
 
     updateCameraMoved() {
-        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 }; //Controls Class

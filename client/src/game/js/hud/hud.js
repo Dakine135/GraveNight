@@ -256,8 +256,6 @@ module.exports = class HUD {
             );
 
             //location in world
-            // let mouseWorld = this.ENGINE.CONTROLS.translateScreenLocToWorld(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y);
-
             this.render.save();
             this.ENGINE.CAMERA.translate(
                 this.temp.translatedLocation,

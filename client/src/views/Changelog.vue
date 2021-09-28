@@ -35,6 +35,14 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject:
+                        'Zoom Fixed, started testing with lighting. camera zoom to mouse, mouse snap to center of screen to stay on target',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Monday, 27 Sep 2021 23:05:00 -0400'
+                    }
+                },
+                {
                     subject: 'working on render distance optimisation for reducing number of drawn entities. reworking zoom again.',
                     commiter: {
                         name: 'd.welborn',
