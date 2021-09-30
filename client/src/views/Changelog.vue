@@ -35,6 +35,43 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'Created Discord Server, linked to website and invited some friends',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Thursday, 30 Sep 2021 10:05:00 -0400'
+                    }
+                },
+                {
+                    subject: 'Researching and learning about PixiJS, deciding if it is a good fit as a Render Library to leverage WebGL',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Wednesday, 29 Sep 2021 10:05:00 -0400'
+                    }
+                },
+                {
+                    subject:
+                        'Zoom Fixed, started testing with lighting. camera zoom to mouse, mouse snap to center of screen to stay on target',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Monday, 27 Sep 2021 23:05:00 -0400'
+                    }
+                },
+                {
+                    subject: 'working on render distance optimisation for reducing number of drawn entities. reworking zoom again.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Sunday, 26 Sep 2021 23:13:00 -0400'
+                    }
+                },
+                {
+                    subject:
+                        'Reworked State to be a single Object, no class instances. Reworked EnergyNode and hud to work with new state style. Saving and loading from localstorage of gamestate. removed backgroun sprites until backgroun rework. reworked many functions to re-use temp memory variables instead of allocating new memory to optimise Garbage collector. Re-use energy packet memory references. This removed the huge framerate drops on Non-incremental GC events lasting 1-2 seconds.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Sunday, 26 Sep 2021 1:50:00 -0400'
+                    }
+                },
+                {
                     subject: 'Main Title on Home page, flashlight purity effect.',
                     commiter: {
                         name: 'd.welborn',
@@ -92,7 +129,8 @@ export default {
                     }
                 },
                 {
-                    subject: 'still working on scaling/zooming, translate functions need work. cleaning up gargage collector issues on the way',
+                    subject:
+                        'still working on scaling/zooming, translate functions need work. cleaning up gargage collector issues on the way',
                     commiter: {
                         name: 'welbordn',
                         date: 'Tue, 14 Sep 2021 23:48:46 -0400'

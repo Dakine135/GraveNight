@@ -11,17 +11,11 @@ function randomColor() {
 }
 exports.randomColor = randomColor;
 
-function colorBlend(startColor, endColor, fraction) {
-    let diffR = endColor.r - startColor.r;
-    let diffG = endColor.g - startColor.g;
-    let diffB = endColor.b - startColor.b;
-    let diffA = endColor.a - startColor.a;
-    return {
-        r: Math.floor(startColor.r + diffR * fraction),
-        g: Math.floor(startColor.g + diffG * fraction),
-        b: Math.floor(startColor.b + diffB * fraction),
-        a: Math.floor(startColor.a + diffA * fraction)
-    };
+function colorBlend(outputColor, startColor, endColor, fraction) {
+    outputColor.r = Math.floor(startColor.r + (endColor.r - startColor.r) * fraction);
+    outputColor.g = Math.floor(startColor.g + (endColor.g - startColor.g) * fraction);
+    outputColor.b = Math.floor(startColor.b + (endColor.b - startColor.b) * fraction);
+    outputColor.a = Math.floor(startColor.a + (endColor.a - startColor.a) * fraction);
 }
 exports.colorBlend = colorBlend;
 
@@ -92,13 +86,10 @@ exports.calculateAngle = ({ point1, point2, centerPoint = { x: 0, y: 0 } }) => {
     // return  angleOfP2 - angleOfP1;
 };
 
-exports.mapNum = ({ input, start1, end1, start2, end2 }) => {
+exports.mapNum = (input, start1, end1, start2, end2) => {
     if (input < start1) input = start1;
     else if (input > end1) input = end1;
-    let diffRange1 = end1 - start1;
-    let fractionOfFirstRange = (input - start1) / diffRange1;
-    let diffRange2 = end2 - start2;
-    return diffRange2 * fractionOfFirstRange + start2;
+    return (end2 - start2) * ((input - start1) / (end1 - start1)) + start2;
 };
 
 function cloneObject(obj) {

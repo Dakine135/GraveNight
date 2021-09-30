@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import Game from '../views/Game.vue';
+import PixiTest from '../views/PixiTest.vue';
 
 Vue.use(VueRouter);
 
@@ -23,6 +24,11 @@ const routes = [
         path: '/game',
         name: 'Game',
         component: Game
+    },
+    {
+        path: '/PixiTest',
+        name: 'PixiTest',
+        component: PixiTest
     }
 ];
 

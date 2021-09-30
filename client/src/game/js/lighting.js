@@ -1,10 +1,8 @@
 const Hitbox = require('../shared/Hitbox.js');
 const Utilities = require('../shared/Utilities.js');
-const Grid = require('../shared/Grid.js');
-const World = require('../shared/World.js');
-const State = require('../shared/State.js');
+
 // import LineOfSightWorker from 'worker-loader!./lineOfSightWorker.js';
-const LineOfSightWorker = require('./lineOfSight.worker.js');
+// const LineOfSightWorker = require('./lineOfSight.worker.js');
 
 module.exports = class lighting {
     constructor({ debug = false, engine = null, darkness = 0.9, brightness = 0.9, canvas = null }) {
@@ -15,8 +13,6 @@ module.exports = class lighting {
             this.darkness = darkness * 0.8;
             this.brightness = brightness * 0.8;
         }
-        //main canvas that exists in dom
-        // this.canvas = document.getElementById(divId);
         this.canvas = canvas;
         this.canvas.width = this.ENGINE.width;
         this.canvas.height = this.ENGINE.height;
@@ -28,11 +24,14 @@ module.exports = class lighting {
         this.offscreenRender = this.offscreenCanvas.getContext('2d');
         this.debug = debug;
         this.lightSources = {};
-        this.objectsInRange = {};
-        this.myPlayer == null;
 
-        //contains cached info about how to draw each players light
-        this.playersToDraw = {};
+        this.temp = {
+            translatedLocation: { x: 0, y: 0 }
+        };
+
+        //testing
+        this.skipAmount = 30;
+        this.drawSkipsLeft = 0;
 
         console.log('Created lighting-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
@@ -60,94 +59,12 @@ module.exports = class lighting {
         };
     } //create light source
 
-    update(deltaTime, objectsToDraw, myPlayer, playersInRange) {
-        this.objectsInRange = objectsToDraw;
+    update(deltaTime) {
         if (this.debug) {
-            this.ENGINE.HUD.debugUpdate({
-                ObjectsInRangeLighting: Object.keys(this.objectsInRange).length
-            });
         }
-        if (myPlayer != null) {
-            this.myPlayer = myPlayer;
-        }
-
-        for (var id in playersInRange) {
-            let player = playersInRange[id];
-            if (this.playersToDraw[id] == null) {
-                //create entry
-                let newPlayerInRange = {};
-                newPlayerInRange.lineOfSightOrigin = { x: player.x, y: player.y };
-                // render.fillRect(obj.width/4, obj.height/2, obj.width/2, obj.height/4);
-                let x = player.x + player.width * 2;
-                let y = player.y + player.height * 2;
-                newPlayerInRange.lineOfSightFlashlightOrigin = this.ENGINE.CAMERA.rotatePoint({
-                    center: newPlayerInRange.lineOfSightOrigin,
-                    point: { x: x, y: y },
-                    angle: player.angle
-                });
-                newPlayerInRange.lineOfSightWorker = new LineOfSightWorker();
-                newPlayerInRange.listOfPoints = [];
-                newPlayerInRange.workerCalculating == false;
-                newPlayerInRange.timeSinceLastUpdate = 0;
-                newPlayerInRange.offset = this.ENGINE.CAMERA;
-                //canvas for light point calculations
-                newPlayerInRange.flashlightGlowCanvas = document.createElement('canvas');
-                newPlayerInRange.flashlightGlowCanvas.width = this.ENGINE.width;
-                newPlayerInRange.flashlightGlowCanvas.height = this.ENGINE.height;
-                newPlayerInRange.flashlightGlowRender = newPlayerInRange.flashlightGlowCanvas.getContext('2d');
-                //canvas for light cone calculations
-                newPlayerInRange.flashlightConeCanvas = document.createElement('canvas');
-                newPlayerInRange.flashlightConeCanvas.width = this.ENGINE.width;
-                newPlayerInRange.flashlightConeCanvas.height = this.ENGINE.height;
-                newPlayerInRange.flashlightConeRender = newPlayerInRange.flashlightConeCanvas.getContext('2d');
-                let that = this;
-                newPlayerInRange.lineOfSightWorker.onmessage = function (event) {
-                    // console.log("return from worker:", event.data);
-                    newPlayerInRange.listOfPoints = event.data.points;
-                    newPlayerInRange.offset = event.data.offset;
-                    let originPTrans = that.ENGINE.CAMERA.translate(newPlayerInRange.lineOfSightFlashlightOrigin);
-                    let lineOfSight = that.getLineOfSightPath({
-                        listOfPoints: newPlayerInRange.listOfPoints,
-                        origin: originPTrans,
-                        distance: that.ENGINE.renderDistance
-                    });
-                    newPlayerInRange.lineOfSightPath = lineOfSight;
-                    newPlayerInRange.workerCalculating = false;
-                }.bind(newPlayerInRange);
-                this.playersToDraw[id] = newPlayerInRange;
-            } //create new player in range entry for lighting
-            else {
-                //update entry
-                let playerLightEntry = this.playersToDraw[id];
-                playerLightEntry.lineOfSightOrigin = { x: player.x, y: player.y };
-                let x = player.x + player.width * 0.5;
-                let y = player.y + player.height * 0.625;
-                playerLightEntry.lineOfSightFlashlightOrigin = this.ENGINE.CAMERA.rotatePoint({
-                    center: playerLightEntry.lineOfSightOrigin,
-                    point: { x: x, y: y },
-                    angle: player.angle
-                });
-            } //update existing
-
-            let playerLightEntry = this.playersToDraw[id];
-
-            //TODO each line of sight needs its own objects in range
-            //update the lineOfSight
-            playerLightEntry.timeSinceLastUpdate += deltaTime;
-            if (!playerLightEntry.workerCalculating && playerLightEntry.timeSinceLastUpdate > 16) {
-                playerLightEntry.timeSinceLastUpdate = 0;
-                playerLightEntry.workerCalculating = true;
-                playerLightEntry.lineOfSightWorker.postMessage({
-                    objectsInRange: this.objectsInRange,
-                    origin: playerLightEntry.lineOfSightFlashlightOrigin,
-                    renderDistance: this.ENGINE.renderDistance,
-                    camera: { x: this.ENGINE.CAMERA.x, y: this.ENGINE.CAMERA.y, width: this.ENGINE.width, height: this.ENGINE.height }
-                });
-            } //if worker is not still busy with the last calculation
-        } //for each player in range
     } //update
 
-    draw(state) {
+    draw() {
         // console.log("drawing lighting");
 
         this.render.globalCompositeOperation = 'source-over';
@@ -166,11 +83,42 @@ module.exports = class lighting {
         this.render.fillRect(0, 0, this.ENGINE.width, this.ENGINE.height);
         this.render.restore();
 
-        //clear the canvas
+        //draw lights for the energy nodes
+        // this.offscreenRender.fillStyle = 'white';
         this.offscreenRender.save();
-        this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
-        this.offscreenRender.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
-        this.offscreenRender.beginPath();
+        if (this.drawSkipsLeft == 0) {
+            //clear the offscreen canvas
+            this.offscreenRender.setTransform(1, 0, 0, 1, 0, 0);
+            this.offscreenRender.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
+            this.offscreenRender.beginPath();
+            this.ENGINE.CAMERA.translate(this.temp.translatedLocation, 0, 0);
+            this.offscreenRender.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+            this.offscreenRender.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+            this.ENGINE.STATES.temp.nearbyDraw.forEach((entity) => {
+                if ((entity.type = 'EnergyNode')) {
+                    this.offscreenRender.beginPath();
+                    this.temp.lightIntensity = Utilities.mapNum(entity.heat, 0, 1000, 100, 300);
+                    this.temp.gradientRest = this.offscreenRender.createRadialGradient(
+                        entity.x,
+                        entity.y,
+                        this.temp.lightIntensity * 0.2,
+                        entity.x,
+                        entity.y,
+                        this.temp.lightIntensity
+                    );
+                    this.temp.gradientRest.addColorStop(0, 'rgba(255, 255, 255, ' + this.brightness + ')');
+                    this.temp.gradientRest.addColorStop(0.9, 'rgba(255, 255, 255, ' + this.brightness * 0.3 + ')');
+                    this.temp.gradientRest.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    this.offscreenRender.fillStyle = this.temp.gradientRest;
+                    this.offscreenRender.arc(entity.x, entity.y, this.temp.lightIntensity, 0, Math.PI * 2);
+                    this.offscreenRender.fill();
+                    this.offscreenRender.closePath();
+                }
+            });
+            this.drawSkipsLeft = this.skipAmount;
+        }
+        this.drawSkipsLeft--;
+
         this.offscreenRender.restore();
 
         //draw light sources
@@ -183,80 +131,11 @@ module.exports = class lighting {
         // 	});
         // }// for every light source
 
-        for (var id in this.playersToDraw) {
-            let playerToDraw = this.playersToDraw[id];
-            let playerInState = state.players[id];
-
-            if (playerToDraw.lineOfSightPath) {
-                // let width = Math.PI/2;
-                // let intensityFlashLight = 300;
-                // let intensityGlow = 300;
-                let width = Utilities.mapNum({
-                    input: playerInState.flashlightFocus,
-                    start1: 0,
-                    end1: 1,
-                    start2: Math.PI * 0.1,
-                    end2: Math.PI
-                });
-                let intensityFlashLight = Utilities.mapNum({
-                    input: 1 - playerInState.flashlightFocus,
-                    start1: 0,
-                    end1: 1,
-                    start2: playerInState.energy,
-                    end2: playerInState.energy * 2
-                });
-                let brightnessFlashLight = Utilities.mapNum({
-                    input: 1 - playerInState.flashlightFocus,
-                    start1: 0,
-                    end1: 1,
-                    start2: 0,
-                    end2: this.brightness
-                });
-                let intensityGlow = Utilities.mapNum({
-                    input: 1 - playerInState.flashlightFocus,
-                    start1: 0,
-                    end1: 1,
-                    start2: playerInState.energy * 0.9,
-                    end2: playerInState.energy * 0.2
-                });
-                let brightnessGlow = Utilities.mapNum({
-                    input: 1 - playerInState.flashlightFocus,
-                    start1: 0,
-                    end1: 1,
-                    start2: this.brightness * 0.8,
-                    end2: this.brightness * 0.3
-                });
-                this.drawLightCone({
-                    x: playerToDraw.lineOfSightFlashlightOrigin.x,
-                    y: playerToDraw.lineOfSightFlashlightOrigin.y,
-                    angle: playerInState.angle, //player.angle
-                    intensity: intensityFlashLight,
-                    brightness: brightnessFlashLight,
-                    width: width,
-                    lineOfSight: playerToDraw.lineOfSightPath,
-                    offset: playerToDraw.offset,
-                    canvas: playerToDraw.flashlightConeCanvas,
-                    render: playerToDraw.flashlightConeRender
-                });
-
-                this.drawLightPoint({
-                    x: playerToDraw.lineOfSightFlashlightOrigin.x,
-                    y: playerToDraw.lineOfSightFlashlightOrigin.y,
-                    intensity: intensityGlow,
-                    brightness: brightnessGlow,
-                    lineOfSight: playerToDraw.lineOfSightPath,
-                    offset: playerToDraw.offset,
-                    canvas: playerToDraw.flashlightGlowCanvas,
-                    render: playerToDraw.flashlightGlowRender
-                });
-            } //only if line of sight path is ready
-        } // every player in playersToDraw Lighting
-
         this.render.globalCompositeOperation = 'xor';
         this.render.drawImage(this.offscreenCanvas, 0, 0);
     } //draw
 
-    addGowingObject({ intensity, obj }) {
+    addGlowingObject({ intensity, obj }) {
         if (obj == null) return;
         //TODO technically this is applied per frame and will be effected by frame rate
         intensity = intensity / 20;
@@ -284,32 +163,37 @@ module.exports = class lighting {
         darkness = this.darkness,
         lineOfSight = null,
         offset = { x: 0, y: 0 },
-        canvas = null,
-        render = null
+        canvas = this.offscreenCanvas,
+        render = this.offscreenRender
     }) {
         // console.log("lightdraw:",intensity);
         if (intensity <= 0) {
             return;
         }
-        let origin = {
-            x: Math.round(x),
-            y: Math.round(y)
-        };
-        let originPTrans = this.ENGINE.CAMERA.translate(origin);
 
-        let offsetX = Math.round(offset.x - this.ENGINE.CAMERA.x);
-        let offsetY = Math.round(offset.y - this.ENGINE.CAMERA.y);
+        let originPTrans = { x: 0, y: 0 };
+        this.ENGINE.CAMERA.translate(originPTrans, x, y);
 
-        //draw full line-of-Sight
-        if (lineOfSight) {
-            render.save();
-            render.fillStyle = 'white';
-            render.translate(offsetX, offsetY);
-            render.fill(lineOfSight);
-            render.restore();
-        }
+        // let offsetX = Math.round(offset.x - this.ENGINE.CAMERA.x);
+        // let offsetY = Math.round(offset.y - this.ENGINE.CAMERA.y);
+
+        // //draw full line-of-Sight
+        // if (lineOfSight) {
+        //     render.save();
+        //     render.fillStyle = 'white';
+        //     render.translate(offsetX, offsetY);
+        //     render.fill(lineOfSight);
+        //     render.restore();
+        // }
         //glow gradient
-        let gradientRest = render.createRadialGradient(originPTrans.x, originPTrans.y, intensity * 0.2, originPTrans.x, originPTrans.y, intensity);
+        let gradientRest = render.createRadialGradient(
+            originPTrans.x,
+            originPTrans.y,
+            intensity * 0.2,
+            originPTrans.x,
+            originPTrans.y,
+            intensity
+        );
         gradientRest.addColorStop(0, 'rgba(255, 255, 255, ' + brightness + ')');
         gradientRest.addColorStop(0.9, 'rgba(255, 255, 255, ' + brightness * 0.3 + ')');
         gradientRest.addColorStop(1, 'rgba(255, 255, 255, 0)');
@@ -404,7 +288,14 @@ module.exports = class lighting {
         render.fill(lineOfSight);
         render.restore();
         //cone gradient
-        let gradient = render.createRadialGradient(originPTrans.x, originPTrans.y, intensity * 0.2, originPTrans.x, originPTrans.y, intensity);
+        let gradient = render.createRadialGradient(
+            originPTrans.x,
+            originPTrans.y,
+            intensity * 0.2,
+            originPTrans.x,
+            originPTrans.y,
+            intensity
+        );
         gradient.addColorStop(0, 'rgba(255, 255, 255, ' + brightness + ')');
         gradient.addColorStop(0.7, 'rgba(255, 255, 255, ' + brightness * 0.3 + ')');
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');

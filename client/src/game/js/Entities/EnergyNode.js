@@ -1,220 +1,299 @@
 const Utilities = require('../../shared/Utilities.js');
 const Hitbox = require('../../shared/Hitbox.js');
-module.exports = class EnergyNode {
-    constructor({ id = null, x = 0, y = 0, debug = false, engine = null } = {}) {
-        this.ENGINE = engine;
-        this.x = x;
-        this.y = y;
-        this.id = id;
-        this.heat = 0;
-        this.maxHeat = 2000;
-        this.radius = 12;
-        this.distanceCanLink = 100;
-        this.travelMax = 2000;
-        this.debug = debug;
-        this.startColor = { r: 0, g: 255, b: 0, a: 1 };
-        this.endColor = { r: 255, g: 255, b: 0, a: 1 };
-        this.currentStartColor = { r: 0, g: 255, b: 0, a: 1 };
-        this.currentEndColor = { r: 255, g: 255, b: 0, a: 1 };
-        this.hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
-        this.hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
-        this.energyPackets = [
-            {
-                travel: this.travelMax,
-                x: this.distanceCanLink,
-                y: 0,
-                startX: this.distanceCanLink,
-                startY: 0,
-                fromId: null
-            }
-        ];
-        this.selected = false;
-        this.canBePlaced = true;
 
-        this.otherLinkableEntities = this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
-        this.currentLinkIndex = 0;
+const travelMax = 2000;
+const distanceCanLink = 100;
+const maxHeat = 2000;
+const radius = 12;
+const startColor = { r: 0, g: 255, b: 0, a: 1 };
+const endColor = { r: 255, g: 255, b: 0, a: 1 };
+const hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
+const hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
+module.exports = EnergyNodeClass = {
+    type: 'EnergyNode',
+    travelMax: 2000,
+    distanceCanLink: 100,
+    maxHeat: 2000,
+    radius: 12,
+    startColor: { r: 0, g: 255, b: 0, a: 1 },
+    endColor: { r: 255, g: 255, b: 0, a: 1 },
+    hotStartColor: { r: 255, g: 0, b: 255, a: 1 },
+    hotEndColor: { r: 255, g: 0, b: 0, a: 1 },
+    availableEnergyPackets: [],
+    new({ id = null, x = 0, y = 0, debug = false, ENGINE = null } = {}) {
+        let newEnergyNode = {
+            type: 'EnergyNode',
+            x: x,
+            y: y,
+            id: id,
+            heat: 0,
+            debug: debug,
+            currentStartColor: { r: 0, g: 255, b: 0, a: 1 },
+            currentEndColor: { r: 255, g: 255, b: 0, a: 1 },
+            energyPackets: [
+                {
+                    travel: travelMax,
+                    x: distanceCanLink,
+                    y: 0,
+                    startX: distanceCanLink,
+                    startY: 0,
+                    fromId: null
+                }
+            ],
+            selected: false,
+            canBePlaced: true,
+            otherLinkableEntities: [],
+            currentLinkIndex: 0,
+            temp: { linkTo: [], translatedLocation: { x: 0, y: 0 } }
+        };
+
+        ENGINE.STATES.getEntitiesInRange(newEnergyNode.otherLinkableEntities, 'energyLinkableEntities', { x, y }, distanceCanLink);
 
         //add yourself to others linkable
-        this.otherLinkableEntities.forEach((otherLinkable) => {
-            otherLinkable.otherLinkableEntities.push(this);
+        newEnergyNode.otherLinkableEntities.forEach((otherLinkable) => {
+            otherLinkable.otherLinkableEntities.push(newEnergyNode);
         });
 
-        if (debug) console.log('Created EnergyNode at', this.x, this.y);
-    } //constructor
+        if (debug) console.log('Created EnergyNode at', x, y);
+        return newEnergyNode;
+    }, //constructor
 
-    update(deltaTime) {
+    update(ENGINE, deltaTime) {
         //update heat and color
         this.selected = false;
-        this.heat -= deltaTime;
+        this.heat -= deltaTime / 2;
         if (this.heat < 0) this.heat = 0;
-        if (this.heat > this.maxHeat) this.heat = this.maxHeat;
-        this.currentStartColor = Utilities.colorBlend(this.startColor, this.hotStartColor, this.heat / this.maxHeat);
-        this.currentEndColor = Utilities.colorBlend(this.endColor, this.hotEndColor, this.heat / this.maxHeat);
+        if (this.heat > maxHeat) this.heat = maxHeat;
+        Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
+        Utilities.colorBlend(this.currentEndColor, endColor, hotEndColor, this.heat / maxHeat);
+        // console.log('this.currentStartColor :>> ', this.currentStartColor);
 
         for (let i = this.energyPackets.length - 1; i >= 0; i--) {
             this.energyPackets[i].travel -= deltaTime;
             if (this.energyPackets[i].travel <= 0) {
                 //TODO dont send, but delete if at max heat
-                this.sendPacketOut(this.energyPackets[i].fromId);
+                ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.push(this.energyPackets[i]);
+                ENGINE.ENTITY_CLASSES['EnergyNode'].sendPacketOut.bind(this)(ENGINE, this.energyPackets[i].fromId);
                 this.energyPackets.splice(i, 1);
                 continue;
             }
-            this.energyPackets[i].x = (this.energyPackets[i].travel / this.travelMax) * this.energyPackets[i].startX;
-            this.energyPackets[i].y = (this.energyPackets[i].travel / this.travelMax) * this.energyPackets[i].startY;
+            this.energyPackets[i].x = (this.energyPackets[i].travel / travelMax) * this.energyPackets[i].startX;
+            this.energyPackets[i].y = (this.energyPackets[i].travel / travelMax) * this.energyPackets[i].startY;
         }
-    }
+    },
 
-    sendPacketOut(previouslyFromId) {
+    sendPacketOut(ENGINE, previouslyFromId) {
         // console.log('sendPacketOut');
         //generate heat as packets pass through EnergyNode
-        this.heat += 500; //TODO re-balance
+        this.heat += 100; //TODO re-balance
         //check for Entities in range that want to consume packets
 
         //else pass to next Energy Node
         if (this.otherLinkableEntities.length > 0) {
-            let sendTo = this.otherLinkableEntities[this.currentLinkIndex];
+            this.temp.sendTo = this.otherLinkableEntities[this.currentLinkIndex];
+            // console.log('this.temp.sendTo :>> ', this.temp.sendTo);
+            // console.log('this.otherLinkableEntities :>> ', this.otherLinkableEntities);
             this.currentLinkIndex++;
             if (this.currentLinkIndex >= this.otherLinkableEntities.length) this.currentLinkIndex = 0;
-            if (sendTo.id == previouslyFromId && this.otherLinkableEntities.length > 1) {
-                this.sendPacketOut(previouslyFromId);
+            if (this.temp.sendTo.id == previouslyFromId && this.otherLinkableEntities.length > 1) {
+                ENGINE.ENTITY_CLASSES['EnergyNode'].sendPacketOut.bind(this)(ENGINE, previouslyFromId);
                 return;
             }
-            sendTo.receivePacket(this.x, this.y, this.id);
+            ENGINE.ENTITY_CLASSES['EnergyNode'].receivePacket.bind(this.temp.sendTo)(ENGINE, this.x, this.y, this.id);
         }
 
         //If nowhere to pass, send back, else dont spawn packet, aka lost energy
-    }
+    },
 
-    receivePacket(x, y, fromId) {
-        let travel = Math.round((Utilities.dist({ x, y }, { x: this.x, y: this.y }) / this.distanceCanLink) * this.travelMax);
+    receivePacket(ENGINE, x, y, fromId) {
+        let travel = Math.round((Utilities.dist({ x, y }, { x: this.x, y: this.y }) / distanceCanLink) * travelMax);
         // console.log('receivePacket, travel, fromId,x,y :>> ', travel, fromId, x, y);
-        let newPacket = { travel: travel, x: x - this.x, y: y - this.y, startX: x - this.x, startY: y - this.y, fromId };
-        this.energyPackets.push(newPacket);
-    }
+        // availableEnergyPackets
+        if (ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.length > 0) {
+            let reusePacket = ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.pop();
+            (reusePacket.travel = travel),
+                (reusePacket.x = x - this.x),
+                (reusePacket.y = y - this.y),
+                (reusePacket.startX = x - this.x),
+                (reusePacket.startY = y - this.y),
+                (reusePacket.fromId = fromId);
+            this.energyPackets.push(reusePacket);
+        } else {
+            let newPacket = { travel: travel, x: x - this.x, y: y - this.y, startX: x - this.x, startY: y - this.y, fromId };
+            this.energyPackets.push(newPacket);
+        }
+    },
 
-    draw0(deltaTime) {
+    draw0(ENGINE) {
         // Start a new drawing state
-        this.ENGINE.render.save();
-        let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
-        this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+        ENGINE.render.save();
+        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
         if (this.debug) {
-            this.ENGINE.render.fillStyle = 'black';
-            this.ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), this.radius + 2, this.radius + 2);
+            ENGINE.render.fillStyle = 'black';
+            ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
         }
 
         //show distance to link
         if (this.selected) {
-            this.ENGINE.render.beginPath();
-            this.ENGINE.render.strokeStyle = 'blue';
-            this.ENGINE.render.lineWidth = 1;
-            this.ENGINE.render.arc(0, 0, this.distanceCanLink, 0, 2 * Math.PI);
-            this.ENGINE.render.stroke();
-            this.ENGINE.render.closePath();
-            this.ENGINE.render.beginPath();
-            this.ENGINE.render.strokeStyle = 'orange';
-            this.ENGINE.render.lineWidth = 1;
-            this.ENGINE.render.arc(0, 0, this.distanceCanLink + this.ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
-            this.ENGINE.render.stroke();
-            this.ENGINE.render.closePath();
+            ENGINE.render.beginPath();
+            ENGINE.render.strokeStyle = 'blue';
+            ENGINE.render.lineWidth = 1;
+            ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
+            ENGINE.render.stroke();
+            ENGINE.render.closePath();
+            ENGINE.render.beginPath();
+            ENGINE.render.strokeStyle = 'orange';
+            ENGINE.render.lineWidth = 1;
+            ENGINE.render.arc(0, 0, distanceCanLink + ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
+            ENGINE.render.stroke();
+            ENGINE.render.closePath();
         }
 
         //draw main body
-        this.ENGINE.render.beginPath();
+        ENGINE.render.beginPath();
         // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
-        if (this.ENGINE.CAMERA.zoomLevel <= 0.5) {
-            this.ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
-            this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-            this.ENGINE.render.fill();
-            this.ENGINE.render.closePath();
+        if (ENGINE.CAMERA.zoomLevel <= 0.5) {
+            ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
+            ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+            ENGINE.render.fill();
+            ENGINE.render.closePath();
         } else {
-            let gradient = this.ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-            gradient.addColorStop(0, `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`);
-            gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`);
-            this.ENGINE.render.fillStyle = gradient;
+            let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
+            gradient.addColorStop(
+                0,
+                `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
+            );
+            gradient.addColorStop(
+                1,
+                `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`
+            );
+            ENGINE.render.fillStyle = gradient;
             //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
-            this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-            this.ENGINE.render.fill();
-            this.ENGINE.render.closePath();
+            ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+            ENGINE.render.fill();
+            ENGINE.render.closePath();
         }
 
-        this.ENGINE.render.restore(); // Restore original state
-    } //end Draw
+        ENGINE.render.restore(); // Restore original state
+    }, //end Draw
 
-    draw1(deltaTime) {
+    draw1(ENGINE) {
         //draw energyPackets
-        if (this.ENGINE.CAMERA.zoomLevel >= 0.5) {
-            this.ENGINE.render.save();
-            let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-            this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
-            this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+        if (ENGINE.CAMERA.zoomLevel > 0.5) {
+            ENGINE.render.save();
+            ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+            ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+            ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
             this.energyPackets.forEach((packet) => {
-                this.ENGINE.render.beginPath();
-                this.ENGINE.render.fillStyle = 'white';
-                this.ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
-                this.ENGINE.render.fill();
-                this.ENGINE.render.closePath();
+                ENGINE.render.beginPath();
+                ENGINE.render.fillStyle = 'white';
+                ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
+                ENGINE.render.fill();
+                ENGINE.render.closePath();
             });
-            this.ENGINE.render.restore(); // Restore original state
+            ENGINE.render.restore(); // Restore original state
         }
-    }
+    },
 
-    drawGhost() {
+    drawGhost(ENGINE) {
+        // console.log('ENGINE :>> ', ENGINE);
         // Start a new drawing state
-        this.ENGINE.render.save();
-        let translatedLocation = this.ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        this.ENGINE.render.translate(translatedLocation.x, translatedLocation.y);
-        this.ENGINE.render.scale(this.ENGINE.CAMERA.zoomLevel, this.ENGINE.CAMERA.zoomLevel);
+        ENGINE.render.save();
+        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
         //EnergyNode location for debugging
         if (this.debug) {
-            this.ENGINE.render.fillStyle = 'black';
-            this.ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), this.radius + 2, this.radius + 2);
+            ENGINE.render.fillStyle = 'black';
+            ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
         }
 
-        this.ENGINE.render.strokeStyle = 'blue';
-        if (!this.canBePlaced) this.ENGINE.render.strokeStyle = 'red';
-        this.ENGINE.render.lineWidth = 1;
+        ENGINE.render.strokeStyle = 'blue';
+        if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
+        ENGINE.render.lineWidth = 1;
 
         //get linkable Nodes
-        let linkTo = this.ENGINE.STATES.getEntitiesInRange('energyLinkableEntities', this, this.distanceCanLink);
-        let relativeLocation;
+        ENGINE.STATES.getEntitiesInRange(this.temp.linkTo, 'energyLinkableEntities', this, distanceCanLink);
         this.canBePlaced = true;
-        let overlapping = false;
-        linkTo.forEach((otherNode) => {
-            overlapping = Hitbox.collideCircleCircle({ x: this.x, y: this.y, r: this.radius }, { x: otherNode.x, y: otherNode.y, r: otherNode.radius });
-            if (overlapping) this.canBePlaced = false;
-            relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
-            this.ENGINE.render.beginPath();
-            this.ENGINE.render.moveTo(0, 0);
-            this.ENGINE.render.lineTo(relativeLocation.x, relativeLocation.y);
-            this.ENGINE.render.stroke();
-            this.ENGINE.render.closePath();
+        this.temp.overlapping = false;
+        this.temp.linkTo.forEach((otherNode) => {
+            this.temp.overlapping = Hitbox.collideCircleCircle(
+                { x: this.x, y: this.y, r: radius },
+                { x: otherNode.x, y: otherNode.y, r: radius }
+            );
+            if (this.temp.overlapping) this.canBePlaced = false;
+            this.temp.relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
+            ENGINE.render.beginPath();
+            ENGINE.render.moveTo(0, 0);
+            ENGINE.render.lineTo(this.temp.relativeLocation.x, this.temp.relativeLocation.y);
+            ENGINE.render.stroke();
+            ENGINE.render.closePath();
         });
-        //not sure if helpful to speed up GC
-        linkTo = undefined;
-        relativeLocation = undefined;
 
         //show distance to link
-        this.ENGINE.render.beginPath();
-        this.ENGINE.render.strokeStyle = 'blue';
-        if (!this.canBePlaced) this.ENGINE.render.strokeStyle = 'red';
-        this.ENGINE.render.lineWidth = 1;
-        this.ENGINE.render.arc(0, 0, this.distanceCanLink, 0, 2 * Math.PI);
-        this.ENGINE.render.stroke();
-        this.ENGINE.render.closePath();
+        ENGINE.render.beginPath();
+        ENGINE.render.strokeStyle = 'blue';
+        if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
+        ENGINE.render.lineWidth = 1;
+        ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
+        ENGINE.render.stroke();
+        ENGINE.render.closePath();
         //main body
-        this.ENGINE.render.beginPath();
-        let gradient = this.ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-        gradient.addColorStop(0, `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`);
-        gradient.addColorStop(1, `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`);
-        this.ENGINE.render.fillStyle = gradient;
-        this.ENGINE.render.arc(0, 0, this.radius, 0, 2 * Math.PI);
-        this.ENGINE.render.fill();
-        this.ENGINE.render.closePath();
+        ENGINE.render.beginPath();
+        let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
+        gradient.addColorStop(
+            0,
+            `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`
+        );
+        gradient.addColorStop(
+            1,
+            `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`
+        );
+        ENGINE.render.fillStyle = gradient;
+        ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+        ENGINE.render.fill();
+        ENGINE.render.closePath();
 
-        this.ENGINE.render.restore(); // Restore original state
-    } //draw ghost
+        ENGINE.render.restore(); // Restore original state
+    }, //draw ghost
+
+    toJSON() {
+        return {
+            type: 'EnergyNode',
+            x: this.x,
+            y: this.y,
+            id: this.id,
+            heat: this.heat,
+            currentStartColor: this.currentStartColor,
+            currentEndColor: this.currentEndColor,
+            energyPackets: this.energyPackets,
+            otherLinkableEntities: this.otherLinkableEntities.map((other) => {
+                if (other.id == null) {
+                    console.log('other :>> ', other);
+                }
+                return other.id;
+            }),
+            currentLinkIndex: this.currentLinkIndex
+        };
+    },
+    restoreFromSave(STATES, energyNode) {
+        (energyNode.debug = false),
+            (energyNode.selected = false),
+            (energyNode.canBePlaced = true),
+            (energyNode.otherLinkableEntities = energyNode.otherLinkableEntities.map((id) => {
+                if (STATES.currentState.entities[id] == null) {
+                    console.log('energyNode.id :>> ', energyNode.id);
+                    console.log('id :>> ', id);
+                    console.log('STATES.currentState.entities[id] :>> ', STATES.currentState.entities[id]);
+                    console.log('energyNode.otherLinkableEntities :>> ', JSON.stringify(energyNode.otherLinkableEntities));
+                }
+                return STATES.currentState.entities[id];
+            })),
+            (energyNode.temp = { linkTo: [], translatedLocation: { x: 0, y: 0 } });
+    }
 }; //end EnergyNode Class

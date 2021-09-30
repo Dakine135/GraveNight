@@ -2,8 +2,8 @@
     <div>
         <div id="stage" ref="stage">
             <canvas id="hud-layer" ref="hud-layer">Your browser does not support HTML5 canvas</canvas>
-            <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas>
-            <canvas id="lighting-layer" ref="lighting-layer"></canvas> -->
+            <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas> -->
+            <canvas id="lighting-layer" ref="lighting-layer"></canvas>
             <canvas id="main-layer" ref="main-layer"></canvas>
             <canvas id="background-layer" ref="background-layer"></canvas>
         </div>
@@ -54,7 +54,14 @@ export default {
         let lightingCanvas = this.$refs['lighting-layer'];
         let lineOfSightCanvas = this.$refs['lineOfSight-layer'];
         let hudCanvas = this.$refs['hud-layer'];
-        this.engine = new EngineClass({ mainCanvas: mainLayerCanvas, stage, backgroundCanvas, lightingCanvas, lineOfSightCanvas, hudCanvas });
+        this.engine = new EngineClass({
+            mainCanvas: mainLayerCanvas,
+            stage,
+            backgroundCanvas,
+            lightingCanvas,
+            lineOfSightCanvas,
+            hudCanvas
+        });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
         this.setup();
         this.draw();
@@ -71,16 +78,20 @@ body {
 /*Stuff to make the full screen better and remove cursor*/
 canvas {
     position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     /* cursor: none; */
 }
 #stage {
     position: fixed;
     left: 0;
     top: 0;
-    /*width:100%;
-                height:100%;*/
+    width: 100%;
+    height: 100%;
     /*border: 1px solid white;*/
-    /*margin: 0 auto;*/
+    margin: 0 auto;
 }
 #hud-layer {
     z-index: 5;

@@ -5,8 +5,8 @@ module.exports = class Controls {
         this.ENGINE = engine;
 
         this.mouse = { x: 0, y: 0 };
-        this.mouseLocked = false;
         this.mouseLocationInWorld = { x: 0, y: 0 };
+        this.mouseLocked = false;
         this.keysBeingPressed = {};
         this.cameraMovement = {
             vx: 0,
@@ -61,7 +61,8 @@ module.exports = class Controls {
         // window.addEventListener('mousemove', this.mouseMoved.bind(this));
         // pointer lock object forking for cross browser
 
-        this.ENGINE.HUD.canvas.requestPointerLock = this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
+        this.ENGINE.HUD.canvas.requestPointerLock =
+            this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
         document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
         this.ENGINE.HUD.canvas.onclick = () => {
             // console.log('clicked hud canvas');
@@ -73,6 +74,8 @@ module.exports = class Controls {
         document.addEventListener('pointerlockchange', this.lockChange.bind(this), false);
         document.addEventListener('mozpointerlockchange', this.lockChange.bind(this), false);
         // this.ENGINE.HUD.canvas.requestPointerLock();
+
+        this.temp = {};
     } //constructor
 
     scrollEvent(event) {
@@ -108,6 +111,12 @@ module.exports = class Controls {
         switch (keyCode) {
             case 49: //1
                 this.ENGINE.HUD.pressButtonProgrammatically('createEnergyNode');
+                break;
+            case 50: //2
+                this.ENGINE.HUD.pressButtonProgrammatically('saveGame');
+                break;
+            case 51: //3
+                this.ENGINE.HUD.pressButtonProgrammatically('clearSave');
                 break;
             case 65: //A
             case 37: //left arrow
@@ -149,6 +158,8 @@ module.exports = class Controls {
         let validKey = true;
         switch (keyCode) {
             case 49: //1
+            case 50: //2
+            case 51: //3
                 break;
             case 65: //A
             case 37: //left arrow
@@ -182,7 +193,7 @@ module.exports = class Controls {
         if (Object.keys(this.keysBeingPressed).length == 0) return;
         Object.keys(this.keysBeingPressed).forEach((keyCode) => {
             keyCode = parseInt(keyCode);
-            let validKey = true;
+            // this.temp.validKey = true;
             switch (keyCode) {
                 case 65: //A
                 case 37: //left arrow
@@ -201,11 +212,11 @@ module.exports = class Controls {
                     this.ENGINE.CAMERA.moveGoal(0, 10);
                     break;
                 default:
-                    // console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
-                    validKey = false;
+                // console.log(`Key Not Used Held: ${keyCode} ${typeof keyCode}`);
+                // this.temp.validKey = false;
             } //switch
-            if (validKey) {
-            }
+            // if (this.temp.validKey) {
+            // }
         });
     } //handleHeldKeys
 
@@ -232,20 +243,21 @@ module.exports = class Controls {
         this.handlePressedKeys();
     }
 
-    translateScreenLocToWorld(x, y) {
-        // let offsetX = x - this.ENGINE.width;
-        // let offsetY = y - this.ENGINE.height;
-        // let diffInWidth = (this.ENGINE.CAMERA.worldViewWidth - this.ENGINE.width) / 2;
-        // let diffInHeight = (this.ENGINE.CAMERA.worldViewHeight - this.ENGINE.height) / 2;
-        // let worldX = Math.round(this.ENGINE.CAMERA.x - this.ENGINE.width / 2); /// this.ENGINE.CAMERA.zoomLevel
-        // let worldY = Math.round(this.ENGINE.CAMERA.y - this.ENGINE.height / 2);
+    translateScreenLocToWorld(result, x, y) {
+        // let diffX = (x - this.ENGINE.width / 2) / this.ENGINE.CAMERA.zoomLevel;
+        // let diffY = (y - this.ENGINE.height / 2) / this.ENGINE.CAMERA.zoomLevel;
+        // let offsetWidth = diffX + this.ENGINE.CAMERA.x;
+        // let offsetHeight = diffY + this.ENGINE.CAMERA.y;
+        // result.x = offsetWidth;
+        // result.y = offsetHeight;
+        result.x = (x - this.ENGINE.width / 2) / this.ENGINE.CAMERA.zoomLevel + this.ENGINE.CAMERA.x;
+        result.y = (y - this.ENGINE.height / 2) / this.ENGINE.CAMERA.zoomLevel + this.ENGINE.CAMERA.y;
+    }
 
-        return {
-            // x: Math.round(x * this.zoomLevel + this.engine.width / 2 - this.x),
-            // y: Math.round(y * this.zoomLevel + this.engine.height / 2 - this.y)
-            x: Math.round((x - this.ENGINE.width / 2 + this.ENGINE.CAMERA.x) / this.ENGINE.CAMERA.zoomLevel),
-            y: Math.round((y - this.ENGINE.height / 2 + this.ENGINE.CAMERA.y) / this.ENGINE.CAMERA.zoomLevel)
-        };
+    moveMouseToCenterOfScreen() {
+        this.mouse.x = this.ENGINE.width / 2;
+        this.mouse.y = this.ENGINE.height / 2;
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 
     mouseMoved(event) {
@@ -255,7 +267,7 @@ module.exports = class Controls {
         if (this.mouse.y > this.ENGINE.height) this.mouse.y = this.ENGINE.height;
         if (this.mouse.x < 0) this.mouse.x = 0;
         if (this.mouse.y < 0) this.mouse.y = 0;
-        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 
     lockChange() {
@@ -280,7 +292,7 @@ module.exports = class Controls {
     }
 
     setLeftClickAction(action) {
-        if (this.debug) console.log('Setting left CLick Action:', action);
+        // if (this.debug) console.log('Setting left CLick Action:', action);
         switch (action) {
             case 'default':
             case 'clear':
@@ -301,6 +313,6 @@ module.exports = class Controls {
     } //setLeftClickAction
 
     updateCameraMoved() {
-        this.mouseLocationInWorld = this.translateScreenLocToWorld(this.mouse.x, this.mouse.y);
+        this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
     }
 }; //Controls Class

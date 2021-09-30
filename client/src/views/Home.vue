@@ -44,6 +44,12 @@
                             Reddit
                         </a>
                     </div>
+                    <div class="item">
+                        <a href="https://discord.gg/aBuHJuMybK">
+                            <img src="@assets/Discord-Logo-White.svg" alt="Discord Logo" title="Discord Logo" width="50" height="50" />
+                            Discord
+                        </a>
+                    </div>
                 </el-card>
             </el-col>
         </el-row>

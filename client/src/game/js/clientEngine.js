@@ -2,18 +2,21 @@ const StatesManager = require('./StateManager.js');
 const Controls = require('./clientControls.js');
 // const Networking = require('./networking.js');
 const Camera = require('./Camera.js');
-// const Lighting = require('./lighting.js');
+const Lighting = require('./lighting.js');
 // const LineOfSight = require('./lineOfSight.js');
 const Hud = require('./hud/hud.js');
 const Background = require('./background.js');
 const World = require('../shared/World.js');
 const Block = require('../shared/Block.js');
 
+//EntityClasses
+const EnergyNodeClass = require('./Entities/EnergyNode.js');
+
 module.exports = class clientEngine {
     constructor({
         FRAMERATE = 60,
-        DARKNESS = 0.5, //1 full dark, 0 full light
-        BRIGHTNESS = 0.5, //1 full white, 0 no light
+        DARKNESS = 1, //1 full dark, 0 full light
+        BRIGHTNESS = 1, //1 full white, 0 no light
         gridSize = 32,
         mainCanvas = null,
         backgroundCanvas = null,
@@ -26,7 +29,7 @@ module.exports = class clientEngine {
         this.CONTROLS = {};
         this.NETWORK = {};
         this.CAMERA = {};
-        // this.LIGHTING = {};
+        this.LIGHTING = {};
         // this.LINEOFSIGHT = {};
         this.HUD = {};
         this.BACKGROUND = {};
@@ -35,6 +38,8 @@ module.exports = class clientEngine {
         this.DARKNESS = DARKNESS; //1 full dark, 0 full light
         this.BRIGHTNESS = BRIGHTNESS; //1 full white, 0 no light
         this.gridSize = gridSize;
+
+        this.ENTITY_CLASSES = { EnergyNode: EnergyNodeClass };
 
         //main layer with players and walls
         // let divId = 'main-layer';
@@ -68,7 +73,7 @@ module.exports = class clientEngine {
         this.accumulatedDeltaTime = 0;
         this.timeTakenToUpdate = 0;
 
-        this.useRealScreenSize = true;
+        this.useRealScreenSize = false;
 
         this.windowResized();
         if (this.useRealScreenSize) {
@@ -88,9 +93,9 @@ module.exports = class clientEngine {
 
         this.CAMERA = new Camera({
             debug: this.isProduction ? false : false,
-            x: 0,
-            y: 0,
-            speed: 0.1,
+            x: 11,
+            y: -367,
+            speed: 0.5,
             engine: this
         });
         this.STATES = new StatesManager({
@@ -106,18 +111,20 @@ module.exports = class clientEngine {
             engine: this,
             canvas: hudCanvas,
             debug: this.isProduction ? false : true,
-            debugButton: this.isProduction ? false : false
+            debugButton: this.isProduction ? false : false,
+            debugCursor: this.isProduction ? false : false
         });
         this.CONTROLS = new Controls({
             debug: this.isProduction ? false : false,
             engine: this
         });
-        // this.LIGHTING = new Lighting({
-        //     debug: this.isProduction ? false : false,
-        //     engine: this,
-        //     darkness: this.DARKNESS, //darkness level 0-1
-        //     brightness: this.BRIGHTNESS
-        // });
+        this.LIGHTING = new Lighting({
+            debug: this.isProduction ? false : false,
+            canvas: lightingCanvas,
+            engine: this,
+            darkness: this.DARKNESS, //darkness level 0-1
+            brightness: this.BRIGHTNESS
+        });
         // // this.LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
         // this.LINEOFSIGHT = new LineOfSight({
         //     debug: this.isProduction ? false : false,
@@ -138,6 +145,7 @@ module.exports = class clientEngine {
         });
         // World.createBoundaries(this.WORLD);
         // World.randomWorld(this.WORLD);
+        this.temp = { translatedLocation: { x: 0, y: 0 } };
     } //constructor
 
     windowResized() {
@@ -166,6 +174,7 @@ module.exports = class clientEngine {
 
     update() {
         //updateTimings
+        let performanceStart = performance.now();
         this.deltaTimeUpdate = this.currentTime - this.lastUpdateTime;
         this.accumulatedDeltaTime += this.deltaTimeUpdate;
 
@@ -177,6 +186,13 @@ module.exports = class clientEngine {
             this.accumulatedDeltaTime -= this.targetDeltaTime;
             this.STATES.update(this.targetDeltaTime);
             this.lastUpdateTime = new Date().getTime();
+        }
+
+        let timeTaken = performance.now() - performanceStart;
+        if (this.debug && this.HUD.debug && timeTaken > 2) {
+            this.HUD.debugUpdate({
+                timeTakenToUpdate: timeTaken + 'ms'
+            });
         }
     } //update
 
@@ -207,46 +223,52 @@ module.exports = class clientEngine {
         if (this.debug) this.performanceCheckPoint('backgroundDraw');
 
         //square at 0,0
-        let origin = this.CAMERA.translate({ x: 0, y: 0 });
-        this.render.save();
-        this.render.translate(origin.x, origin.y);
-        this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
-        // let translatedLocation = ENGINE.CAMERA.translate({ x: this.x, y: this.y });
-        this.render.strokeStyle = 'black';
-        this.render.strokeRect(-10, -10, 20, 20);
-        // render.font = "px Arial";
-        this.render.textAlign = 'center';
-        this.render.fillText('0,0', 0, 0);
-        this.render.restore();
+        if (this.debug) {
+            this.CAMERA.translate(this.temp.translatedLocation, 0, 0);
+            this.render.save();
+            this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+            this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
+            this.render.strokeStyle = 'black';
+            this.render.strokeRect(-10, -10, 20, 20);
+            // render.font = "px Arial";
+            this.render.textAlign = 'center';
+            this.render.fillText('0,0', 0, 0);
+            this.render.restore();
+        }
 
         this.STATES.draw(this.deltaTime);
         if (this.debug) this.performanceCheckPoint('statesDraw');
 
+        // this.LIGHTING.draw(this.deltaTime);
+        // if (this.debug) this.performanceCheckPoint('lightingDraw');
+
         //World drawing
-        let objectsToDraw = {};
-        if (this.WORLD != null && this.WORLD.grid != null) {
-            objectsToDraw = World.getObjects({
-                world: this.WORLD,
-                x: this.CAMERA.x,
-                y: this.CAMERA.y,
-                distance: this.renderDistance,
-                //angle: myPlayer.angle,
-                fieldOfView: Math.PI / 2 //90 degrees
-            });
-            // console.log("objectsToDraw:",objectsToDraw);
-            for (var id in objectsToDraw) {
-                let object = objectsToDraw[id];
-                switch (object.type) {
-                    case 'block':
-                        Block.draw(object, this.render, this.CAMERA);
-                        break;
-                    default:
-                        console.log('Object not recognized to Draw');
-                }
-            }
-            if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
-        } //if World has been received from Server
-        if (this.debug) this.performanceCheckPoint('worldDraw');
+        // let objectsToDraw = {};
+        // if (this.WORLD != null && this.WORLD.grid != null) {
+        //     objectsToDraw = World.getObjects({
+        //         world: this.WORLD,
+        //         x: this.CAMERA.x,
+        //         y: this.CAMERA.y,
+        //         distance: this.renderDistance,
+        //         //angle: myPlayer.angle,
+        //         fieldOfView: Math.PI / 2 //90 degrees
+        //     });
+        //     // console.log("objectsToDraw:",objectsToDraw);
+        //     for (var id in objectsToDraw) {
+        //         let object = objectsToDraw[id];
+        //         switch (object.type) {
+        //             case 'block':
+        //                 Block.draw(object, this.render, this.CAMERA);
+        //                 break;
+        //             default:
+        //                 console.log('Object not recognized to Draw');
+        //         }
+        //     }
+        //     if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
+        // } //if World has been received from Server
+        // if (this.debug) this.performanceCheckPoint('worldDraw');
+
+        // if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
 
         this.HUD.draw();
         if (this.debug) this.performanceCheckPoint('hudDraw');
@@ -268,11 +290,14 @@ module.exports = class clientEngine {
                     // renderDistance: this.renderDistance,
                     CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
                     deltaTime: this.deltaTime,
-                    timeBackground:
-                        Math.round((this.performanceMetrics['backgroundDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
-                    timeStateDraw: Math.round((this.performanceMetrics['statesDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
-                    timeWorldDraw: Math.round((this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%',
-                    timeHudDraw: Math.round((this.performanceMetrics['hudDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100) + '%'
+                    timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
+                    timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
+                    timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
+                    // timeWorldDraw:
+                    //     Math.round(
+                    //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
+                    //     ) + '%',
+                    timeHudDraw: Math.round(this.performanceMetrics['hudDraw']) + 'ms'
                 });
             }
             this.lastSecond = this.currentTime;
