@@ -4,7 +4,7 @@
             <canvas id="hud-layer" ref="hud-layer">Your browser does not support HTML5 canvas</canvas>
             <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas> -->
             <canvas id="lighting-layer" ref="lighting-layer"></canvas>
-            <canvas id="main-layer" ref="main-layer"></canvas>
+            <div id="main-layer" ref="main-layer"></div>
             <canvas id="background-layer" ref="background-layer"></canvas>
         </div>
     </div>
@@ -13,12 +13,15 @@
 // import socket io
 // import game engine
 import EngineClass from '../game/js/clientEngine.js';
+// import * as PIXI from 'pixi.js';
 console.log('Game Route');
 export default {
     name: 'Game',
     data: function () {
         return {
             engine: null
+            // screenWidth: window.innerWidth,
+            // screenHeight: window.innerHeight
         };
     },
     methods: {
@@ -47,21 +50,29 @@ export default {
             );
         })();
 
-        //disabled right-click menu
-        let mainLayerCanvas = this.$refs['main-layer'];
+        //main layer Pixi JS
+
+        // The application will create a canvas element for you that you
+        // can then insert into the DOM
+        let mainLayerDiv = this.$refs['main-layer'];
+        // console.log('mainLayerPixi :>> ', mainLayerPixi);
+
         let stage = this.$refs['stage'];
         let backgroundCanvas = this.$refs['background-layer'];
         let lightingCanvas = this.$refs['lighting-layer'];
         let lineOfSightCanvas = this.$refs['lineOfSight-layer'];
         let hudCanvas = this.$refs['hud-layer'];
         this.engine = new EngineClass({
-            mainCanvas: mainLayerCanvas,
+            pixiAppDiv: mainLayerDiv,
             stage,
             backgroundCanvas,
             lightingCanvas,
             lineOfSightCanvas,
             hudCanvas
+            // width: this.screenWidth,
+            // height: this.screenHeight
         });
+        //disabled right-click menu
         window.addEventListener('contextmenu', (event) => event.preventDefault());
         this.setup();
         this.draw();
@@ -104,10 +115,15 @@ canvas {
 }
 #main-layer {
     z-index: 2;
-    cursor: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    /* cursor: none; */
 }
 #background-layer {
     z-index: 1;
-    cursor: none;
+    /* cursor: none; */
 }
 </style>

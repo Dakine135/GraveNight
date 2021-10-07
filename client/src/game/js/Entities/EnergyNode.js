@@ -1,5 +1,7 @@
 const Utilities = require('../../shared/Utilities.js');
 const Hitbox = require('../../shared/Hitbox.js');
+const PIXI = require('pixi.js');
+// import * as PIXI from 'pixi.js';
 
 const travelMax = 2000;
 const distanceCanLink = 100;
@@ -21,6 +23,14 @@ module.exports = EnergyNodeClass = {
     hotEndColor: { r: 255, g: 0, b: 0, a: 1 },
     availableEnergyPackets: [],
     new({ id = null, x = 0, y = 0, debug = false, ENGINE = null } = {}) {
+        //PIXI JS
+        const EnergyNodePixi = new PIXI.Graphics();
+        // Circle
+        EnergyNodePixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        EnergyNodePixi.beginFill(0xde3249, 1);
+        EnergyNodePixi.drawCircle(x, y, radius);
+        EnergyNodePixi.endFill();
+
         let newEnergyNode = {
             type: 'EnergyNode',
             x: x,
@@ -44,7 +54,8 @@ module.exports = EnergyNodeClass = {
             canBePlaced: true,
             otherLinkableEntities: [],
             currentLinkIndex: 0,
-            temp: { linkTo: [], translatedLocation: { x: 0, y: 0 } }
+            temp: { linkTo: [], translatedLocation: { x: 0, y: 0 } },
+            pixiGraphic: EnergyNodePixi
         };
 
         ENGINE.STATES.getEntitiesInRange(newEnergyNode.otherLinkableEntities, 'energyLinkableEntities', { x, y }, distanceCanLink);
@@ -53,6 +64,8 @@ module.exports = EnergyNodeClass = {
         newEnergyNode.otherLinkableEntities.forEach((otherLinkable) => {
             otherLinkable.otherLinkableEntities.push(newEnergyNode);
         });
+
+        ENGINE.mainPixiContainer.addChild(EnergyNodePixi);
 
         if (debug) console.log('Created EnergyNode at', x, y);
         return newEnergyNode;
@@ -124,143 +137,143 @@ module.exports = EnergyNodeClass = {
         }
     },
 
-    draw0(ENGINE) {
-        // Start a new drawing state
-        ENGINE.render.save();
-        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
+    // draw0(ENGINE) {
+    //     // Start a new drawing state
+    //     ENGINE.render.save();
+    //     ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+    //     ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+    //     ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
-        //EnergyNode location for debugging
-        if (this.debug) {
-            ENGINE.render.fillStyle = 'black';
-            ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
-        }
+    //     //EnergyNode location for debugging
+    //     if (this.debug) {
+    //         ENGINE.render.fillStyle = 'black';
+    //         ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
+    //     }
 
-        //show distance to link
-        if (this.selected) {
-            ENGINE.render.beginPath();
-            ENGINE.render.strokeStyle = 'blue';
-            ENGINE.render.lineWidth = 1;
-            ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
-            ENGINE.render.stroke();
-            ENGINE.render.closePath();
-            ENGINE.render.beginPath();
-            ENGINE.render.strokeStyle = 'orange';
-            ENGINE.render.lineWidth = 1;
-            ENGINE.render.arc(0, 0, distanceCanLink + ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
-            ENGINE.render.stroke();
-            ENGINE.render.closePath();
-        }
+    //     //show distance to link
+    //     if (this.selected) {
+    //         ENGINE.render.beginPath();
+    //         ENGINE.render.strokeStyle = 'blue';
+    //         ENGINE.render.lineWidth = 1;
+    //         ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
+    //         ENGINE.render.stroke();
+    //         ENGINE.render.closePath();
+    //         ENGINE.render.beginPath();
+    //         ENGINE.render.strokeStyle = 'orange';
+    //         ENGINE.render.lineWidth = 1;
+    //         ENGINE.render.arc(0, 0, distanceCanLink + ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
+    //         ENGINE.render.stroke();
+    //         ENGINE.render.closePath();
+    //     }
 
-        //draw main body
-        ENGINE.render.beginPath();
-        // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
-        if (ENGINE.CAMERA.zoomLevel <= 0.5) {
-            ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
-            ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-            ENGINE.render.fill();
-            ENGINE.render.closePath();
-        } else {
-            let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
-            gradient.addColorStop(
-                0,
-                `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
-            );
-            gradient.addColorStop(
-                1,
-                `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`
-            );
-            ENGINE.render.fillStyle = gradient;
-            //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
-            ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-            ENGINE.render.fill();
-            ENGINE.render.closePath();
-        }
+    //     //draw main body
+    //     ENGINE.render.beginPath();
+    //     // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
+    //     if (ENGINE.CAMERA.zoomLevel <= 0.5) {
+    //         ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
+    //         ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+    //         ENGINE.render.fill();
+    //         ENGINE.render.closePath();
+    //     } else {
+    //         let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
+    //         gradient.addColorStop(
+    //             0,
+    //             `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
+    //         );
+    //         gradient.addColorStop(
+    //             1,
+    //             `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`
+    //         );
+    //         ENGINE.render.fillStyle = gradient;
+    //         //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
+    //         ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+    //         ENGINE.render.fill();
+    //         ENGINE.render.closePath();
+    //     }
 
-        ENGINE.render.restore(); // Restore original state
-    }, //end Draw
+    //     ENGINE.render.restore(); // Restore original state
+    // }, //end Draw
 
-    draw1(ENGINE) {
-        //draw energyPackets
-        if (ENGINE.CAMERA.zoomLevel > 0.5) {
-            ENGINE.render.save();
-            ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-            ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-            ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
-            this.energyPackets.forEach((packet) => {
-                ENGINE.render.beginPath();
-                ENGINE.render.fillStyle = 'white';
-                ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
-                ENGINE.render.fill();
-                ENGINE.render.closePath();
-            });
-            ENGINE.render.restore(); // Restore original state
-        }
-    },
+    // draw1(ENGINE) {
+    //     //draw energyPackets
+    //     if (ENGINE.CAMERA.zoomLevel > 0.5) {
+    //         ENGINE.render.save();
+    //         ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+    //         ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+    //         ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
+    //         this.energyPackets.forEach((packet) => {
+    //             ENGINE.render.beginPath();
+    //             ENGINE.render.fillStyle = 'white';
+    //             ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
+    //             ENGINE.render.fill();
+    //             ENGINE.render.closePath();
+    //         });
+    //         ENGINE.render.restore(); // Restore original state
+    //     }
+    // },
 
-    drawGhost(ENGINE) {
-        // console.log('ENGINE :>> ', ENGINE);
-        // Start a new drawing state
-        ENGINE.render.save();
-        ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-        ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-        ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
+    // drawGhost(ENGINE) {
+    //     // console.log('ENGINE :>> ', ENGINE);
+    //     // Start a new drawing state
+    //     ENGINE.render.save();
+    //     ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
+    //     ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+    //     ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
 
-        //EnergyNode location for debugging
-        if (this.debug) {
-            ENGINE.render.fillStyle = 'black';
-            ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
-        }
+    //     //EnergyNode location for debugging
+    //     if (this.debug) {
+    //         ENGINE.render.fillStyle = 'black';
+    //         ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
+    //     }
 
-        ENGINE.render.strokeStyle = 'blue';
-        if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
-        ENGINE.render.lineWidth = 1;
+    //     ENGINE.render.strokeStyle = 'blue';
+    //     if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
+    //     ENGINE.render.lineWidth = 1;
 
-        //get linkable Nodes
-        ENGINE.STATES.getEntitiesInRange(this.temp.linkTo, 'energyLinkableEntities', this, distanceCanLink);
-        this.canBePlaced = true;
-        this.temp.overlapping = false;
-        this.temp.linkTo.forEach((otherNode) => {
-            this.temp.overlapping = Hitbox.collideCircleCircle(
-                { x: this.x, y: this.y, r: radius },
-                { x: otherNode.x, y: otherNode.y, r: radius }
-            );
-            if (this.temp.overlapping) this.canBePlaced = false;
-            this.temp.relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
-            ENGINE.render.beginPath();
-            ENGINE.render.moveTo(0, 0);
-            ENGINE.render.lineTo(this.temp.relativeLocation.x, this.temp.relativeLocation.y);
-            ENGINE.render.stroke();
-            ENGINE.render.closePath();
-        });
+    //     //get linkable Nodes
+    //     ENGINE.STATES.getEntitiesInRange(this.temp.linkTo, 'energyLinkableEntities', this, distanceCanLink);
+    //     this.canBePlaced = true;
+    //     this.temp.overlapping = false;
+    //     this.temp.linkTo.forEach((otherNode) => {
+    //         this.temp.overlapping = Hitbox.collideCircleCircle(
+    //             { x: this.x, y: this.y, r: radius },
+    //             { x: otherNode.x, y: otherNode.y, r: radius }
+    //         );
+    //         if (this.temp.overlapping) this.canBePlaced = false;
+    //         this.temp.relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
+    //         ENGINE.render.beginPath();
+    //         ENGINE.render.moveTo(0, 0);
+    //         ENGINE.render.lineTo(this.temp.relativeLocation.x, this.temp.relativeLocation.y);
+    //         ENGINE.render.stroke();
+    //         ENGINE.render.closePath();
+    //     });
 
-        //show distance to link
-        ENGINE.render.beginPath();
-        ENGINE.render.strokeStyle = 'blue';
-        if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
-        ENGINE.render.lineWidth = 1;
-        ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
-        ENGINE.render.stroke();
-        ENGINE.render.closePath();
-        //main body
-        ENGINE.render.beginPath();
-        let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
-        gradient.addColorStop(
-            0,
-            `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`
-        );
-        gradient.addColorStop(
-            1,
-            `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`
-        );
-        ENGINE.render.fillStyle = gradient;
-        ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-        ENGINE.render.fill();
-        ENGINE.render.closePath();
+    //     //show distance to link
+    //     ENGINE.render.beginPath();
+    //     ENGINE.render.strokeStyle = 'blue';
+    //     if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
+    //     ENGINE.render.lineWidth = 1;
+    //     ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
+    //     ENGINE.render.stroke();
+    //     ENGINE.render.closePath();
+    //     //main body
+    //     ENGINE.render.beginPath();
+    //     let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
+    //     gradient.addColorStop(
+    //         0,
+    //         `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`
+    //     );
+    //     gradient.addColorStop(
+    //         1,
+    //         `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`
+    //     );
+    //     ENGINE.render.fillStyle = gradient;
+    //     ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
+    //     ENGINE.render.fill();
+    //     ENGINE.render.closePath();
 
-        ENGINE.render.restore(); // Restore original state
-    }, //draw ghost
+    //     ENGINE.render.restore(); // Restore original state
+    // }, //draw ghost
 
     toJSON() {
         return {

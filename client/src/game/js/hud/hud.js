@@ -45,11 +45,11 @@ module.exports = class HUD {
                 this.ghost = null;
                 break;
             case 'drawGhost':
-                if (ghostEntity == null) {
-                    throw Error('ghostEntity Null in Hud.setDrawMode');
-                }
+                // if (ghostEntity == null) {
+                //     throw Error('ghostEntity Null in Hud.setDrawMode');
+                // }
                 this.drawMode = 'drawGhost';
-                this.ghost = ghostEntity;
+                // this.ghost = ghostEntity;
                 break;
             default:
                 console.log('setDrawMode unknown :>> ', mode);
@@ -80,11 +80,11 @@ module.exports = class HUD {
                 this.ENGINE.CONTROLS.setLeftClickAction('placeEnergyNode');
                 this.setDrawMode({
                     mode: 'drawGhost',
-                    ghostEntity: EnergyNodeClass.new({
-                        x: this.ENGINE.CONTROLS.mouse.x,
-                        y: this.ENGINE.CONTROLS.mouse.y,
-                        ENGINE: this.ENGINE
-                    }),
+                    // ghostEntity: EnergyNodeClass.new({
+                    //     x: this.ENGINE.CONTROLS.mouse.x,
+                    //     y: this.ENGINE.CONTROLS.mouse.y,
+                    //     ENGINE: this.ENGINE
+                    // }),
                     snapping: true
                 });
             }
@@ -283,9 +283,9 @@ module.exports = class HUD {
     }
 
     drawGhost() {
-        if (!this.ghost) return;
+        // if (!this.ghost) return;
         this.render.save();
-        this.ENGINE.ENTITY_CLASSES[this.ghost.type].drawGhost.bind(this.ghost)(this.ENGINE);
+        // this.ENGINE.ENTITY_CLASSES[this.ghost.type].drawGhost.bind(this.ghost)(this.ENGINE);
 
         this.render.strokeStyle = 'rgba(0,0,255,0.3)';
         this.render.beginPath();

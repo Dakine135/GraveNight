@@ -71,6 +71,9 @@ module.exports = class Camera {
     moveTo(x, y) {
         this.x = Math.round(x);
         this.y = Math.round(y);
+        let cameraTranslation = { x: 0, y: 0 };
+        this.translate(cameraTranslation, 0, 0);
+        this.engine.translateMainPixiContainer.set(cameraTranslation.x, cameraTranslation.y);
     }
 
     setGoal(x, y) {

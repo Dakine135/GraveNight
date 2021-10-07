@@ -35,6 +35,13 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'started replacing graphics with Pixi. Get some basic camera translation working',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Wednesday, 6 Oct 2021 11:55:00 -0400'
+                    }
+                },
+                {
                     subject: 'Created Discord Server, linked to website and invited some friends',
                     commiter: {
                         name: 'd.welborn',

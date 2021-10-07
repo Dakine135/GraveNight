@@ -27,18 +27,23 @@ export default {
             let logoSource = require('@assets/GNHandLogo256.png');
             this.app.loader.add('GNHandLogo', logoSource).load((loader, resources) => {
                 // This creates a texture from a 'logo.png' image
-                this.logo = new PIXI.Sprite(resources.GNHandLogo.texture);
-
+                // this.logo = new PIXI.Sprite(resources.GNHandLogo.texture);
                 // Setup the position of the logo
-                this.logo.x = this.app.screen.width / 2;
-                this.logo.y = this.app.screen.height / 2;
-
+                // this.logo.x = this.app.screen.width / 2;
+                // this.logo.y = this.app.screen.height / 2;
                 // Rotate around the center
-                this.logo.anchor.x = 0.5;
-                this.logo.anchor.y = 0.5;
-
+                // this.logo.anchor.x = 0.5;
+                // this.logo.anchor.y = 0.5;
                 // Add the logo to the scene we are building
-                this.app.stage.addChild(this.logo);
+                // this.app.stage.addChild(this.logo);
+
+                const graphics = new PIXI.Graphics();
+                // Circle
+                graphics.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+                graphics.beginFill(0xde3249, 1);
+                graphics.drawCircle(100, 250, 50);
+                graphics.endFill();
+                this.app.stage.addChild(graphics);
 
                 // Listen for frame updates
                 this.app.ticker.add((deltaTime) => {

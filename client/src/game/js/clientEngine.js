@@ -8,6 +8,7 @@ const Hud = require('./hud/hud.js');
 const Background = require('./background.js');
 const World = require('../shared/World.js');
 const Block = require('../shared/Block.js');
+const PIXI = require('pixi.js');
 
 //EntityClasses
 const EnergyNodeClass = require('./Entities/EnergyNode.js');
@@ -18,7 +19,8 @@ module.exports = class clientEngine {
         DARKNESS = 1, //1 full dark, 0 full light
         BRIGHTNESS = 1, //1 full white, 0 no light
         gridSize = 32,
-        mainCanvas = null,
+        // mainCanvas = null,
+        pixiAppDiv = null,
         backgroundCanvas = null,
         lightingCanvas = null,
         lineOfSightCanvas = null,
@@ -41,11 +43,25 @@ module.exports = class clientEngine {
 
         this.ENTITY_CLASSES = { EnergyNode: EnergyNodeClass };
 
-        //main layer with players and walls
-        // let divId = 'main-layer';
-        // this.canvas = document.getElementById(divId);
-        this.canvas = mainCanvas;
-        this.render = this.canvas.getContext('2d');
+        this.screenWidth = window.innerWidth;
+        this.screenHeight = window.innerHeight;
+        this.width = this.screenWidth;
+        this.height = this.screenHeight;
+
+        this.pixiApp = new PIXI.Application({ width: this.screenWidth, height: this.screenHeight, backgroundColor: 0x1aa32f });
+        pixiAppDiv.appendChild(this.pixiApp.view);
+        this.mainPixiContainer = new PIXI.Container();
+        this.pixiApp.stage.addChild(this.mainPixiContainer);
+
+        this.elapsed = 0.0;
+        // Listen for frame updates
+        this.pixiApp.ticker.add((deltaTime) => {
+            this.elapsed += deltaTime;
+            // each frame we spin the logo around a bit
+            // logo.rotation += Math.cos(this.elapsed / 1000.0) * 360;
+        });
+        // this.canvas = mainCanvas;
+        // this.render = this.canvas.getContext('2d');
         // this.stage = document.getElementById('stage');
         this.stage = stage;
 
@@ -75,17 +91,17 @@ module.exports = class clientEngine {
 
         this.useRealScreenSize = false;
 
-        this.windowResized();
-        if (this.useRealScreenSize) {
-            this.width = this.screenWidth;
-            this.height = this.screenHeight;
-        } else {
-            let scale = 80;
-            this.width = 16 * scale;
-            this.height = 9 * scale;
-        }
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        // this.windowResized();
+        // if (this.useRealScreenSize) {
+        //     this.width = this.screenWidth;
+        //     this.height = this.screenHeight;
+        // } else {
+        //     let scale = 80;
+        //     this.width = 16 * scale;
+        //     this.height = 9 * scale;
+        // }
+        // this.canvas.width = this.width;
+        // this.canvas.height = this.height;
         this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
         window.addEventListener('resize', this.windowResized.bind(this));
 
@@ -93,11 +109,27 @@ module.exports = class clientEngine {
 
         this.CAMERA = new Camera({
             debug: this.isProduction ? false : false,
-            x: 11,
-            y: -367,
+            x: 0,
+            y: 0,
             speed: 0.5,
             engine: this
         });
+
+        //camera position translation
+        let cameraTranslation = { x: 0, y: 0 };
+        this.CAMERA.translate(cameraTranslation, 0, 0);
+        // console.log('cameraTranslation :>> ', cameraTranslation);
+        this.translateMainPixiContainer = new PIXI.ObservablePoint(
+            () => {
+                // console.log('position :>> ', this);
+                this.mainPixiContainer.position = this.translateMainPixiContainer;
+            },
+            this,
+            cameraTranslation.x,
+            cameraTranslation.y
+        );
+        this.mainPixiContainer.position = this.translateMainPixiContainer;
+
         this.STATES = new StatesManager({
             debug: this.isProduction ? false : false,
             debugState: this.isProduction ? false : false,
@@ -204,11 +236,11 @@ module.exports = class clientEngine {
     draw() {
         //background "wipes" the screen every frame
         //clear the canvas
-        this.render.save();
-        this.render.setTransform(1, 0, 0, 1, 0, 0);
-        this.render.clearRect(0, 0, this.width, this.height);
-        this.render.beginPath();
-        this.render.restore();
+        // this.render.save();
+        // this.render.setTransform(1, 0, 0, 1, 0, 0);
+        // this.render.clearRect(0, 0, this.width, this.height);
+        // this.render.beginPath();
+        // this.render.restore();
 
         this.currentTime = new Date().getTime();
         if (this.debug) {
@@ -225,19 +257,19 @@ module.exports = class clientEngine {
         //square at 0,0
         if (this.debug) {
             this.CAMERA.translate(this.temp.translatedLocation, 0, 0);
-            this.render.save();
-            this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-            this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
-            this.render.strokeStyle = 'black';
-            this.render.strokeRect(-10, -10, 20, 20);
-            // render.font = "px Arial";
-            this.render.textAlign = 'center';
-            this.render.fillText('0,0', 0, 0);
-            this.render.restore();
+            // this.render.save();
+            // this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+            // this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
+            // this.render.strokeStyle = 'black';
+            // this.render.strokeRect(-10, -10, 20, 20);
+            // // render.font = "px Arial";
+            // this.render.textAlign = 'center';
+            // this.render.fillText('0,0', 0, 0);
+            // this.render.restore();
         }
 
-        this.STATES.draw(this.deltaTime);
-        if (this.debug) this.performanceCheckPoint('statesDraw');
+        // this.STATES.draw(this.deltaTime);
+        // if (this.debug) this.performanceCheckPoint('statesDraw');
 
         // this.LIGHTING.draw(this.deltaTime);
         // if (this.debug) this.performanceCheckPoint('lightingDraw');
@@ -291,8 +323,8 @@ module.exports = class clientEngine {
                     CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
                     deltaTime: this.deltaTime,
                     timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
-                    timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
-                    timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
+                    // timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
+                    // timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
                     // timeWorldDraw:
                     //     Math.round(
                     //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100

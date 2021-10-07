@@ -79,10 +79,11 @@ module.exports = class StatesManager {
     getIntermediateState(deltaTime) {} // getIntermediateState
 
     placeEnergyNode({ x = this.ENGINE.CONTROLS.mouseLocationInWorld.x, y = this.ENGINE.CONTROLS.mouseLocationInWorld.y } = {}) {
-        // console.log('placeEnergyNode');
         if (this.ENGINE.HUD.ghost != null) {
-            (x = this.ENGINE.HUD.ghost.x), (y = this.ENGINE.HUD.ghost.y);
+            x = this.ENGINE.HUD.ghost.x;
+            y = this.ENGINE.HUD.ghost.y;
         }
+        // console.log('placeEnergyNode', x, y);
 
         //get other Nodes
         //hard coded distance node radius at this time is 12
