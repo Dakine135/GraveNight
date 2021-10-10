@@ -21,10 +21,10 @@ module.exports = class clientEngine {
         gridSize = 32,
         // mainCanvas = null,
         pixiAppDiv = null,
-        backgroundCanvas = null,
-        lightingCanvas = null,
-        lineOfSightCanvas = null,
-        hudCanvas = null,
+        // backgroundCanvas = null,
+        // lightingCanvas = null,
+        // lineOfSightCanvas = null,
+        // hudCanvas = null,
         stage = null
     }) {
         this.STATES = {};
@@ -50,8 +50,11 @@ module.exports = class clientEngine {
 
         this.pixiApp = new PIXI.Application({ width: this.screenWidth, height: this.screenHeight, backgroundColor: 0x1aa32f });
         pixiAppDiv.appendChild(this.pixiApp.view);
+        window.__PIXI_INSPECTOR_GLOBAL_HOOK__ && window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
         this.mainPixiContainer = new PIXI.Container();
+        this.mainPixiContainer.name = 'mainContainer';
         this.pixiApp.stage.addChild(this.mainPixiContainer);
+        // console.log('this.mainPixiContainer :>> ', this.mainPixiContainer);
 
         this.elapsed = 0.0;
         // Listen for frame updates
@@ -141,7 +144,7 @@ module.exports = class clientEngine {
         // });
         this.HUD = new Hud({
             engine: this,
-            canvas: hudCanvas,
+            // canvas: hudCanvas,
             debug: this.isProduction ? false : true,
             debugButton: this.isProduction ? false : false,
             debugCursor: this.isProduction ? false : false
@@ -150,23 +153,23 @@ module.exports = class clientEngine {
             debug: this.isProduction ? false : false,
             engine: this
         });
-        this.LIGHTING = new Lighting({
-            debug: this.isProduction ? false : false,
-            canvas: lightingCanvas,
-            engine: this,
-            darkness: this.DARKNESS, //darkness level 0-1
-            brightness: this.BRIGHTNESS
-        });
+        // this.LIGHTING = new Lighting({
+        //     debug: this.isProduction ? false : false,
+        //     canvas: lightingCanvas,
+        //     engine: this,
+        //     darkness: this.DARKNESS, //darkness level 0-1
+        //     brightness: this.BRIGHTNESS
+        // });
         // // this.LIGHTING.createLightSource({intensity:500}); //defaults to 0,0
         // this.LINEOFSIGHT = new LineOfSight({
         //     debug: this.isProduction ? false : false,
         //     engine: this
         // });
-        this.BACKGROUND = new Background({
-            debug: this.isProduction ? false : false,
-            engine: this,
-            canvas: backgroundCanvas
-        });
+        // this.BACKGROUND = new Background({
+        //     debug: this.isProduction ? false : false,
+        //     engine: this,
+        //     canvas: backgroundCanvas
+        // });
         // this.NETWORK.updateServerTimeDiffernce();
 
         //generate world on client
@@ -204,137 +207,128 @@ module.exports = class clientEngine {
         if (this.BACKGROUND.resize) this.BACKGROUND.resize();
     } //window Resized
 
-    update() {
-        //updateTimings
-        let performanceStart = performance.now();
-        this.deltaTimeUpdate = this.currentTime - this.lastUpdateTime;
-        this.accumulatedDeltaTime += this.deltaTimeUpdate;
+    // update() {
+    //updateTimings
+    // let performanceStart = performance.now();
+    // this.deltaTimeUpdate = this.currentTime - this.lastUpdateTime;
+    // this.accumulatedDeltaTime += this.deltaTimeUpdate;
 
-        this.CAMERA.update();
-        this.HUD.update();
-        this.CONTROLS.update();
+    // this.CAMERA.update();
+    // this.HUD.update();
+    // this.CONTROLS.update();
 
-        while (this.accumulatedDeltaTime >= this.targetDeltaTime) {
-            this.accumulatedDeltaTime -= this.targetDeltaTime;
-            this.STATES.update(this.targetDeltaTime);
-            this.lastUpdateTime = new Date().getTime();
-        }
+    // while (this.accumulatedDeltaTime >= this.targetDeltaTime) {
+    //     this.accumulatedDeltaTime -= this.targetDeltaTime;
+    //     this.STATES.update(this.targetDeltaTime);
+    //     this.lastUpdateTime = new Date().getTime();
+    // }
 
-        let timeTaken = performance.now() - performanceStart;
-        if (this.debug && this.HUD.debug && timeTaken > 2) {
-            this.HUD.debugUpdate({
-                timeTakenToUpdate: timeTaken + 'ms'
-            });
-        }
-    } //update
+    // let timeTaken = performance.now() - performanceStart;
+    // if (this.debug && this.HUD.debug && timeTaken > 2) {
+    //     this.HUD.debugUpdate({
+    //         timeTakenToUpdate: timeTaken + 'ms'
+    //     });
+    // }
+    // } //update
 
     performanceCheckPoint(name) {
         this.performanceMetrics[name] = performance.now() - this.lastTimeStampPerformance;
         this.lastTimeStampPerformance = performance.now();
     }
 
-    draw() {
-        //background "wipes" the screen every frame
-        //clear the canvas
-        // this.render.save();
-        // this.render.setTransform(1, 0, 0, 1, 0, 0);
-        // this.render.clearRect(0, 0, this.width, this.height);
-        // this.render.beginPath();
-        // this.render.restore();
-
-        this.currentTime = new Date().getTime();
-        if (this.debug) {
-            this.startOfDrawPerformance = performance.now();
-            this.lastTimeStampPerformance = performance.now();
-        }
-        this.deltaTime = this.currentTime - this.lastFrame;
-        this.lastFrame = this.currentTime;
-        this.frames++;
-
-        this.BACKGROUND.draw();
-        if (this.debug) this.performanceCheckPoint('backgroundDraw');
-
-        //square at 0,0
-        if (this.debug) {
-            this.CAMERA.translate(this.temp.translatedLocation, 0, 0);
-            // this.render.save();
-            // this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-            // this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
-            // this.render.strokeStyle = 'black';
-            // this.render.strokeRect(-10, -10, 20, 20);
-            // // render.font = "px Arial";
-            // this.render.textAlign = 'center';
-            // this.render.fillText('0,0', 0, 0);
-            // this.render.restore();
-        }
-
-        // this.STATES.draw(this.deltaTime);
-        // if (this.debug) this.performanceCheckPoint('statesDraw');
-
-        // this.LIGHTING.draw(this.deltaTime);
-        // if (this.debug) this.performanceCheckPoint('lightingDraw');
-
-        //World drawing
-        // let objectsToDraw = {};
-        // if (this.WORLD != null && this.WORLD.grid != null) {
-        //     objectsToDraw = World.getObjects({
-        //         world: this.WORLD,
-        //         x: this.CAMERA.x,
-        //         y: this.CAMERA.y,
-        //         distance: this.renderDistance,
-        //         //angle: myPlayer.angle,
-        //         fieldOfView: Math.PI / 2 //90 degrees
-        //     });
-        //     // console.log("objectsToDraw:",objectsToDraw);
-        //     for (var id in objectsToDraw) {
-        //         let object = objectsToDraw[id];
-        //         switch (object.type) {
-        //             case 'block':
-        //                 Block.draw(object, this.render, this.CAMERA);
-        //                 break;
-        //             default:
-        //                 console.log('Object not recognized to Draw');
-        //         }
-        //     }
-        //     if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
-        // } //if World has been received from Server
-        // if (this.debug) this.performanceCheckPoint('worldDraw');
-
-        // if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
-
-        this.HUD.draw();
-        if (this.debug) this.performanceCheckPoint('hudDraw');
-
-        //once a second
-        if (this.currentTime % this.lastSecond >= 1000) {
-            // console.log('origin =>', origin);
-            // console.log(STATES.state);
-            // this.NETWORK.updateServerTimeDiffernce();
-            this.endOfDrawPerformance = performance.now();
-            if (this.debug && this.HUD.debug) {
-                this.HUD.debugUpdate({
-                    FrameRate: Math.round(this.lastFrames * 0.8 + this.frames * 0.2),
-                    GameResolution: this.width + ', ' + this.height,
-                    WindowSize: this.screenWidth + ', ' + this.screenHeight,
-                    // Ping: this.NETWORK.ping,
-                    // timeDiffernce: this.NETWORK.timeDiffernce,
-                    // objectsToDraw: Object.keys(objectsToDraw).length,
-                    // renderDistance: this.renderDistance,
-                    CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
-                    deltaTime: this.deltaTime,
-                    timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
-                    // timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
-                    // timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
-                    // timeWorldDraw:
-                    //     Math.round(
-                    //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
-                    //     ) + '%',
-                    timeHudDraw: Math.round(this.performanceMetrics['hudDraw']) + 'ms'
-                });
-            }
-            this.lastSecond = this.currentTime;
-            this.lastFrames = this.frames;
-            this.frames = 0;
-        }
-    } //draw
+    // draw() {
+    //background "wipes" the screen every frame
+    //clear the canvas
+    // this.render.save();
+    // this.render.setTransform(1, 0, 0, 1, 0, 0);
+    // this.render.clearRect(0, 0, this.width, this.height);
+    // this.render.beginPath();
+    // this.render.restore();
+    // this.currentTime = new Date().getTime();
+    // if (this.debug) {
+    //     this.startOfDrawPerformance = performance.now();
+    //     this.lastTimeStampPerformance = performance.now();
+    // }
+    // this.deltaTime = this.currentTime - this.lastFrame;
+    // this.lastFrame = this.currentTime;
+    // this.frames++;
+    // this.BACKGROUND.draw();
+    // if (this.debug) this.performanceCheckPoint('backgroundDraw');
+    //square at 0,0
+    // if (this.debug) {
+    //     this.CAMERA.translate(this.temp.translatedLocation, 0, 0);
+    // this.render.save();
+    // this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+    // this.render.scale(this.CAMERA.zoomLevel, this.CAMERA.zoomLevel);
+    // this.render.strokeStyle = 'black';
+    // this.render.strokeRect(-10, -10, 20, 20);
+    // // render.font = "px Arial";
+    // this.render.textAlign = 'center';
+    // this.render.fillText('0,0', 0, 0);
+    // this.render.restore();
+    // }
+    // this.STATES.draw(this.deltaTime);
+    // if (this.debug) this.performanceCheckPoint('statesDraw');
+    // this.LIGHTING.draw(this.deltaTime);
+    // if (this.debug) this.performanceCheckPoint('lightingDraw');
+    //World drawing
+    // let objectsToDraw = {};
+    // if (this.WORLD != null && this.WORLD.grid != null) {
+    //     objectsToDraw = World.getObjects({
+    //         world: this.WORLD,
+    //         x: this.CAMERA.x,
+    //         y: this.CAMERA.y,
+    //         distance: this.renderDistance,
+    //         //angle: myPlayer.angle,
+    //         fieldOfView: Math.PI / 2 //90 degrees
+    //     });
+    //     // console.log("objectsToDraw:",objectsToDraw);
+    //     for (var id in objectsToDraw) {
+    //         let object = objectsToDraw[id];
+    //         switch (object.type) {
+    //             case 'block':
+    //                 Block.draw(object, this.render, this.CAMERA);
+    //                 break;
+    //             default:
+    //                 console.log('Object not recognized to Draw');
+    //         }
+    //     }
+    //     if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
+    // } //if World has been received from Server
+    // if (this.debug) this.performanceCheckPoint('worldDraw');
+    // if (!this.BACKGROUND.backgroundGenerated) this.BACKGROUND.updateWithWorldData(this.WORLD);
+    // this.HUD.draw();
+    // if (this.debug) this.performanceCheckPoint('hudDraw');
+    //once a second
+    // if (this.currentTime % this.lastSecond >= 1000) {
+    //     // console.log('origin =>', origin);
+    //     // console.log(STATES.state);
+    //     // this.NETWORK.updateServerTimeDiffernce();
+    //     this.endOfDrawPerformance = performance.now();
+    //     if (this.debug && this.HUD.debug) {
+    //         this.HUD.debugUpdate({
+    //             FrameRate: Math.round(this.lastFrames * 0.8 + this.frames * 0.2),
+    //             GameResolution: this.width + ', ' + this.height,
+    //             WindowSize: this.screenWidth + ', ' + this.screenHeight,
+    //             // Ping: this.NETWORK.ping,
+    //             // timeDiffernce: this.NETWORK.timeDiffernce,
+    //             // objectsToDraw: Object.keys(objectsToDraw).length,
+    //             // renderDistance: this.renderDistance,
+    //             CAMERA: this.CAMERA.x + ', ' + this.CAMERA.y,
+    //             deltaTime: this.deltaTime,
+    //             timeBackground: Math.round(this.performanceMetrics['backgroundDraw']) + 'ms',
+    //             // timeStateDraw: Math.round(this.performanceMetrics['statesDraw']) + 'ms',
+    //             // timeLightingDrawDraw: Math.round(this.performanceMetrics['lightingDraw']) + 'ms',
+    //             // timeWorldDraw:
+    //             //     Math.round(
+    //             //         (this.performanceMetrics['worldDraw'] / (this.endOfDrawPerformance - this.startOfDrawPerformance)) * 100
+    //             //     ) + '%',
+    //             timeHudDraw: Math.round(this.performanceMetrics['hudDraw']) + 'ms'
+    //         });
+    //     }
+    //     this.lastSecond = this.currentTime;
+    //     this.lastFrames = this.frames;
+    //     this.frames = 0;
+    // }
+    // } //draw
 }; //clientEngine class

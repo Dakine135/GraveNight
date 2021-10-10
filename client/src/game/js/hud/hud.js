@@ -1,21 +1,31 @@
 const Button = require('./button.js');
 const Hitbox = require('../../shared/Hitbox.js');
 const Utilities = require('../../shared/Utilities.js');
+const PIXI = require('pixi.js');
 
 module.exports = class HUD {
     constructor({ debug = false, debugCursor = false, debugButton = false, fontSize = 20, engine = null, canvas = null }) {
         this.ENGINE = engine;
-        // this.canvas = document.getElementById(divId);
-        this.canvas = canvas;
-        this.render = this.canvas.getContext('2d');
-        this.canvas.width = this.ENGINE.width;
-        this.canvas.height = this.ENGINE.height;
-        this.width = this.canvas.width;
-        this.height = this.canvas.height;
+        //pixi container for hud stuff, wont translate with camera
+        this.hudPixiContainer = new PIXI.Container();
+        this.hudPixiContainer.sortableChildren = true;
+        this.hudPixiContainer.name = 'hudContainer';
+        this.ENGINE.pixiApp.stage.addChild(this.hudPixiContainer);
+        //add cursor to hud
+        this.crossHairSize = 10;
+        this.mainCursor = new PIXI.Graphics();
+        this.mainCursor.zIndex = 1;
+        this.mainCursor.name = 'defaultCursor';
+        this.mainCursor.lineStyle(1, 0x004dc9, 1);
+        this.mainCursor.moveTo(-this.crossHairSize, 0);
+        this.mainCursor.lineTo(this.crossHairSize, 0);
+        this.mainCursor.moveTo(0, -this.crossHairSize);
+        this.mainCursor.lineTo(0, this.crossHairSize);
+        this.hudPixiContainer.addChild(this.mainCursor);
+
         this.debug = debug;
         this.debugButton = debugButton;
         this.debugCursor = debugCursor;
-        this.crossHairSize = 10;
 
         this.drawMode = 'drawCrossHair';
         this.ghost = null;
@@ -68,8 +78,9 @@ module.exports = class HUD {
 
     createButtons() {
         let createEnergyNodeButton = new Button({
+            hudPixiContainer: this.hudPixiContainer,
             x: 50,
-            y: this.height - 50,
+            y: this.ENGINE.height - 50,
             width: 150,
             label: 'Create Energy Node',
             shortCutText: '1',
@@ -90,8 +101,9 @@ module.exports = class HUD {
             }
         });
         let saveGame = new Button({
+            hudPixiContainer: this.hudPixiContainer,
             x: 210,
-            y: this.height - 50,
+            y: this.ENGINE.height - 50,
             width: 150,
             label: 'SaveGame',
             shortCutText: '2',
@@ -102,8 +114,9 @@ module.exports = class HUD {
             }
         });
         let clearSave = new Button({
+            hudPixiContainer: this.hudPixiContainer,
             x: 370,
-            y: this.height - 50,
+            y: this.ENGINE.height - 50,
             width: 150,
             label: 'ClearSave',
             shortCutText: '3',
@@ -125,7 +138,7 @@ module.exports = class HUD {
     }
 
     update() {
-        this.updateButtons();
+        // this.updateButtons();
         if (this.drawMode == 'drawGhost' && this.ghost) {
             if (this.snappingEnabled) {
                 //get nodes in range of linking + snapping buffer

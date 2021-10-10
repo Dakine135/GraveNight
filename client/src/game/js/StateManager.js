@@ -1,6 +1,7 @@
 const Utilities = require('../shared/Utilities.js');
 const Hitbox = require('../shared/Hitbox.js');
 const EnergyNodeClass = require('./Entities/EnergyNode');
+const PIXI = require('pixi.js');
 // const QuadTree = require('./dataStructures/quadTree.js');
 // const Rectangle = require('./dataStructures/rectangle.js');
 
@@ -33,9 +34,14 @@ module.exports = class StatesManager {
 
         //load saveGame from localStorage
         this.loadSaveGameFromStorage('savedGame');
+
+        this.ENGINE.pixiApp.ticker.add((deltaTime) => {
+            this.update(deltaTime);
+        });
     } //constructor
 
     update(deltaTime) {
+        // console.log(deltaTime);
         Object.entries(this.currentState.entities).forEach(([id, entity]) => {
             this.ENGINE.ENTITY_CLASSES[entity.type].update.bind(entity)(this.ENGINE, deltaTime);
         });
@@ -83,7 +89,7 @@ module.exports = class StatesManager {
             x = this.ENGINE.HUD.ghost.x;
             y = this.ENGINE.HUD.ghost.y;
         }
-        // console.log('placeEnergyNode', x, y);
+        console.log('placeEnergyNode', x, y);
 
         //get other Nodes
         //hard coded distance node radius at this time is 12

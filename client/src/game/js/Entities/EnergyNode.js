@@ -3,36 +3,44 @@ const Hitbox = require('../../shared/Hitbox.js');
 const PIXI = require('pixi.js');
 // import * as PIXI from 'pixi.js';
 
-const travelMax = 2000;
-const distanceCanLink = 100;
-const maxHeat = 2000;
+const type = 'EnergyNode';
+const travelMax = 100.0;
+const distanceCanLink = 100.0;
+const maxHeat = 2000.0;
 const radius = 12;
 const startColor = { r: 0, g: 255, b: 0, a: 1 };
 const endColor = { r: 255, g: 255, b: 0, a: 1 };
 const hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
 const hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
 module.exports = EnergyNodeClass = {
-    type: 'EnergyNode',
-    travelMax: 2000,
-    distanceCanLink: 100,
-    maxHeat: 2000,
-    radius: 12,
+    type,
+    travelMax: travelMax,
+    distanceCanLink: distanceCanLink,
+    maxHeat: maxHeat,
+    radius: radius,
     startColor: { r: 0, g: 255, b: 0, a: 1 },
     endColor: { r: 255, g: 255, b: 0, a: 1 },
     hotStartColor: { r: 255, g: 0, b: 255, a: 1 },
     hotEndColor: { r: 255, g: 0, b: 0, a: 1 },
     availableEnergyPackets: [],
     new({ id = null, x = 0, y = 0, debug = false, ENGINE = null } = {}) {
-        //PIXI JS
+        const EnergyNodePixiContainer = new PIXI.Container();
+        EnergyNodePixiContainer.x = x;
+        EnergyNodePixiContainer.y = y;
+        EnergyNodePixiContainer.name = `EnergyNodeContainer${id}`;
+
+        //main EnergyNode Body
         const EnergyNodePixi = new PIXI.Graphics();
-        // Circle
         EnergyNodePixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
         EnergyNodePixi.beginFill(0xde3249, 1);
-        EnergyNodePixi.drawCircle(x, y, radius);
+        EnergyNodePixi.drawCircle(0, 0, radius);
         EnergyNodePixi.endFill();
+        EnergyNodePixi.name = `EnergyNodeGraphics${id}`;
+
+        EnergyNodePixiContainer.addChild(EnergyNodePixi);
 
         let newEnergyNode = {
-            type: 'EnergyNode',
+            type,
             x: x,
             y: y,
             id: id,
@@ -40,22 +48,13 @@ module.exports = EnergyNodeClass = {
             debug: debug,
             currentStartColor: { r: 0, g: 255, b: 0, a: 1 },
             currentEndColor: { r: 255, g: 255, b: 0, a: 1 },
-            energyPackets: [
-                {
-                    travel: travelMax,
-                    x: distanceCanLink,
-                    y: 0,
-                    startX: distanceCanLink,
-                    startY: 0,
-                    fromId: null
-                }
-            ],
+            energyPackets: [],
             selected: false,
             canBePlaced: true,
             otherLinkableEntities: [],
             currentLinkIndex: 0,
             temp: { linkTo: [], translatedLocation: { x: 0, y: 0 } },
-            pixiGraphic: EnergyNodePixi
+            pixiGraphicContainer: EnergyNodePixiContainer
         };
 
         ENGINE.STATES.getEntitiesInRange(newEnergyNode.otherLinkableEntities, 'energyLinkableEntities', { x, y }, distanceCanLink);
@@ -65,11 +64,37 @@ module.exports = EnergyNodeClass = {
             otherLinkable.otherLinkableEntities.push(newEnergyNode);
         });
 
-        ENGINE.mainPixiContainer.addChild(EnergyNodePixi);
+        //create energyPacket for testing, add to EnergyNode's container
+        // console.log('object :>> ', object);
+        let energyPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket();
+        newEnergyNode.energyPackets.push(energyPacket);
+        newEnergyNode.pixiGraphicContainer.addChild(energyPacket.pixiGraphic);
+
+        ENGINE.mainPixiContainer.addChild(EnergyNodePixiContainer);
 
         if (debug) console.log('Created EnergyNode at', x, y);
         return newEnergyNode;
     }, //constructor
+
+    newEnergyPacket({ travel = travelMax, x = distanceCanLink, y = 0, startX = distanceCanLink, startY = 0, fromId = null } = {}) {
+        const EnergyPacketPixi = new PIXI.Graphics();
+        // Circle
+        EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        EnergyPacketPixi.beginFill(0xffffff, 1);
+        EnergyPacketPixi.drawCircle(0, 0, 4);
+        EnergyPacketPixi.endFill();
+        EnergyPacketPixi.name = 'EnergyPacketGraphics';
+
+        return {
+            travel,
+            x,
+            y,
+            startX,
+            startY,
+            fromId,
+            pixiGraphic: EnergyPacketPixi
+        };
+    },
 
     update(ENGINE, deltaTime) {
         //update heat and color
@@ -77,8 +102,8 @@ module.exports = EnergyNodeClass = {
         this.heat -= deltaTime / 2;
         if (this.heat < 0) this.heat = 0;
         if (this.heat > maxHeat) this.heat = maxHeat;
-        Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
-        Utilities.colorBlend(this.currentEndColor, endColor, hotEndColor, this.heat / maxHeat);
+        // Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
+        // Utilities.colorBlend(this.currentEndColor, endColor, hotEndColor, this.heat / maxHeat);
         // console.log('this.currentStartColor :>> ', this.currentStartColor);
 
         for (let i = this.energyPackets.length - 1; i >= 0; i--) {
@@ -92,6 +117,7 @@ module.exports = EnergyNodeClass = {
             }
             this.energyPackets[i].x = (this.energyPackets[i].travel / travelMax) * this.energyPackets[i].startX;
             this.energyPackets[i].y = (this.energyPackets[i].travel / travelMax) * this.energyPackets[i].startY;
+            this.energyPackets[i].pixiGraphic.setTransform(this.energyPackets[i].x, this.energyPackets[i].y);
         }
     },
 
@@ -124,15 +150,24 @@ module.exports = EnergyNodeClass = {
         // availableEnergyPackets
         if (ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.length > 0) {
             let reusePacket = ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.pop();
-            (reusePacket.travel = travel),
-                (reusePacket.x = x - this.x),
-                (reusePacket.y = y - this.y),
-                (reusePacket.startX = x - this.x),
-                (reusePacket.startY = y - this.y),
-                (reusePacket.fromId = fromId);
+            reusePacket.travel = travel;
+            reusePacket.x = x - this.x;
+            reusePacket.y = y - this.y;
+            reusePacket.startX = x - this.x;
+            reusePacket.startY = y - this.y;
+            reusePacket.fromId = fromId;
+            reusePacket.pixiGraphic.setParent(this.pixiGraphicContainer);
+            reusePacket.pixiGraphic.setTransform(reusePacket.x, reusePacket.y);
             this.energyPackets.push(reusePacket);
         } else {
-            let newPacket = { travel: travel, x: x - this.x, y: y - this.y, startX: x - this.x, startY: y - this.y, fromId };
+            let newPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket({
+                travel: travel,
+                x: x - this.x,
+                y: y - this.y,
+                startX: x - this.x,
+                startY: y - this.y,
+                fromId
+            });
             this.energyPackets.push(newPacket);
         }
     },
@@ -284,7 +319,16 @@ module.exports = EnergyNodeClass = {
             heat: this.heat,
             currentStartColor: this.currentStartColor,
             currentEndColor: this.currentEndColor,
-            energyPackets: this.energyPackets,
+            energyPackets: this.energyPackets.map((packet) => {
+                return {
+                    travel: packet.travel,
+                    x: packet.x,
+                    y: packet.y,
+                    startX: packet.startX,
+                    startY: packet.startY,
+                    fromId: packet.fromId
+                };
+            }),
             otherLinkableEntities: this.otherLinkableEntities.map((other) => {
                 if (other.id == null) {
                     console.log('other :>> ', other);
@@ -295,18 +339,49 @@ module.exports = EnergyNodeClass = {
         };
     },
     restoreFromSave(STATES, energyNode) {
-        (energyNode.debug = false),
-            (energyNode.selected = false),
-            (energyNode.canBePlaced = true),
-            (energyNode.otherLinkableEntities = energyNode.otherLinkableEntities.map((id) => {
-                if (STATES.currentState.entities[id] == null) {
-                    console.log('energyNode.id :>> ', energyNode.id);
-                    console.log('id :>> ', id);
-                    console.log('STATES.currentState.entities[id] :>> ', STATES.currentState.entities[id]);
-                    console.log('energyNode.otherLinkableEntities :>> ', JSON.stringify(energyNode.otherLinkableEntities));
-                }
-                return STATES.currentState.entities[id];
-            })),
-            (energyNode.temp = { linkTo: [], translatedLocation: { x: 0, y: 0 } });
+        energyNode.debug = false;
+        energyNode.selected = false;
+        energyNode.canBePlaced = true;
+        energyNode.otherLinkableEntities = energyNode.otherLinkableEntities.map((id) => {
+            if (STATES.currentState.entities[id] == null) {
+                console.log('energyNode.id :>> ', energyNode.id);
+                console.log('id :>> ', id);
+                console.log('STATES.currentState.entities[id] :>> ', STATES.currentState.entities[id]);
+                console.log('energyNode.otherLinkableEntities :>> ', JSON.stringify(energyNode.otherLinkableEntities));
+            }
+            return STATES.currentState.entities[id];
+        });
+
+        const EnergyNodePixiContainer = new PIXI.Container();
+        EnergyNodePixiContainer.x = energyNode.x;
+        EnergyNodePixiContainer.y = energyNode.y;
+        EnergyNodePixiContainer.name = `EnergyNodeContainer${energyNode.id}`;
+
+        //main EnergyNode Body
+        const EnergyNodePixi = new PIXI.Graphics();
+        EnergyNodePixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        EnergyNodePixi.beginFill(0xde3249, 1);
+        EnergyNodePixi.drawCircle(0, 0, radius);
+        EnergyNodePixi.endFill();
+        EnergyNodePixi.name = `EnergyNodeGraphics${energyNode.id}`;
+
+        EnergyNodePixiContainer.addChild(EnergyNodePixi);
+
+        energyNode.pixiGraphicContainer = EnergyNodePixiContainer;
+
+        energyNode.energyPackets = energyNode.energyPackets.map((packet) => {
+            const EnergyPacketPixi = new PIXI.Graphics();
+            // Circle
+            EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+            EnergyPacketPixi.beginFill(0xffffff, 1);
+            EnergyPacketPixi.drawCircle(0, 0, 4);
+            EnergyPacketPixi.endFill();
+            EnergyPacketPixi.name = 'EnergyPacketGraphics';
+            packet.pixiGraphic = EnergyPacketPixi;
+            energyNode.pixiGraphicContainer.addChild(packet.pixiGraphic);
+            return packet;
+        });
+        energyNode.temp = { linkTo: [], translatedLocation: { x: 0, y: 0 } };
+        STATES.ENGINE.mainPixiContainer.addChild(EnergyNodePixiContainer);
     }
 }; //end EnergyNode Class

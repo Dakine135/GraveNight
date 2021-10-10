@@ -35,6 +35,13 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'Pixi is coming along nicely. Moved buttons and HUD, energy packets working again. Save and Restore working.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Sunday, 10 Oct 2021 00:27:00 -0400'
+                    }
+                },
+                {
                     subject: 'started replacing graphics with Pixi. Get some basic camera translation working',
                     commiter: {
                         name: 'd.welborn',

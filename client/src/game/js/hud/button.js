@@ -1,7 +1,9 @@
 const HitBox = require('../../shared/Hitbox.js');
+const PIXI = require('pixi.js');
 
 module.exports = class Button {
     constructor({
+        hudPixiContainer,
         x = 0,
         y = 0,
         width = 100,
@@ -33,6 +35,57 @@ module.exports = class Button {
         this.onHoverCallback = hover;
         this.onHoverLeaveCallback = hoverLeave;
 
+        //pixiStuff
+        this.pixiGraphic = new PIXI.Graphics();
+        this.pixiGraphic.lineStyle(2, 0xffffff, 1);
+        this.pixiGraphic.beginFill(0xaa4f08);
+        this.pixiGraphic.drawRect(this.x, this.y, this.width, this.height);
+        this.pixiGraphic.endFill();
+        // make the button interactive...
+        this.pixiGraphic.interactive = true;
+        // this.pixiGraphic.buttonMode = true; //makes cursor a hand html style
+
+        this.pixiGraphic
+            // .on('pointerdown', (event) => {
+            //     console.log('pointerdown');
+            // })
+            .on('pointerup', (event) => {
+                this.onClick();
+            })
+            // .on('pointerupoutside', (event) => {
+            //     console.log('pointerupoutside');
+            // })
+            .on('pointerover', (event) => {
+                this.onHover();
+            })
+            .on('pointerout', (event) => {
+                this.onHoverLeave();
+            });
+        hudPixiContainer.addChild(this.pixiGraphic);
+
+        //Main Label Text
+        this.text = new PIXI.Text(
+            this.label,
+            new PIXI.TextStyle({
+                fontSize: 14
+            })
+        );
+        this.text.x = this.x + 15;
+        this.text.y = this.y + this.height / 3;
+        hudPixiContainer.addChild(this.text);
+        //shortcut Label
+        if (this.shortCutText) {
+            this.text = new PIXI.Text(
+                this.shortCutText,
+                new PIXI.TextStyle({
+                    fontSize: 14
+                })
+            );
+            this.text.x = this.x + 5;
+            this.text.y = this.y + 1;
+            hudPixiContainer.addChild(this.text);
+        }
+
         console.log('Created Button:', this.label);
         if (this.debug) console.log('Button Debug On');
     } //constructor
@@ -58,58 +111,4 @@ module.exports = class Button {
         this.isHovered = false;
         this.onHoverLeaveCallback();
     }
-
-    update({ mouseX = 0, mouseY = 0, leftClick = false } = {}) {
-        //check if mouse is inside this button
-        if (HitBox.collidePointRect({ x: mouseX, y: mouseY }, { rx: this.x, ry: this.y, rw: this.width, rh: this.height })) {
-            if (!this.isHovered) this.onHover();
-            if (leftClick && !this.isClicked) this.onClick();
-            if (!leftClick && this.isClicked) this.isClicked = false;
-        } else {
-            if (this.isHovered) {
-                this.isHovered = false;
-                this.isClicked = false;
-                this.onHoverLeave();
-            }
-        }
-    }
-
-    draw(render) {
-        // Start a new drawing state
-        render.save();
-        render.beginPath();
-
-        //draw Button body
-        render.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.isHovered ? '1' : '0.6'})`;
-        render.lineWidth = this.isHovered ? 3 : 1;
-        render.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
-        render.rect(this.x, this.y, this.width, this.height);
-        render.stroke();
-        render.fill();
-
-        //button keyboard shortcut text
-        let shortCutTextWidth = 0;
-        if (this.shortCutText && this.shortCutText.length > 0) {
-            render.font = '15px Arial';
-            render.fillStyle = `rgba(${this.labelColor.r}, ${this.labelColor.g}, ${this.labelColor.b}, 1)`;
-            render.textAlign = 'left';
-            render.textBaseline = 'top';
-            shortCutTextWidth = render.measureText(this.shortCutText).width;
-            render.fillText(this.shortCutText, this.x + 2, this.y);
-            render.lineWidth = 1;
-            render.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
-            render.rect(this.x, this.y, shortCutTextWidth + 4, this.height / 2);
-            render.stroke();
-        }
-
-        //Button Label
-        render.font = '20px Arial';
-        render.fillStyle = `rgba(${this.labelColor.r}, ${this.labelColor.g}, ${this.labelColor.b}, 1)`;
-        render.textAlign = 'center';
-        render.textBaseline = 'middle';
-        render.fillText(this.label, this.x + this.width / 2 + shortCutTextWidth, this.y + this.height / 2, this.width - 10 - shortCutTextWidth);
-
-        render.closePath();
-        render.restore(); // Restore original state
-    } //draw
 }; //Button

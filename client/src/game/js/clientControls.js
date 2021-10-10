@@ -1,3 +1,4 @@
+const PIXI = require('pixi.js');
 module.exports = class Controls {
     constructor({ debug = false, engine = null }) {
         console.log('Create Controls');
@@ -24,56 +25,61 @@ module.exports = class Controls {
         this.leftClickAction = null;
         this.middleClickAction = null;
         this.rightClickAction = null;
-        window.addEventListener('mousedown', (event) => {
-            if (this.debug) console.log('mousePressed:', event.button);
-            switch (event.button) {
-                case 0:
-                    this.leftClickPressed = true;
-                    this.leftClickHandled = false;
-                    break;
-                case 1:
-                    this.middleClickPressed = true;
-                    this.middleClickHandled = false;
-                    break;
-                case 2:
-                    this.rightClickPressed = true;
-                    this.rightClickHandled = false;
-                    break;
-            }
-        });
-        window.addEventListener('mouseup', (event) => {
-            if (this.debug) console.log('mouseReleased:', event.button);
-            switch (event.button) {
-                case 0:
-                    this.leftClickPressed = false;
-                    break;
-                case 1:
-                    this.middleClickPressed = false;
-                    break;
-                case 2:
-                    this.rightClickPressed = false;
-                    break;
-            }
-        });
+        // window.addEventListener('mousedown', (event) => {
+        //     if (this.debug) console.log('mousePressed:', event.button);
+        //     switch (event.button) {
+        //         case 0:
+        //             this.leftClickPressed = true;
+        //             this.leftClickHandled = false;
+        //             break;
+        //         case 1:
+        //             this.middleClickPressed = true;
+        //             this.middleClickHandled = false;
+        //             break;
+        //         case 2:
+        //             this.rightClickPressed = true;
+        //             this.rightClickHandled = false;
+        //             break;
+        //     }
+        // });
+        // window.addEventListener('mouseup', (event) => {
+        //     if (this.debug) console.log('mouseReleased:', event.button);
+        //     switch (event.button) {
+        //         case 0:
+        //             this.leftClickPressed = false;
+        //             break;
+        //         case 1:
+        //             this.middleClickPressed = false;
+        //             break;
+        //         case 2:
+        //             this.rightClickPressed = false;
+        //             break;
+        //     }
+        // });
         window.addEventListener('wheel', this.scrollEvent.bind(this));
         window.addEventListener('keydown', this.keyPressed.bind(this));
         window.addEventListener('keyup', this.keyReleased.bind(this));
         // window.addEventListener('mousemove', this.mouseMoved.bind(this));
         // pointer lock object forking for cross browser
 
-        this.ENGINE.HUD.canvas.requestPointerLock =
-            this.ENGINE.HUD.canvas.requestPointerLock || this.ENGINE.HUD.canvas.mozRequestPointerLock;
-        document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-        this.ENGINE.HUD.canvas.onclick = () => {
-            // console.log('clicked hud canvas');
-            this.leftClickHandled = true;
-            this.ENGINE.HUD.canvas.requestPointerLock();
-            this.ENGINE.HUD.canvas.onclick = null;
-        };
+        // this.ENGINE.stage.requestPointerLock = this.ENGINE.stage.requestPointerLock || this.ENGINE.stage.mozRequestPointerLock;
+        // document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+        // this.ENGINE.stage.onclick = () => {
+        //     console.log('clicked stage');
+        //     this.leftClickHandled = true;
+        //     this.ENGINE.stage.requestPointerLock();
+        //     this.ENGINE.stage.onclick = null;
+        // };
         // Hook pointer lock state change events for different browsers
-        document.addEventListener('pointerlockchange', this.lockChange.bind(this), false);
-        document.addEventListener('mozpointerlockchange', this.lockChange.bind(this), false);
+        // document.addEventListener('pointerlockchange', this.lockChange.bind(this), false);
+        // document.addEventListener('mozpointerlockchange', this.lockChange.bind(this), false);
         // this.ENGINE.HUD.canvas.requestPointerLock();
+
+        this.ENGINE.pixiApp.renderer.plugins.interaction.on('mousemove', this.mouseMoved.bind(this));
+        this.ENGINE.pixiApp.renderer.plugins.interaction.on('mousedown', () => {
+            console.log('mouseDown');
+            if (this.leftClickAction) this.ENGINE.STATES[this.leftClickAction]();
+        });
 
         this.temp = {};
     } //constructor
@@ -239,8 +245,8 @@ module.exports = class Controls {
     } //handlePressedKeys
 
     update() {
-        this.handleHeldKeys();
-        this.handlePressedKeys();
+        // this.handleHeldKeys();
+        // this.handlePressedKeys();
     }
 
     translateScreenLocToWorld(result, x, y) {
@@ -261,38 +267,36 @@ module.exports = class Controls {
     }
 
     mouseMoved(event) {
-        if (!this.mouseLocked) return;
-        this.mouse = { x: Math.round(this.mouse.x + event.movementX / 2), y: Math.round(this.mouse.y + event.movementY / 2) };
-        if (this.mouse.x > this.ENGINE.width) this.mouse.x = this.ENGINE.width;
-        if (this.mouse.y > this.ENGINE.height) this.mouse.y = this.ENGINE.height;
-        if (this.mouse.x < 0) this.mouse.x = 0;
-        if (this.mouse.y < 0) this.mouse.y = 0;
+        event.data.global.x, event.data.global.y;
+        this.mouse = { x: event.data.global.x, y: event.data.global.y };
         this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
+        this.ENGINE.HUD.mainCursor.setTransform(this.mouse.x, this.mouse.y);
     }
 
-    lockChange() {
-        if (document.pointerLockElement === this.ENGINE.HUD.canvas || document.mozPointerLockElement === this.ENGINE.HUD.canvas) {
-            // console.log('The pointer lock status is now locked');
-            document.addEventListener('mousemove', this.mouseMoved.bind(this), false);
-            this.mouse = { x: Math.round(this.ENGINE.HUD.width / 2), y: Math.round(this.ENGINE.HUD.height / 2) };
-            this.mouseLocked = true;
-        } else {
-            // console.log('The pointer lock status is now unlocked');
-            document.removeEventListener('mousemove', this.mouseMoved.bind(this), false);
-            this.mouseLocked = false;
-            this.setLeftClickAction();
-            this.ENGINE.HUD.setDrawMode();
-            this.ENGINE.HUD.canvas.onclick = () => {
-                // console.log('clicked hud canvas');
-                this.leftClickHandled = true;
-                this.ENGINE.HUD.canvas.requestPointerLock();
-                this.ENGINE.HUD.canvas.onclick = null;
-            };
-        }
-    }
+    // lockChange() {
+    //     if (document.pointerLockElement === this.ENGINE.stage || document.mozPointerLockElement === this.ENGINE.stage) {
+    //         console.log('The pointer lock status is now locked');
+    //         document.addEventListener('mousemove', this.mouseMoved.bind(this), false);
+    //         this.mouse = { x: Math.round(this.ENGINE.width / 2), y: Math.round(this.ENGINE.height / 2) };
+    //         this.mouseLocked = true;
+    //     } else {
+    //         console.log('The pointer lock status is now unlocked');
+    //         document.removeEventListener('mousemove', this.mouseMoved.bind(this), false);
+    //         this.mouseLocked = false;
+    //         this.setLeftClickAction();
+    //         this.ENGINE.HUD.setDrawMode();
+    //         this.ENGINE.stage.onclick = () => {
+    //             console.log('clicked stage');
+    //             this.leftClickHandled = true;
+    //             this.ENGINE.stage.requestPointerLock();
+    //             this.ENGINE.stage.onclick = null;
+    //         };
+    //     }
+    // }
 
     setLeftClickAction(action) {
         // if (this.debug) console.log('Setting left CLick Action:', action);
+        console.log('Setting left CLick Action:', action);
         switch (action) {
             case 'default':
             case 'clear':

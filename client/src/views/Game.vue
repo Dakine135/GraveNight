@@ -1,11 +1,11 @@
 <template>
     <div>
         <div id="stage" ref="stage">
-            <canvas id="hud-layer" ref="hud-layer">Your browser does not support HTML5 canvas</canvas>
+            <!-- <canvas id="hud-layer" ref="hud-layer">Your browser does not support HTML5 canvas</canvas> -->
             <!-- <canvas id="lineOfSight-layer" ref="lineOfSight-layer"></canvas> -->
-            <canvas id="lighting-layer" ref="lighting-layer"></canvas>
+            <!-- <canvas id="lighting-layer" ref="lighting-layer"></canvas> -->
             <div id="main-layer" ref="main-layer"></div>
-            <canvas id="background-layer" ref="background-layer"></canvas>
+            <!-- <canvas id="background-layer" ref="background-layer"></canvas> -->
         </div>
     </div>
 </template>
@@ -27,28 +27,28 @@ export default {
     methods: {
         setup() {
             console.log('SETUP');
-        }, //SETUP
+        } //SETUP
 
-        draw() {
-            this.engine.update();
-            this.engine.draw();
-            window.requestAnimFrame(this.draw);
-        } //draw
+        // draw() {
+        //     this.engine.update();
+        //     this.engine.draw();
+        //     window.requestAnimFrame(this.draw);
+        // } //draw
     },
 
     mounted: function () {
-        window.requestAnimFrame = (function (callback) {
-            return (
-                window.requestAnimationFrame ||
-                window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame ||
-                window.oRequestAnimationFrame ||
-                window.msRequestAnimationFrame ||
-                function (callback) {
-                    window.setTimeout(callback, 1000 / 60);
-                }
-            );
-        })();
+        // window.requestAnimFrame = (function (callback) {
+        //     return (
+        //         window.requestAnimationFrame ||
+        //         window.webkitRequestAnimationFrame ||
+        //         window.mozRequestAnimationFrame ||
+        //         window.oRequestAnimationFrame ||
+        //         window.msRequestAnimationFrame ||
+        //         function (callback) {
+        //             window.setTimeout(callback, 1000 / 60);
+        //         }
+        //     );
+        // })();
 
         //main layer Pixi JS
 
@@ -58,24 +58,24 @@ export default {
         // console.log('mainLayerPixi :>> ', mainLayerPixi);
 
         let stage = this.$refs['stage'];
-        let backgroundCanvas = this.$refs['background-layer'];
-        let lightingCanvas = this.$refs['lighting-layer'];
-        let lineOfSightCanvas = this.$refs['lineOfSight-layer'];
-        let hudCanvas = this.$refs['hud-layer'];
+        // let backgroundCanvas = this.$refs['background-layer'];
+        // let lightingCanvas = this.$refs['lighting-layer'];
+        // let lineOfSightCanvas = this.$refs['lineOfSight-layer'];
+        // let hudCanvas = this.$refs['hud-layer'];
         this.engine = new EngineClass({
             pixiAppDiv: mainLayerDiv,
-            stage,
-            backgroundCanvas,
-            lightingCanvas,
-            lineOfSightCanvas,
-            hudCanvas
+            stage
+            // backgroundCanvas,
+            // lightingCanvas,
+            // lineOfSightCanvas,
+            // hudCanvas
             // width: this.screenWidth,
             // height: this.screenHeight
         });
         //disabled right-click menu
         window.addEventListener('contextmenu', (event) => event.preventDefault());
-        this.setup();
-        this.draw();
+        // this.setup();
+        // this.draw();
     }
 };
 </script>
@@ -103,6 +103,7 @@ canvas {
     height: 100%;
     /*border: 1px solid white;*/
     margin: 0 auto;
+    cursor: none;
 }
 #hud-layer {
     z-index: 5;
