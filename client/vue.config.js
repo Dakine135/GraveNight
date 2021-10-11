@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     // ...other vue-cli plugin options...
@@ -7,7 +8,12 @@ module.exports = {
             alias: {
                 '@assets': path.resolve(__dirname, 'src/assets/')
             }
-        }
+        },
+        plugins: [
+            new CopyPlugin({
+                patterns: [{ from: path.resolve(__dirname, 'src/assets/background'), to: 'assets/background' }]
+            })
+        ]
     },
     pwa: {
         name: 'GraveNight',

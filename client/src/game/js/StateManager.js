@@ -66,11 +66,11 @@ module.exports = class StatesManager {
             );
             this.entityAddedSinceLastDraw = false;
             this.cameraChange = false;
-            if (this.ENGINE.HUD.debug) {
-                this.ENGINE.HUD.debugUpdate({
-                    entitiesBeingDrawn: this.temp.nearbyDraw.length
-                });
-            }
+            // if (this.ENGINE.HUD.debug) {
+            //     this.ENGINE.HUD.debugUpdate({
+            //         entitiesBeingDrawn: this.temp.nearbyDraw.length
+            //     });
+            // }
         }
         for (let i = 0; i < this.numberOfDrawLayers; i++) {
             Object.entries(this.temp.nearbyDraw).forEach(([id, entity]) => {
@@ -86,8 +86,10 @@ module.exports = class StatesManager {
 
     placeEnergyNode({ x = this.ENGINE.CONTROLS.mouseLocationInWorld.x, y = this.ENGINE.CONTROLS.mouseLocationInWorld.y } = {}) {
         if (this.ENGINE.HUD.ghost != null) {
-            x = this.ENGINE.HUD.ghost.x;
-            y = this.ENGINE.HUD.ghost.y;
+            let point = this.ENGINE.HUD.ghost.toGlobal({ x: 0, y: 0 });
+            this.ENGINE.CONTROLS.translateScreenLocToWorld(point, point.x, point.y);
+            x = point.x;
+            y = point.y;
         }
         console.log('placeEnergyNode', x, y);
 

@@ -29,15 +29,8 @@ module.exports = EnergyNodeClass = {
         EnergyNodePixiContainer.y = y;
         EnergyNodePixiContainer.name = `EnergyNodeContainer${id}`;
 
-        //main EnergyNode Body
-        const EnergyNodePixi = new PIXI.Graphics();
-        EnergyNodePixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        EnergyNodePixi.beginFill(0xde3249, 1);
-        EnergyNodePixi.drawCircle(0, 0, radius);
-        EnergyNodePixi.endFill();
-        EnergyNodePixi.name = `EnergyNodeGraphics${id}`;
-
-        EnergyNodePixiContainer.addChild(EnergyNodePixi);
+        //main EnergyNode Graphics
+        ENGINE.ENTITY_CLASSES[type].createGraphics(EnergyNodePixiContainer, id);
 
         let newEnergyNode = {
             type,
@@ -110,6 +103,7 @@ module.exports = EnergyNodeClass = {
             this.energyPackets[i].travel -= deltaTime;
             if (this.energyPackets[i].travel <= 0) {
                 //TODO dont send, but delete if at max heat
+                //TODO set to not render if going to available
                 ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.push(this.energyPackets[i]);
                 ENGINE.ENTITY_CLASSES['EnergyNode'].sendPacketOut.bind(this)(ENGINE, this.energyPackets[i].fromId);
                 this.energyPackets.splice(i, 1);
@@ -150,6 +144,7 @@ module.exports = EnergyNodeClass = {
         // availableEnergyPackets
         if (ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.length > 0) {
             let reusePacket = ENGINE.ENTITY_CLASSES['EnergyNode'].availableEnergyPackets.pop();
+            //TODO mark render-able again
             reusePacket.travel = travel;
             reusePacket.x = x - this.x;
             reusePacket.y = y - this.y;
@@ -172,143 +167,28 @@ module.exports = EnergyNodeClass = {
         }
     },
 
-    // draw0(ENGINE) {
-    //     // Start a new drawing state
-    //     ENGINE.render.save();
-    //     ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-    //     ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-    //     ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
+    createGraphics(container, id) {
+        let mainBody = new PIXI.Graphics();
+        mainBody.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        mainBody.beginFill(0xde3249, 1);
+        mainBody.drawCircle(0, 0, radius);
+        mainBody.endFill();
+        mainBody.name = `EnergyNodeGraphicsMainBody${id}`;
+        container.addChild(mainBody);
+        return mainBody;
+    },
 
-    //     //EnergyNode location for debugging
-    //     if (this.debug) {
-    //         ENGINE.render.fillStyle = 'black';
-    //         ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
-    //     }
-
-    //     //show distance to link
-    //     if (this.selected) {
-    //         ENGINE.render.beginPath();
-    //         ENGINE.render.strokeStyle = 'blue';
-    //         ENGINE.render.lineWidth = 1;
-    //         ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
-    //         ENGINE.render.stroke();
-    //         ENGINE.render.closePath();
-    //         ENGINE.render.beginPath();
-    //         ENGINE.render.strokeStyle = 'orange';
-    //         ENGINE.render.lineWidth = 1;
-    //         ENGINE.render.arc(0, 0, distanceCanLink + ENGINE.HUD.snappingBuffer, 0, 2 * Math.PI);
-    //         ENGINE.render.stroke();
-    //         ENGINE.render.closePath();
-    //     }
-
-    //     //draw main body
-    //     ENGINE.render.beginPath();
-    //     // 	context.createRadialGradient(x0,y0,r0,x1,y1,r1);
-    //     if (ENGINE.CAMERA.zoomLevel <= 0.5) {
-    //         ENGINE.render.fillStyle = `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`;
-    //         ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-    //         ENGINE.render.fill();
-    //         ENGINE.render.closePath();
-    //     } else {
-    //         let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
-    //         gradient.addColorStop(
-    //             0,
-    //             `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a})`
-    //         );
-    //         gradient.addColorStop(
-    //             1,
-    //             `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a})`
-    //         );
-    //         ENGINE.render.fillStyle = gradient;
-    //         //void ctx.arc(x, y, radius, startAngle, endAngle [, counterclockwise]);
-    //         ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-    //         ENGINE.render.fill();
-    //         ENGINE.render.closePath();
-    //     }
-
-    //     ENGINE.render.restore(); // Restore original state
-    // }, //end Draw
-
-    // draw1(ENGINE) {
-    //     //draw energyPackets
-    //     if (ENGINE.CAMERA.zoomLevel > 0.5) {
-    //         ENGINE.render.save();
-    //         ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-    //         ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-    //         ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
-    //         this.energyPackets.forEach((packet) => {
-    //             ENGINE.render.beginPath();
-    //             ENGINE.render.fillStyle = 'white';
-    //             ENGINE.render.arc(packet.x, packet.y, 4, 0, 2 * Math.PI);
-    //             ENGINE.render.fill();
-    //             ENGINE.render.closePath();
-    //         });
-    //         ENGINE.render.restore(); // Restore original state
-    //     }
-    // },
-
-    // drawGhost(ENGINE) {
-    //     // console.log('ENGINE :>> ', ENGINE);
-    //     // Start a new drawing state
-    //     ENGINE.render.save();
-    //     ENGINE.CAMERA.translate(this.temp.translatedLocation, this.x, this.y);
-    //     ENGINE.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-    //     ENGINE.render.scale(ENGINE.CAMERA.zoomLevel, ENGINE.CAMERA.zoomLevel);
-
-    //     //EnergyNode location for debugging
-    //     if (this.debug) {
-    //         ENGINE.render.fillStyle = 'black';
-    //         ENGINE.render.fillText(Math.round(this.x) + ',' + Math.round(this.y), radius + 2, radius + 2);
-    //     }
-
-    //     ENGINE.render.strokeStyle = 'blue';
-    //     if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
-    //     ENGINE.render.lineWidth = 1;
-
-    //     //get linkable Nodes
-    //     ENGINE.STATES.getEntitiesInRange(this.temp.linkTo, 'energyLinkableEntities', this, distanceCanLink);
-    //     this.canBePlaced = true;
-    //     this.temp.overlapping = false;
-    //     this.temp.linkTo.forEach((otherNode) => {
-    //         this.temp.overlapping = Hitbox.collideCircleCircle(
-    //             { x: this.x, y: this.y, r: radius },
-    //             { x: otherNode.x, y: otherNode.y, r: radius }
-    //         );
-    //         if (this.temp.overlapping) this.canBePlaced = false;
-    //         this.temp.relativeLocation = { x: otherNode.x - this.x, y: otherNode.y - this.y };
-    //         ENGINE.render.beginPath();
-    //         ENGINE.render.moveTo(0, 0);
-    //         ENGINE.render.lineTo(this.temp.relativeLocation.x, this.temp.relativeLocation.y);
-    //         ENGINE.render.stroke();
-    //         ENGINE.render.closePath();
-    //     });
-
-    //     //show distance to link
-    //     ENGINE.render.beginPath();
-    //     ENGINE.render.strokeStyle = 'blue';
-    //     if (!this.canBePlaced) ENGINE.render.strokeStyle = 'red';
-    //     ENGINE.render.lineWidth = 1;
-    //     ENGINE.render.arc(0, 0, distanceCanLink, 0, 2 * Math.PI);
-    //     ENGINE.render.stroke();
-    //     ENGINE.render.closePath();
-    //     //main body
-    //     ENGINE.render.beginPath();
-    //     let gradient = ENGINE.render.createRadialGradient(0, 0, 0, 0, 0, radius);
-    //     gradient.addColorStop(
-    //         0,
-    //         `rgba(${this.currentStartColor.r},${this.currentStartColor.g},${this.currentStartColor.b},${this.currentStartColor.a / 2})`
-    //     );
-    //     gradient.addColorStop(
-    //         1,
-    //         `rgba(${this.currentEndColor.r},${this.currentEndColor.g},${this.currentEndColor.b},${this.currentEndColor.a / 2})`
-    //     );
-    //     ENGINE.render.fillStyle = gradient;
-    //     ENGINE.render.arc(0, 0, radius, 0, 2 * Math.PI);
-    //     ENGINE.render.fill();
-    //     ENGINE.render.closePath();
-
-    //     ENGINE.render.restore(); // Restore original state
-    // }, //draw ghost
+    createPacketGraphics(container) {
+        const EnergyPacketPixi = new PIXI.Graphics();
+        // Circle
+        EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        EnergyPacketPixi.beginFill(0xffffff, 1);
+        EnergyPacketPixi.drawCircle(0, 0, 4);
+        EnergyPacketPixi.endFill();
+        EnergyPacketPixi.name = 'EnergyPacketGraphics';
+        container.addChild(EnergyPacketPixi);
+        return EnergyPacketPixi;
+    },
 
     toJSON() {
         return {
@@ -357,28 +237,13 @@ module.exports = EnergyNodeClass = {
         EnergyNodePixiContainer.y = energyNode.y;
         EnergyNodePixiContainer.name = `EnergyNodeContainer${energyNode.id}`;
 
-        //main EnergyNode Body
-        const EnergyNodePixi = new PIXI.Graphics();
-        EnergyNodePixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        EnergyNodePixi.beginFill(0xde3249, 1);
-        EnergyNodePixi.drawCircle(0, 0, radius);
-        EnergyNodePixi.endFill();
-        EnergyNodePixi.name = `EnergyNodeGraphics${energyNode.id}`;
-
-        EnergyNodePixiContainer.addChild(EnergyNodePixi);
+        STATES.ENGINE.ENTITY_CLASSES[type].createGraphics(EnergyNodePixiContainer, energyNode.id);
 
         energyNode.pixiGraphicContainer = EnergyNodePixiContainer;
 
         energyNode.energyPackets = energyNode.energyPackets.map((packet) => {
-            const EnergyPacketPixi = new PIXI.Graphics();
-            // Circle
-            EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-            EnergyPacketPixi.beginFill(0xffffff, 1);
-            EnergyPacketPixi.drawCircle(0, 0, 4);
-            EnergyPacketPixi.endFill();
-            EnergyPacketPixi.name = 'EnergyPacketGraphics';
+            const EnergyPacketPixi = STATES.ENGINE.ENTITY_CLASSES[type].createPacketGraphics(energyNode.pixiGraphicContainer);
             packet.pixiGraphic = EnergyPacketPixi;
-            energyNode.pixiGraphicContainer.addChild(packet.pixiGraphic);
             return packet;
         });
         energyNode.temp = { linkTo: [], translatedLocation: { x: 0, y: 0 } };

@@ -361,9 +361,9 @@ module.exports = class lighting {
 
         // console.log(listOfPoints.length);
         if (this.debug) {
-            this.ENGINE.HUD.debugUpdate({
-                numberOfPoints: listOfPoints.length
-            });
+            // this.ENGINE.HUD.debugUpdate({
+            //     numberOfPoints: listOfPoints.length
+            // });
         }
 
         // create Path of line-of-sight

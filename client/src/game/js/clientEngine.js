@@ -49,10 +49,12 @@ module.exports = class clientEngine {
         this.height = this.screenHeight;
 
         this.pixiApp = new PIXI.Application({ width: this.screenWidth, height: this.screenHeight, backgroundColor: 0x1aa32f });
+        this.pixiApp.stage.sortableChildren = true;
         pixiAppDiv.appendChild(this.pixiApp.view);
         window.__PIXI_INSPECTOR_GLOBAL_HOOK__ && window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
         this.mainPixiContainer = new PIXI.Container();
         this.mainPixiContainer.name = 'mainContainer';
+        this.mainPixiContainer.zIndex = 1;
         this.pixiApp.stage.addChild(this.mainPixiContainer);
         // console.log('this.mainPixiContainer :>> ', this.mainPixiContainer);
 
@@ -122,16 +124,16 @@ module.exports = class clientEngine {
         let cameraTranslation = { x: 0, y: 0 };
         this.CAMERA.translate(cameraTranslation, 0, 0);
         // console.log('cameraTranslation :>> ', cameraTranslation);
-        this.translateMainPixiContainer = new PIXI.ObservablePoint(
-            () => {
-                // console.log('position :>> ', this);
-                this.mainPixiContainer.position = this.translateMainPixiContainer;
-            },
-            this,
-            cameraTranslation.x,
-            cameraTranslation.y
-        );
-        this.mainPixiContainer.position = this.translateMainPixiContainer;
+        // this.translateMainPixiContainer = new PIXI.ObservablePoint(
+        //     () => {
+        //         // console.log('position :>> ', this);
+        //         this.mainPixiContainer.position = this.translateMainPixiContainer;
+        //     },
+        //     this,
+        //     cameraTranslation.x,
+        //     cameraTranslation.y
+        // );
+        // this.mainPixiContainer.position = this.translateMainPixiContainer;
 
         this.STATES = new StatesManager({
             debug: this.isProduction ? false : false,
@@ -165,11 +167,10 @@ module.exports = class clientEngine {
         //     debug: this.isProduction ? false : false,
         //     engine: this
         // });
-        // this.BACKGROUND = new Background({
-        //     debug: this.isProduction ? false : false,
-        //     engine: this,
-        //     canvas: backgroundCanvas
-        // });
+        this.BACKGROUND = new Background({
+            debug: this.isProduction ? false : false,
+            engine: this
+        });
         // this.NETWORK.updateServerTimeDiffernce();
 
         //generate world on client

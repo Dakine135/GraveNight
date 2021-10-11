@@ -36,16 +36,23 @@ module.exports = class Button {
         this.onHoverLeaveCallback = hoverLeave;
 
         //pixiStuff
-        this.pixiGraphic = new PIXI.Graphics();
-        this.pixiGraphic.lineStyle(2, 0xffffff, 1);
-        this.pixiGraphic.beginFill(0xaa4f08);
-        this.pixiGraphic.drawRect(this.x, this.y, this.width, this.height);
-        this.pixiGraphic.endFill();
+        this.buttonContainer = new PIXI.Container();
+        this.buttonContainer.name = `Button ${this.label}`;
+        this.buttonContainer.x = this.x;
+        this.buttonContainer.y = this.y;
+        hudPixiContainer.addChild(this.buttonContainer);
+
+        this.square = new PIXI.Graphics();
+        this.square.name = `square ${this.label}`;
+        this.square.lineStyle(2, 0xffffff, 1);
+        this.square.beginFill(0xaa4f08);
+        this.square.drawRect(0, 0, this.width, this.height);
+        this.square.endFill();
         // make the button interactive...
-        this.pixiGraphic.interactive = true;
+        this.square.interactive = true;
         // this.pixiGraphic.buttonMode = true; //makes cursor a hand html style
 
-        this.pixiGraphic
+        this.square
             // .on('pointerdown', (event) => {
             //     console.log('pointerdown');
             // })
@@ -61,29 +68,31 @@ module.exports = class Button {
             .on('pointerout', (event) => {
                 this.onHoverLeave();
             });
-        hudPixiContainer.addChild(this.pixiGraphic);
+        this.buttonContainer.addChild(this.square);
 
         //Main Label Text
-        this.text = new PIXI.Text(
+        this.pixiLabel = new PIXI.Text(
             this.label,
             new PIXI.TextStyle({
                 fontSize: 14
             })
         );
-        this.text.x = this.x + 15;
-        this.text.y = this.y + this.height / 3;
-        hudPixiContainer.addChild(this.text);
+        this.pixiLabel.name = `label ${this.label}`;
+        this.pixiLabel.x = 15;
+        this.pixiLabel.y = this.height / 3;
+        this.buttonContainer.addChild(this.pixiLabel);
         //shortcut Label
         if (this.shortCutText) {
-            this.text = new PIXI.Text(
+            this.pixiShortCutText = new PIXI.Text(
                 this.shortCutText,
                 new PIXI.TextStyle({
                     fontSize: 14
                 })
             );
-            this.text.x = this.x + 5;
-            this.text.y = this.y + 1;
-            hudPixiContainer.addChild(this.text);
+            this.pixiShortCutText.name = `shortcutText ${this.shortCutText}`;
+            this.pixiShortCutText.x = 5;
+            this.pixiShortCutText.y = 1;
+            this.buttonContainer.addChild(this.pixiShortCutText);
         }
 
         console.log('Created Button:', this.label);

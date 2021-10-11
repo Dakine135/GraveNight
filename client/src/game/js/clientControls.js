@@ -56,6 +56,22 @@ module.exports = class Controls {
         //             break;
         //     }
         // });
+
+        /*
+            slider.addEventListener('wheel', onWheel);
+            function onWheel(e) {
+                const deltaY = e.deltaY;
+
+                handle.position.y = Math.max(4,
+                    Math.min(
+                        handle.position.y + deltaY,
+                        app.renderer.screen.height - 4,
+                    ));
+                onHandleMoved();
+
+                e.preventDefault();
+            }
+        */
         window.addEventListener('wheel', this.scrollEvent.bind(this));
         window.addEventListener('keydown', this.keyPressed.bind(this));
         window.addEventListener('keyup', this.keyReleased.bind(this));
@@ -79,6 +95,10 @@ module.exports = class Controls {
         this.ENGINE.pixiApp.renderer.plugins.interaction.on('mousedown', () => {
             console.log('mouseDown');
             if (this.leftClickAction) this.ENGINE.STATES[this.leftClickAction]();
+        });
+
+        this.ENGINE.pixiApp.ticker.add((deltaTime) => {
+            this.update();
         });
 
         this.temp = {};
@@ -136,12 +156,10 @@ module.exports = class Controls {
             case 83: //S
             case 40: //arrow down
                 break;
+            case 27: //escape key
             case 81: //Q
                 this.ENGINE.HUD.setDrawMode();
                 this.setLeftClickAction();
-                break;
-            case 27: //escape key
-                //now used to break mouse lock from game
                 break;
             default:
                 console.log(`Key Not Used Pressed: ${keyCode}, ${key}`);
@@ -245,7 +263,7 @@ module.exports = class Controls {
     } //handlePressedKeys
 
     update() {
-        // this.handleHeldKeys();
+        this.handleHeldKeys();
         // this.handlePressedKeys();
     }
 
@@ -267,10 +285,10 @@ module.exports = class Controls {
     }
 
     mouseMoved(event) {
-        event.data.global.x, event.data.global.y;
+        // event.data.global.x, event.data.global.y;
         this.mouse = { x: event.data.global.x, y: event.data.global.y };
         this.translateScreenLocToWorld(this.mouseLocationInWorld, this.mouse.x, this.mouse.y);
-        this.ENGINE.HUD.mainCursor.setTransform(this.mouse.x, this.mouse.y);
+        this.ENGINE.HUD.mainCursor.position.copyFrom(event.data.global);
     }
 
     // lockChange() {
@@ -313,7 +331,7 @@ module.exports = class Controls {
                 this.leftClickAction = null;
         }
 
-        this.ENGINE.HUD.debugUpdate({ leftClickAction: this.leftClickAction ? this.leftClickAction : 'None' });
+        // this.ENGINE.HUD.debugUpdate({ leftClickAction: this.leftClickAction ? this.leftClickAction : 'None' });
     } //setLeftClickAction
 
     updateCameraMoved() {

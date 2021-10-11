@@ -10,17 +10,22 @@ module.exports = class HUD {
         this.hudPixiContainer = new PIXI.Container();
         this.hudPixiContainer.sortableChildren = true;
         this.hudPixiContainer.name = 'hudContainer';
+        this.hudPixiContainer.zIndex = 2;
         this.ENGINE.pixiApp.stage.addChild(this.hudPixiContainer);
         //add cursor to hud
         this.crossHairSize = 10;
-        this.mainCursor = new PIXI.Graphics();
-        this.mainCursor.zIndex = 1;
-        this.mainCursor.name = 'defaultCursor';
-        this.mainCursor.lineStyle(1, 0x004dc9, 1);
-        this.mainCursor.moveTo(-this.crossHairSize, 0);
-        this.mainCursor.lineTo(this.crossHairSize, 0);
-        this.mainCursor.moveTo(0, -this.crossHairSize);
-        this.mainCursor.lineTo(0, this.crossHairSize);
+        this.mainCursor = new PIXI.Container();
+        this.mainCursor.name = 'mainCursor';
+
+        const crosshair = new PIXI.Graphics();
+        crosshair.zIndex = 1;
+        crosshair.name = 'crosshair';
+        crosshair.lineStyle(1, 0x004dc9, 1);
+        crosshair.moveTo(-this.crossHairSize, 0);
+        crosshair.lineTo(this.crossHairSize, 0);
+        crosshair.moveTo(0, -this.crossHairSize);
+        crosshair.lineTo(0, this.crossHairSize);
+        this.mainCursor.addChild(crosshair);
         this.hudPixiContainer.addChild(this.mainCursor);
 
         this.debug = debug;
@@ -42,8 +47,8 @@ module.exports = class HUD {
         if (debug) console.log('Created hud-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
 
-    setDrawMode({ mode, ghostEntity, snapping = false } = {}) {
-        // if (this.debug) console.log('Setting Hud draw mode:', mode);
+    setDrawMode({ mode = 'default', ghostEntity, snapping = false } = {}) {
+        if (this.debug) console.log('Setting Hud draw mode:', mode);
         if (snapping != null) this.snappingEnabled = snapping;
         switch (mode) {
             case 'default':
@@ -52,20 +57,31 @@ module.exports = class HUD {
             case '':
             case 'drawCrossHair':
                 this.drawMode = 'drawCrossHair';
-                this.ghost = null;
+                if (this.ghost != null) {
+                    this.ghost.destroy();
+                    this.ghost = null;
+                }
                 break;
             case 'drawGhost':
-                // if (ghostEntity == null) {
-                //     throw Error('ghostEntity Null in Hud.setDrawMode');
-                // }
+                if (ghostEntity == null) {
+                    throw Error('ghostEntity Null in Hud.setDrawMode');
+                }
+                if (this.ghost != null) {
+                    this.ghost.destroy();
+                    this.ghost = null;
+                }
                 this.drawMode = 'drawGhost';
-                // this.ghost = ghostEntity;
+                this.ghost = ghostEntity;
                 break;
             default:
                 console.log('setDrawMode unknown :>> ', mode);
+                if (this.ghost != null) {
+                    this.ghost.destroy();
+                    this.ghost = null;
+                }
                 this.drawMode = 'drawCrossHair';
         }
-        this.debugUpdate({ hudDrawMode: this.drawMode });
+        // this.debugUpdate({ hudDrawMode: this.drawMode });
     } //setDrawMode
 
     resize() {
@@ -91,11 +107,7 @@ module.exports = class HUD {
                 this.ENGINE.CONTROLS.setLeftClickAction('placeEnergyNode');
                 this.setDrawMode({
                     mode: 'drawGhost',
-                    // ghostEntity: EnergyNodeClass.new({
-                    //     x: this.ENGINE.CONTROLS.mouse.x,
-                    //     y: this.ENGINE.CONTROLS.mouse.y,
-                    //     ENGINE: this.ENGINE
-                    // }),
+                    ghostEntity: this.ENGINE.ENTITY_CLASSES.EnergyNode.createGraphics(this.mainCursor, 'ghost'),
                     snapping: true
                 });
             }
@@ -210,136 +222,136 @@ module.exports = class HUD {
         }
     }
 
-    debugUpdate(obj) {
-        //update debugText based on debug vars
-        for (let id in obj) {
-            this.debugVars[id] = obj[id];
-        }
-    }
+    // debugUpdate(obj) {
+    //     //update debugText based on debug vars
+    //     for (let id in obj) {
+    //         this.debugVars[id] = obj[id];
+    //     }
+    // }
 
-    drawDebugText() {
-        this.render.save();
-        this.render.font = this.fontSize + 'px Arial';
-        this.render.fillStyle = 'yellow';
-        this.render.strokeStyle = 'blue';
-        this.render.textAlign = 'left';
-        this.temp.offset = 0;
-        for (let id in this.debugVars) {
-            this.render.fillText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + this.temp.offset);
-            this.render.strokeText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + this.temp.offset);
-            this.temp.offset += this.fontSize;
-        }
-        this.render.restore();
-    }
+    // drawDebugText() {
+    //     this.render.save();
+    //     this.render.font = this.fontSize + 'px Arial';
+    //     this.render.fillStyle = 'yellow';
+    //     this.render.strokeStyle = 'blue';
+    //     this.render.textAlign = 'left';
+    //     this.temp.offset = 0;
+    //     for (let id in this.debugVars) {
+    //         this.render.fillText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + this.temp.offset);
+    //         this.render.strokeText(`${id}: ${this.debugVars[id]}`, this.startX, this.startY + this.temp.offset);
+    //         this.temp.offset += this.fontSize;
+    //     }
+    //     this.render.restore();
+    // }
 
-    drawCrossHair() {
-        //draw cross-hair
-        this.render.save();
+    // drawCrossHair() {
+    //     //draw cross-hair
+    //     this.render.save();
 
-        //main CrossHair
-        this.render.strokeStyle = 'blue';
-        this.render.beginPath();
-        this.render.moveTo(this.ENGINE.CONTROLS.mouse.x - this.crossHairSize, this.ENGINE.CONTROLS.mouse.y);
-        this.render.lineTo(this.ENGINE.CONTROLS.mouse.x + this.crossHairSize, this.ENGINE.CONTROLS.mouse.y);
-        this.render.stroke();
-        this.render.moveTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y - this.crossHairSize);
-        this.render.lineTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize);
-        this.render.stroke();
+    //     //main CrossHair
+    //     this.render.strokeStyle = 'blue';
+    //     this.render.beginPath();
+    //     this.render.moveTo(this.ENGINE.CONTROLS.mouse.x - this.crossHairSize, this.ENGINE.CONTROLS.mouse.y);
+    //     this.render.lineTo(this.ENGINE.CONTROLS.mouse.x + this.crossHairSize, this.ENGINE.CONTROLS.mouse.y);
+    //     this.render.stroke();
+    //     this.render.moveTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y - this.crossHairSize);
+    //     this.render.lineTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize);
+    //     this.render.stroke();
 
-        if (this.ENGINE.CONTROLS.rightClickPressed) {
-            this.render.beginPath();
-            this.render.arc(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y, this.crossHairSize * 2, 0, Math.PI * 2);
-            this.render.stroke();
-        }
-        if (this.ENGINE.CONTROLS.leftClickPressed) {
-            this.render.beginPath();
-            this.render.arc(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y, this.crossHairSize / 2, 0, Math.PI * 2);
-            this.render.stroke();
-        }
+    //     if (this.ENGINE.CONTROLS.rightClickPressed) {
+    //         this.render.beginPath();
+    //         this.render.arc(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y, this.crossHairSize * 2, 0, Math.PI * 2);
+    //         this.render.stroke();
+    //     }
+    //     if (this.ENGINE.CONTROLS.leftClickPressed) {
+    //         this.render.beginPath();
+    //         this.render.arc(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y, this.crossHairSize / 2, 0, Math.PI * 2);
+    //         this.render.stroke();
+    //     }
 
-        if (this.debugCursor) {
-            this.render.font = this.crossHairSize + 'px Arial';
-            this.render.strokeStyle = 'white';
-            this.render.textAlign = 'center';
-            //location on screen
-            this.render.fillText(
-                this.ENGINE.CONTROLS.mouse.x + ',' + this.ENGINE.CONTROLS.mouse.y,
-                this.ENGINE.CONTROLS.mouse.x,
-                this.ENGINE.CONTROLS.mouse.y - this.crossHairSize
-            );
+    //     if (this.debugCursor) {
+    //         this.render.font = this.crossHairSize + 'px Arial';
+    //         this.render.strokeStyle = 'white';
+    //         this.render.textAlign = 'center';
+    //         //location on screen
+    //         this.render.fillText(
+    //             this.ENGINE.CONTROLS.mouse.x + ',' + this.ENGINE.CONTROLS.mouse.y,
+    //             this.ENGINE.CONTROLS.mouse.x,
+    //             this.ENGINE.CONTROLS.mouse.y - this.crossHairSize
+    //         );
 
-            //location in world
-            this.render.save();
-            this.ENGINE.CAMERA.translate(
-                this.temp.translatedLocation,
-                this.ENGINE.CONTROLS.mouseLocationInWorld.x,
-                this.ENGINE.CONTROLS.mouseLocationInWorld.y
-            );
-            this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
-            this.render.beginPath();
-            this.render.fillText(
-                this.ENGINE.CONTROLS.mouseLocationInWorld.x + ',' + this.ENGINE.CONTROLS.mouseLocationInWorld.y,
-                0,
-                this.crossHairSize * 2
-            );
-            this.render.strokeStyle = 'red';
-            this.render.moveTo(-this.crossHairSize, 0);
-            this.render.lineTo(+this.crossHairSize, 0);
-            this.render.stroke();
-            this.render.moveTo(0, -this.crossHairSize);
-            this.render.lineTo(0, +this.crossHairSize);
-            this.render.stroke();
-            this.render.restore();
-        }
+    //         //location in world
+    //         this.render.save();
+    //         this.ENGINE.CAMERA.translate(
+    //             this.temp.translatedLocation,
+    //             this.ENGINE.CONTROLS.mouseLocationInWorld.x,
+    //             this.ENGINE.CONTROLS.mouseLocationInWorld.y
+    //         );
+    //         this.render.translate(this.temp.translatedLocation.x, this.temp.translatedLocation.y);
+    //         this.render.beginPath();
+    //         this.render.fillText(
+    //             this.ENGINE.CONTROLS.mouseLocationInWorld.x + ',' + this.ENGINE.CONTROLS.mouseLocationInWorld.y,
+    //             0,
+    //             this.crossHairSize * 2
+    //         );
+    //         this.render.strokeStyle = 'red';
+    //         this.render.moveTo(-this.crossHairSize, 0);
+    //         this.render.lineTo(+this.crossHairSize, 0);
+    //         this.render.stroke();
+    //         this.render.moveTo(0, -this.crossHairSize);
+    //         this.render.lineTo(0, +this.crossHairSize);
+    //         this.render.stroke();
+    //         this.render.restore();
+    //     }
 
-        this.render.restore();
-    }
+    //     this.render.restore();
+    // }
 
-    drawGhost() {
-        // if (!this.ghost) return;
-        this.render.save();
-        // this.ENGINE.ENTITY_CLASSES[this.ghost.type].drawGhost.bind(this.ghost)(this.ENGINE);
+    // drawGhost() {
+    //     // if (!this.ghost) return;
+    //     this.render.save();
+    //     // this.ENGINE.ENTITY_CLASSES[this.ghost.type].drawGhost.bind(this.ghost)(this.ENGINE);
 
-        this.render.strokeStyle = 'rgba(0,0,255,0.3)';
-        this.render.beginPath();
-        this.render.moveTo(this.ENGINE.CONTROLS.mouse.x - this.crossHairSize / 2, this.ENGINE.CONTROLS.mouse.y);
-        this.render.lineTo(this.ENGINE.CONTROLS.mouse.x + this.crossHairSize / 2, this.ENGINE.CONTROLS.mouse.y);
-        this.render.stroke();
-        this.render.moveTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y - this.crossHairSize / 2);
-        this.render.lineTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize / 2);
-        this.render.stroke();
+    //     this.render.strokeStyle = 'rgba(0,0,255,0.3)';
+    //     this.render.beginPath();
+    //     this.render.moveTo(this.ENGINE.CONTROLS.mouse.x - this.crossHairSize / 2, this.ENGINE.CONTROLS.mouse.y);
+    //     this.render.lineTo(this.ENGINE.CONTROLS.mouse.x + this.crossHairSize / 2, this.ENGINE.CONTROLS.mouse.y);
+    //     this.render.stroke();
+    //     this.render.moveTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y - this.crossHairSize / 2);
+    //     this.render.lineTo(this.ENGINE.CONTROLS.mouse.x, this.ENGINE.CONTROLS.mouse.y + this.crossHairSize / 2);
+    //     this.render.stroke();
 
-        this.render.restore();
-    }
+    //     this.render.restore();
+    // }
 
-    drawButtons() {
-        Object.entries(this.buttons).forEach(([name, button]) => {
-            button.draw(this.render);
-        });
-    }
+    // drawButtons() {
+    //     Object.entries(this.buttons).forEach(([name, button]) => {
+    //         button.draw(this.render);
+    //     });
+    // }
 
-    updateButtons() {
-        Object.entries(this.buttons).forEach(([name, button]) => {
-            button.update({
-                mouseX: this.ENGINE.CONTROLS.mouse.x,
-                mouseY: this.ENGINE.CONTROLS.mouse.y,
-                leftClick: this.ENGINE.CONTROLS.leftClickPressed,
-                rightClick: this.ENGINE.CONTROLS.rightClickPressed
-            });
-        });
-    }
+    // updateButtons() {
+    //     Object.entries(this.buttons).forEach(([name, button]) => {
+    //         button.update({
+    //             mouseX: this.ENGINE.CONTROLS.mouse.x,
+    //             mouseY: this.ENGINE.CONTROLS.mouse.y,
+    //             leftClick: this.ENGINE.CONTROLS.leftClickPressed,
+    //             rightClick: this.ENGINE.CONTROLS.rightClickPressed
+    //         });
+    //     });
+    // }
 
-    draw() {
-        //clear the canvas
-        this.render.save();
-        this.render.setTransform(1, 0, 0, 1, 0, 0);
-        this.render.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
-        this.render.beginPath();
+    // draw() {
+    //     //clear the canvas
+    //     this.render.save();
+    //     this.render.setTransform(1, 0, 0, 1, 0, 0);
+    //     this.render.clearRect(0, 0, this.ENGINE.width, this.ENGINE.height);
+    //     this.render.beginPath();
 
-        if (this.debug) this.drawDebugText();
-        this.drawButtons();
-        this[this.drawMode]();
+    //     if (this.debug) this.drawDebugText();
+    //     this.drawButtons();
+    //     this[this.drawMode]();
 
-        this.render.restore();
-    } //draw
+    //     this.render.restore();
+    // } //draw
 }; //HUD

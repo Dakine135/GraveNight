@@ -35,6 +35,13 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'Pixi Tiling backgound with spritesheet. ghost cursor working again. snapping needs reworked.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Monday, 11 Oct 2021 00:34:00 -0400'
+                    }
+                },
+                {
                     subject: 'Pixi is coming along nicely. Moved buttons and HUD, energy packets working again. Save and Restore working.',
                     commiter: {
                         name: 'd.welborn',
