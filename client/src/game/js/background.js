@@ -21,7 +21,14 @@ module.exports = class background {
         this.backgroundContainer.zIndex = 0;
         this.ENGINE.pixiApp.stage.addChild(this.backgroundContainer);
 
-        this.ENGINE.pixiApp.loader.add('grassSpriteSheet', 'assets/background/grass.json').load(this.setup.bind(this));
+        const sprite = new PIXI.TilingSprite(
+            this.ENGINE.pixiApp.loader.resources.grassSpriteSheet.textures[`grassTiles64-${0}.png`],
+            this.ENGINE.width,
+            this.ENGINE.height
+        );
+        // sprite.x = i * 64;
+        // sprite.y = 0;
+        this.backgroundContainer.addChild(sprite);
 
         console.log('Created background-layer', this.ENGINE.width, this.ENGINE.height);
     } //constructor
@@ -57,14 +64,6 @@ module.exports = class background {
         //     sprite.y = 0;
         //     this.backgroundContainer.addChild(sprite);
         // }
-
-        const texture = new PIXI.Texture.from(`grassTiles64-${0}.png`);
-        const sprite = new PIXI.TilingSprite(texture, this.ENGINE.width, this.ENGINE.height);
-        // sprite.x = i * 64;
-        // sprite.y = 0;
-        this.backgroundContainer.addChild(sprite);
-
-        // // add it to the stage
     }
 
     // updateWithWorldData(WORLD) {

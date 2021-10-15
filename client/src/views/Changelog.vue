@@ -35,6 +35,13 @@ export default {
             DateTime: DateTime,
             commits: [
                 {
+                    subject: 'Sprites for EnergyNode and Energy Packet are working, tinting on heat amount.',
+                    commiter: {
+                        name: 'd.welborn',
+                        date: 'Thursday, 14 Oct 2021 11:34:00 -0400'
+                    }
+                },
+                {
                     subject: 'Pixi Tiling backgound with spritesheet. ghost cursor working again. snapping needs reworked.',
                     commiter: {
                         name: 'd.welborn',

@@ -72,6 +72,7 @@ export default {
             // width: this.screenWidth,
             // height: this.screenHeight
         });
+        window.ENGINE = this.engine;
         //disabled right-click menu
         window.addEventListener('contextmenu', (event) => event.preventDefault());
         // this.setup();

@@ -9,9 +9,9 @@ const distanceCanLink = 100.0;
 const maxHeat = 2000.0;
 const radius = 12;
 const startColor = { r: 0, g: 255, b: 0, a: 1 };
-const endColor = { r: 255, g: 255, b: 0, a: 1 };
-const hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
-const hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
+const endColor = { r: 255, g: 0, b: 0, a: 1 };
+// const hotStartColor = { r: 255, g: 0, b: 255, a: 1 };
+// const hotEndColor = { r: 255, g: 0, b: 0, a: 1 };
 module.exports = EnergyNodeClass = {
     type,
     travelMax: travelMax,
@@ -19,9 +19,7 @@ module.exports = EnergyNodeClass = {
     maxHeat: maxHeat,
     radius: radius,
     startColor: { r: 0, g: 255, b: 0, a: 1 },
-    endColor: { r: 255, g: 255, b: 0, a: 1 },
-    hotStartColor: { r: 255, g: 0, b: 255, a: 1 },
-    hotEndColor: { r: 255, g: 0, b: 0, a: 1 },
+    endColor: { r: 255, g: 0, b: 0, a: 1 },
     availableEnergyPackets: [],
     new({ id = null, x = 0, y = 0, debug = false, ENGINE = null } = {}) {
         const EnergyNodePixiContainer = new PIXI.Container();
@@ -39,8 +37,7 @@ module.exports = EnergyNodeClass = {
             id: id,
             heat: 0,
             debug: debug,
-            currentStartColor: { r: 0, g: 255, b: 0, a: 1 },
-            currentEndColor: { r: 255, g: 255, b: 0, a: 1 },
+            currentColor: { r: 0, g: 255, b: 0, a: 1 },
             energyPackets: [],
             selected: false,
             canBePlaced: true,
@@ -59,9 +56,9 @@ module.exports = EnergyNodeClass = {
 
         //create energyPacket for testing, add to EnergyNode's container
         // console.log('object :>> ', object);
-        let energyPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket();
+        let energyPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket(newEnergyNode.pixiGraphicContainer);
         newEnergyNode.energyPackets.push(energyPacket);
-        newEnergyNode.pixiGraphicContainer.addChild(energyPacket.pixiGraphic);
+        // newEnergyNode.pixiGraphicContainer.addChild(energyPacket.pixiGraphic);
 
         ENGINE.mainPixiContainer.addChild(EnergyNodePixiContainer);
 
@@ -69,14 +66,19 @@ module.exports = EnergyNodeClass = {
         return newEnergyNode;
     }, //constructor
 
-    newEnergyPacket({ travel = travelMax, x = distanceCanLink, y = 0, startX = distanceCanLink, startY = 0, fromId = null } = {}) {
-        const EnergyPacketPixi = new PIXI.Graphics();
-        // Circle
-        EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        EnergyPacketPixi.beginFill(0xffffff, 1);
-        EnergyPacketPixi.drawCircle(0, 0, 4);
-        EnergyPacketPixi.endFill();
-        EnergyPacketPixi.name = 'EnergyPacketGraphics';
+    newEnergyPacket(
+        container,
+        { travel = travelMax, x = distanceCanLink, y = 0, startX = distanceCanLink, startY = 0, fromId = null } = {}
+    ) {
+        // this.ENGINE.pixiApp.loader.add('grassSpriteSheet', 'assets/background/grass.json').load(this.setup.bind(this));
+
+        // const EnergyPacketPixi = new PIXI.Graphics();
+        // // Circle
+        // EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        // EnergyPacketPixi.beginFill(0xffffff, 1);
+        // EnergyPacketPixi.drawCircle(0, 0, 4);
+        // EnergyPacketPixi.endFill();
+        // EnergyPacketPixi.name = 'EnergyPacketGraphics';
 
         return {
             travel,
@@ -85,18 +87,22 @@ module.exports = EnergyNodeClass = {
             startX,
             startY,
             fromId,
-            pixiGraphic: EnergyPacketPixi
+            pixiGraphic: window.ENGINE.ENTITY_CLASSES['EnergyNode'].createPacketGraphics(container)
         };
     },
 
     update(ENGINE, deltaTime) {
         //update heat and color
         this.selected = false;
-        this.heat -= deltaTime / 2;
+        // if (this.id == 1) console.log('this.heat :>> ', this.heat);
+        this.heat -= deltaTime * 10;
         if (this.heat < 0) this.heat = 0;
         if (this.heat > maxHeat) this.heat = maxHeat;
-        // Utilities.colorBlend(this.currentStartColor, startColor, hotStartColor, this.heat / maxHeat);
-        // Utilities.colorBlend(this.currentEndColor, endColor, hotEndColor, this.heat / maxHeat);
+        // console.log('this.currentColor :>> ', this.currentColor);
+        Utilities.colorBlend(this.currentColor, endColor, startColor, this.heat / maxHeat);
+        let tintColor = PIXI.utils.rgb2hex([this.currentColor.b, this.currentColor.g, this.currentColor.r]);
+        // this.pixiGraphicContainer.getChildByName(`EnergyNodeGraphicsMainBody${this.id}`).tint = 0xffffff;
+        this.pixiGraphicContainer.getChildByName(`EnergyNodeGraphicsMainBody${this.id}`).tint = tintColor;
         // console.log('this.currentStartColor :>> ', this.currentStartColor);
 
         for (let i = this.energyPackets.length - 1; i >= 0; i--) {
@@ -118,7 +124,7 @@ module.exports = EnergyNodeClass = {
     sendPacketOut(ENGINE, previouslyFromId) {
         // console.log('sendPacketOut');
         //generate heat as packets pass through EnergyNode
-        this.heat += 100; //TODO re-balance
+        this.heat += 300; //TODO re-balance
         //check for Entities in range that want to consume packets
 
         //else pass to next Energy Node
@@ -155,7 +161,7 @@ module.exports = EnergyNodeClass = {
             reusePacket.pixiGraphic.setTransform(reusePacket.x, reusePacket.y);
             this.energyPackets.push(reusePacket);
         } else {
-            let newPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket({
+            let newPacket = ENGINE.ENTITY_CLASSES[type].newEnergyPacket(this.pixiGraphicContainer, {
                 travel: travel,
                 x: x - this.x,
                 y: y - this.y,
@@ -168,24 +174,44 @@ module.exports = EnergyNodeClass = {
     },
 
     createGraphics(container, id) {
-        let mainBody = new PIXI.Graphics();
-        mainBody.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        mainBody.beginFill(0xde3249, 1);
-        mainBody.drawCircle(0, 0, radius);
-        mainBody.endFill();
-        mainBody.name = `EnergyNodeGraphicsMainBody${id}`;
-        container.addChild(mainBody);
-        return mainBody;
+        const EnergyNodePixi = new PIXI.Sprite(window.ENGINE.pixiApp.loader.resources.energyNodeSpriteSheet.textures[`light.png`]);
+        EnergyNodePixi.name = `EnergyNodeGraphicsMainBody${id}`;
+        EnergyNodePixi.anchor.set(0.5, 0.5);
+        EnergyNodePixi.scale.set(0.4, 0.4);
+        EnergyNodePixi.tint = 0x00ff00;
+
+        // let mainBody = new PIXI.Graphics();
+        // mainBody.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        // mainBody.beginFill(0xde3249, 1);
+        // mainBody.drawCircle(0, 0, radius);
+        // mainBody.endFill();
+        // mainBody.name = `EnergyNodeGraphicsMainBody${id}`;
+        container.addChild(EnergyNodePixi);
+        return EnergyNodePixi;
     },
 
     createPacketGraphics(container) {
-        const EnergyPacketPixi = new PIXI.Graphics();
-        // Circle
-        EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        EnergyPacketPixi.beginFill(0xffffff, 1);
-        EnergyPacketPixi.drawCircle(0, 0, 4);
-        EnergyPacketPixi.endFill();
+        // console.log(
+        //     'window.ENGINE.pixiApp.loader.resources.energyPacketSpriteSheet.data :>> ',
+        //     window.ENGINE.pixiApp.loader.resources.energyPacketSpriteSheet.data.animations.energyPacket
+        // );
+
+        let frames = window.ENGINE.pixiApp.loader.resources.energyPacketSpriteSheet.spritesheet.animations.energyPacket;
+
+        const EnergyPacketPixi = new PIXI.AnimatedSprite(frames);
         EnergyPacketPixi.name = 'EnergyPacketGraphics';
+        EnergyPacketPixi.animationSpeed = 1;
+        EnergyPacketPixi.anchor.set(0.5, 0.5);
+        EnergyPacketPixi.alpha = 0.8;
+        EnergyPacketPixi.play();
+
+        // const EnergyPacketPixi = new PIXI.Graphics();
+        // // Circle
+        // EnergyPacketPixi.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        // EnergyPacketPixi.beginFill(0xffffff, 1);
+        // EnergyPacketPixi.drawCircle(0, 0, 4);
+        // EnergyPacketPixi.endFill();
+        // EnergyPacketPixi.name = 'EnergyPacketGraphics';
         container.addChild(EnergyPacketPixi);
         return EnergyPacketPixi;
     },
@@ -197,8 +223,7 @@ module.exports = EnergyNodeClass = {
             y: this.y,
             id: this.id,
             heat: this.heat,
-            currentStartColor: this.currentStartColor,
-            currentEndColor: this.currentEndColor,
+            currentColor: this.currentColor,
             energyPackets: this.energyPackets.map((packet) => {
                 return {
                     travel: packet.travel,

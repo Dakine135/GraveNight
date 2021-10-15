@@ -47,40 +47,40 @@ module.exports = class StatesManager {
         });
     }
 
-    draw(deltaTime) {
-        //TODO only draw what is on the screen
-        if (
-            this.lastCameraStatus.x != this.ENGINE.CAMERA.x ||
-            this.lastCameraStatus.y != this.ENGINE.CAMERA.y ||
-            this.lastCameraStatus.zoomLevel != this.ENGINE.CAMERA.zoomLevel
-        ) {
-            this.lastCameraStatus = { x: this.ENGINE.CAMERA.x, y: this.ENGINE.CAMERA.y, zoomLevel: this.ENGINE.CAMERA.zoomLevel };
-            this.cameraChange = true;
-        }
-        if (this.cameraChange || this.entityAddedSinceLastDraw) {
-            this.getEntitiesInRange(
-                this.temp.nearbyDraw,
-                'drawable',
-                this.ENGINE.CAMERA,
-                Math.max(this.ENGINE.CAMERA.worldViewWidth, this.ENGINE.CAMERA.worldViewHeight) / 2 // / this.ENGINE.CAMERA.zoomLevel
-            );
-            this.entityAddedSinceLastDraw = false;
-            this.cameraChange = false;
-            // if (this.ENGINE.HUD.debug) {
-            //     this.ENGINE.HUD.debugUpdate({
-            //         entitiesBeingDrawn: this.temp.nearbyDraw.length
-            //     });
-            // }
-        }
-        for (let i = 0; i < this.numberOfDrawLayers; i++) {
-            Object.entries(this.temp.nearbyDraw).forEach(([id, entity]) => {
-                if (this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`])
-                    this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`].bind(entity)(this.ENGINE, deltaTime);
-            });
-        }
-        // let drawingState = this.getIntermediateState(deltaTime);
-        // if (drawingState == null) return;
-    } //draw
+    // draw(deltaTime) {
+    //     //TODO only draw what is on the screen
+    //     if (
+    //         this.lastCameraStatus.x != this.ENGINE.CAMERA.x ||
+    //         this.lastCameraStatus.y != this.ENGINE.CAMERA.y ||
+    //         this.lastCameraStatus.zoomLevel != this.ENGINE.CAMERA.zoomLevel
+    //     ) {
+    //         this.lastCameraStatus = { x: this.ENGINE.CAMERA.x, y: this.ENGINE.CAMERA.y, zoomLevel: this.ENGINE.CAMERA.zoomLevel };
+    //         this.cameraChange = true;
+    //     }
+    //     if (this.cameraChange || this.entityAddedSinceLastDraw) {
+    //         this.getEntitiesInRange(
+    //             this.temp.nearbyDraw,
+    //             'drawable',
+    //             this.ENGINE.CAMERA,
+    //             Math.max(this.ENGINE.CAMERA.worldViewWidth, this.ENGINE.CAMERA.worldViewHeight) / 2 // / this.ENGINE.CAMERA.zoomLevel
+    //         );
+    //         this.entityAddedSinceLastDraw = false;
+    //         this.cameraChange = false;
+    //         // if (this.ENGINE.HUD.debug) {
+    //         //     this.ENGINE.HUD.debugUpdate({
+    //         //         entitiesBeingDrawn: this.temp.nearbyDraw.length
+    //         //     });
+    //         // }
+    //     }
+    //     for (let i = 0; i < this.numberOfDrawLayers; i++) {
+    //         Object.entries(this.temp.nearbyDraw).forEach(([id, entity]) => {
+    //             if (this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`])
+    //                 this.ENGINE.ENTITY_CLASSES[entity.type][`draw${i}`].bind(entity)(this.ENGINE, deltaTime);
+    //         });
+    //     }
+    //     // let drawingState = this.getIntermediateState(deltaTime);
+    //     // if (drawingState == null) return;
+    // } //draw
 
     getIntermediateState(deltaTime) {} // getIntermediateState
 

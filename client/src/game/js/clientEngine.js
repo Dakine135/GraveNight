@@ -49,6 +49,18 @@ module.exports = class clientEngine {
         this.height = this.screenHeight;
 
         this.pixiApp = new PIXI.Application({ width: this.screenWidth, height: this.screenHeight, backgroundColor: 0x1aa32f });
+
+        //preload all assets
+        this.pixiApp.loader
+            .add('grassSpriteSheet', 'assets/background/grass.json')
+            .add('energyPacketSpriteSheet', 'assets/sprites/EnergyPacket/EnergyPacket.json')
+            .add('energyNodeSpriteSheet', 'assets/sprites/EnergyNode/EnergyNode.json');
+
+        this.pixiApp.loader.onProgress.add(this.showLoadingProgress.bind(this));
+        this.pixiApp.loader.onComplete.add(this.doneLoading.bind(this));
+        this.pixiApp.loader.onError.add(this.errorLoading.bind(this));
+        this.pixiApp.loader.load();
+
         this.pixiApp.stage.sortableChildren = true;
         pixiAppDiv.appendChild(this.pixiApp.view);
         window.__PIXI_INSPECTOR_GLOBAL_HOOK__ && window.__PIXI_INSPECTOR_GLOBAL_HOOK__.register({ PIXI: PIXI });
@@ -110,8 +122,21 @@ module.exports = class clientEngine {
         this.renderDistance = Math.ceil(Math.max(this.width, this.height) * 0.6);
         window.addEventListener('resize', this.windowResized.bind(this));
 
-        this.myPlayerId = null;
+        this.temp = { translatedLocation: { x: 0, y: 0 } };
+    } //constructor
 
+    showLoadingProgress(event) {
+        console.log('Loading :>> ', event.progress);
+    }
+    errorLoading(event) {
+        console.log('Error :>> ', event.message);
+    }
+    doneLoading(event) {
+        console.log('DONE LOADING');
+        this.setup();
+    }
+
+    setup() {
         this.CAMERA = new Camera({
             debug: this.isProduction ? false : false,
             x: 0,
@@ -181,8 +206,7 @@ module.exports = class clientEngine {
         });
         // World.createBoundaries(this.WORLD);
         // World.randomWorld(this.WORLD);
-        this.temp = { translatedLocation: { x: 0, y: 0 } };
-    } //constructor
+    }
 
     windowResized() {
         this.screenWidth = window.innerWidth;

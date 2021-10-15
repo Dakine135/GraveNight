@@ -1,0 +1,36 @@
+{"frames": {
+
+"dark.png":
+{
+	"frame": {"x":126,"y":1,"w":104,"h":106},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":12,"w":104,"h":106},
+	"sourceSize": {"w":128,"h":128}
+},
+"light.png":
+{
+	"frame": {"x":1,"y":1,"w":123,"h":125},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":3,"w":123,"h":125},
+	"sourceSize": {"w":128,"h":128}
+},
+"normal.png":
+{
+	"frame": {"x":232,"y":1,"w":104,"h":106},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":12,"y":12,"w":104,"h":106},
+	"sourceSize": {"w":128,"h":128}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "EnergyNode.png",
+	"format": "RGBA8888",
+	"size": {"w":337,"h":127},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:3df5648ed72d817c8c3aa84874d7e77d:c4606522742758a18ede3f649e3cd7c8:2abfe914a03ee5d66bf17c292ef81f93$"
+}
+}
