@@ -10,7 +10,7 @@ module.exports = class HUD {
         this.hudPixiContainer = new PIXI.Container();
         this.hudPixiContainer.sortableChildren = true;
         this.hudPixiContainer.name = 'hudContainer';
-        this.hudPixiContainer.zIndex = 2;
+        this.hudPixiContainer.zIndex = 100;
         this.ENGINE.pixiApp.stage.addChild(this.hudPixiContainer);
         //add cursor to hud
         this.crossHairSize = 10;

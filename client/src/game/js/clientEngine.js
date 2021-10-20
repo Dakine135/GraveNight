@@ -70,6 +70,62 @@ module.exports = class clientEngine {
         this.pixiApp.stage.addChild(this.mainPixiContainer);
         // console.log('this.mainPixiContainer :>> ', this.mainPixiContainer);
 
+        //mask Testing
+        const darknessContainer = new PIXI.Container();
+        this.pixiApp.stage.addChild(darknessContainer);
+        darknessContainer.name = 'darkness';
+        darknessContainer.zIndex = 2;
+
+        //main rectangle
+        // const darkness = new PIXI.Graphics();
+        // darkness.beginFill(0x000000);
+        // darkness.drawRect(0, 0, this.width, this.height);
+        // darkness.endFill();
+        // darknessContainer.addChild(darkness);
+
+        //holes
+        // Inner radius of the circle
+        const radius = 300;
+
+        // The blur amount
+        const blurSize = 32;
+        var circle = new PIXI.Graphics();
+        // darknessContainer.addChild(circle);
+        // circle.position.x = 0;
+        // circle.position.y = 0;
+        // circle.lineStyle(0);
+        circle.beginFill(0xff0000);
+        circle.drawCircle(radius + blurSize, radius + blurSize, radius);
+        circle.filters = [new PIXI.filters.BlurFilter(blurSize)];
+
+        const bounds = new PIXI.Rectangle(0, 0, (radius + blurSize) * 2, (radius + blurSize) * 2);
+        // displayObject, options
+        let options = {
+            // scaleMode: PIXI.SCALE_MODES.NEAREST,
+            // multisample: 1,
+            resolution: 1,
+            region: bounds
+        };
+        const texture = this.pixiApp.renderer.generateTexture(circle, options);
+        const focus = new PIXI.Sprite(texture);
+        focus.name = 'darknessMask';
+        focus.x = 600;
+        focus.y = 400;
+        // darknessContainer.addChild(focus);
+
+        this.mainPixiContainer.mask = focus;
+        // darknessContainer.mask = focus;
+        //so I can see the darkness mask
+        darknessContainer.addChild(focus);
+        // this.mainPixiContainer.addChild(focus);
+
+        // const mask = new PIXI.Graphics();
+        // mask.beginFill(0xff3300);
+        // mask.drawRect(500, 500, 300, 300);
+        // mask.endFill();
+
+        //end mask testing
+
         this.elapsed = 0.0;
         // Listen for frame updates
         this.pixiApp.ticker.add((deltaTime) => {

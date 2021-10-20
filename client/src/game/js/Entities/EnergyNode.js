@@ -203,6 +203,7 @@ module.exports = EnergyNodeClass = {
         EnergyPacketPixi.animationSpeed = 1;
         EnergyPacketPixi.anchor.set(0.5, 0.5);
         EnergyPacketPixi.alpha = 0.8;
+        // EnergyPacketPixi.tint = 0x9696ff;
         EnergyPacketPixi.play();
 
         // const EnergyPacketPixi = new PIXI.Graphics();
