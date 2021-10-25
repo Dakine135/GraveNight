@@ -54,7 +54,8 @@ module.exports = class clientEngine {
         this.pixiApp.loader
             .add('grassSpriteSheet', 'assets/background/grass.json')
             .add('energyPacketSpriteSheet', 'assets/sprites/EnergyPacket/EnergyPacket.json')
-            .add('energyNodeSpriteSheet', 'assets/sprites/EnergyNode/EnergyNode.json');
+            .add('energyNodeSpriteSheet', 'assets/sprites/EnergyNode/EnergyNode.json')
+            .add('darknessShader', 'assets/shaders/shader.frag');
 
         this.pixiApp.loader.onProgress.add(this.showLoadingProgress.bind(this));
         this.pixiApp.loader.onComplete.add(this.doneLoading.bind(this));
@@ -71,52 +72,52 @@ module.exports = class clientEngine {
         // console.log('this.mainPixiContainer :>> ', this.mainPixiContainer);
 
         //mask Testing
-        const darknessContainer = new PIXI.Container();
-        this.pixiApp.stage.addChild(darknessContainer);
-        darknessContainer.name = 'darkness';
-        darknessContainer.zIndex = 2;
+        // const darknessContainer = new PIXI.Container();
+        // this.pixiApp.stage.addChild(darknessContainer);
+        // darknessContainer.name = 'darkness';
+        // darknessContainer.zIndex = 2;
 
-        //main rectangle
-        // const darkness = new PIXI.Graphics();
-        // darkness.beginFill(0x000000);
-        // darkness.drawRect(0, 0, this.width, this.height);
-        // darkness.endFill();
-        // darknessContainer.addChild(darkness);
+        // //main rectangle
+        // // const darkness = new PIXI.Graphics();
+        // // darkness.beginFill(0x000000);
+        // // darkness.drawRect(0, 0, this.width, this.height);
+        // // darkness.endFill();
+        // // darknessContainer.addChild(darkness);
 
-        //holes
-        // Inner radius of the circle
-        const radius = 300;
+        // //holes
+        // // Inner radius of the circle
+        // const radius = 300;
 
-        // The blur amount
-        const blurSize = 32;
-        var circle = new PIXI.Graphics();
-        // darknessContainer.addChild(circle);
-        // circle.position.x = 0;
-        // circle.position.y = 0;
-        // circle.lineStyle(0);
-        circle.beginFill(0xff0000);
-        circle.drawCircle(radius + blurSize, radius + blurSize, radius);
-        circle.filters = [new PIXI.filters.BlurFilter(blurSize)];
+        // // The blur amount
+        // const blurSize = 32;
+        // var circle = new PIXI.Graphics();
+        // // darknessContainer.addChild(circle);
+        // // circle.position.x = 0;
+        // // circle.position.y = 0;
+        // // circle.lineStyle(0);
+        // circle.beginFill(0xff0000);
+        // circle.drawCircle(radius + blurSize, radius + blurSize, radius);
+        // circle.filters = [new PIXI.filters.BlurFilter(blurSize)];
 
-        const bounds = new PIXI.Rectangle(0, 0, (radius + blurSize) * 2, (radius + blurSize) * 2);
-        // displayObject, options
-        let options = {
-            // scaleMode: PIXI.SCALE_MODES.NEAREST,
-            // multisample: 1,
-            resolution: 1,
-            region: bounds
-        };
-        const texture = this.pixiApp.renderer.generateTexture(circle, options);
-        const focus = new PIXI.Sprite(texture);
-        focus.name = 'darknessMask';
-        focus.x = 600;
-        focus.y = 400;
+        // const bounds = new PIXI.Rectangle(0, 0, (radius + blurSize) * 2, (radius + blurSize) * 2);
+        // // displayObject, options
+        // let options = {
+        //     // scaleMode: PIXI.SCALE_MODES.NEAREST,
+        //     // multisample: 1,
+        //     resolution: 1,
+        //     region: bounds
+        // };
+        // const texture = this.pixiApp.renderer.generateTexture(circle, options);
+        // const focus = new PIXI.Sprite(texture);
+        // focus.name = 'darknessMask';
+        // focus.x = 600;
+        // focus.y = 400;
         // darknessContainer.addChild(focus);
 
-        this.mainPixiContainer.mask = focus;
+        // this.mainPixiContainer.mask = focus;
         // darknessContainer.mask = focus;
         //so I can see the darkness mask
-        darknessContainer.addChild(focus);
+        // darknessContainer.addChild(focus);
         // this.mainPixiContainer.addChild(focus);
 
         // const mask = new PIXI.Graphics();
@@ -193,6 +194,49 @@ module.exports = class clientEngine {
     }
 
     setup() {
+        //shader testing
+
+        const shaderFrag = this.pixiApp.loader.resources.darknessShader.data;
+        console.log('this.pixiApp.loader.resources.darknessShader :>> ', this.pixiApp.loader.resources.darknessShader);
+        console.log('shaderFrag :>> ', shaderFrag);
+        // const shaderFrag = `
+        //     precision highp float;
+
+        //     varying vec2 vTextureCoord;
+
+        //     uniform vec2 mouse;
+        //     uniform vec4 inputSize;
+        //     uniform vec4 outputFrame;
+        //     uniform float time;
+
+        //     void main() {
+        //     vec2 screenPos = vTextureCoord * inputSize.xy + outputFrame.xy;
+        //     if (length(mouse - screenPos) < 25.0) {
+        //         gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0) * 0.7; //yellow circle, alpha=0.7
+        //     } else {
+        //         gl_FragColor = vec4( sin(time), (mouse.xy - outputFrame.xy) / outputFrame.zw, 1.0) * 0.5; // blend with underlying image, alpha=0.5
+        //     }
+        //     }
+        // `;
+
+        const darknessContainer = new PIXI.Container();
+        this.pixiApp.stage.addChild(darknessContainer);
+        darknessContainer.name = 'darkness';
+        darknessContainer.zIndex = 2;
+        darknessContainer.filterArea = new PIXI.Rectangle(0, 0, this.width, this.height);
+
+        const filter = new PIXI.Filter(null, shaderFrag, {
+            customUniform: 0.0
+        });
+        darknessContainer.filters = [filter];
+
+        // Animate the filter
+        this.pixiApp.ticker.add((delta) => {
+            filter.uniforms.customUniform += 0.04 * delta;
+        });
+
+        //end shader testing
+
         this.CAMERA = new Camera({
             debug: this.isProduction ? false : false,
             x: 0,

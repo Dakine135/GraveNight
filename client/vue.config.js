@@ -13,7 +13,8 @@ module.exports = {
             new CopyPlugin({
                 patterns: [
                     { from: path.resolve(__dirname, 'src/assets/background'), to: 'assets/background' },
-                    { from: path.resolve(__dirname, 'src/assets/sprites'), to: 'assets/sprites' }
+                    { from: path.resolve(__dirname, 'src/assets/sprites'), to: 'assets/sprites' },
+                    { from: path.resolve(__dirname, 'src/assets/shaders'), to: 'assets/shaders' }
                 ]
             })
         ]
